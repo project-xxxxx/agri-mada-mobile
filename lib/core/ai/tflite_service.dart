@@ -8,7 +8,6 @@
 //   2 → Leaf smut
 
 import 'dart:io';
-import 'dart:typed_data';
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -209,7 +208,7 @@ class TFLiteService {
 
     // 4. Inférence (TFLite gère son propre threading interne)
     _interpreter!.run(
-      inputData.reshape([1, _inputSize, _inputSize, 3]),
+      inputData.reshape<double>([1, _inputSize, _inputSize, 3]),
       outputList,
     );
 

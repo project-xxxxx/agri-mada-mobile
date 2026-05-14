@@ -131,7 +131,7 @@ final registerNotifierProvider =
 
 typedef _$RegisterNotifier = AutoDisposeNotifier<RegisterState>;
 String _$forgotPasswordNotifierHash() =>
-    r'57748da71e4155a59d3d7368f942933824b4f457';
+    r'3ce8205fb6b8a091b38cc42961a658c4a4730718';
 
 /// See also [ForgotPasswordNotifier].
 @ProviderFor(ForgotPasswordNotifier)

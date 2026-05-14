@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:flutter/material.dart';
 
 abstract final class AppLogger {
   static void debug(String message, {Object? error, StackTrace? stackTrace}) {

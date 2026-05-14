@@ -6,6 +6,8 @@ import 'package:mocktail/mocktail.dart';
 
 import 'package:agri_mada/core/ai/tflite_service.dart';
 import 'package:agri_mada/features/scan/data/repositories/diagnostic_local_repository.dart';
+import 'package:agri_mada/features/scan/domain/entities/diagnostic_result.dart'
+    as domain;
 import 'package:agri_mada/features/scan/presentation/providers/scan_provider.dart';
 
 class MockTFLiteService extends Mock implements TFLiteService {}
@@ -20,7 +22,7 @@ void main() {
   late MockTFLiteService mockTfliteService;
   late MockDiagnosticLocalRepository mockDiagnosticRepository;
 
-  const tResult = DiagnosticResult(
+  const tInferenceResult = TFLiteInferenceResult(
     maladieDetectee: 'Leaf smut',
     confiance: 0.88,
     niveauGravite: 'severe',
@@ -58,7 +60,7 @@ void main() {
       when(() => mockTfliteService.analyzeImage(any())).thenAnswer(
         (_) async {
           await Future<void>.delayed(const Duration(milliseconds: 10));
-          return tResult;
+          return tInferenceResult;
         },
       );
 
@@ -78,17 +80,26 @@ void main() {
     test('succes -> ScanState.success(result)', () async {
       when(() => mockTfliteService.isReady).thenReturn(true);
       when(() => mockTfliteService.analyzeImage(any())).thenAnswer(
-        (_) async => tResult,
+        (_) async => tInferenceResult,
       );
 
       final result = await container
           .read(scanNotifierProvider.notifier)
           .analyzeImage(File('img.jpg'));
 
-      expect(result, tResult);
+      expect(result, isA<domain.DiagnosticResult>());
+      expect(result?.maladieDetectee, tInferenceResult.maladieDetectee);
+      expect(result?.confiance, tInferenceResult.confiance);
+      expect(result?.niveauGravite, tInferenceResult.niveauGravite);
+      expect(result?.recommandations, tInferenceResult.recommandations);
+      expect(result?.createdAt, isNotNull);
       final state = container.read(scanNotifierProvider);
       expect(state, isA<ScanSuccess>());
-      expect((state as ScanSuccess).result, tResult);
+      final successState = state as ScanSuccess;
+      expect(
+        successState.result.maladieDetectee,
+        tInferenceResult.maladieDetectee,
+      );
     });
 
     test(

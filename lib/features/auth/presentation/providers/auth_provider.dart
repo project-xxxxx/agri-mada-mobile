@@ -40,8 +40,7 @@ class RegisterState with _$RegisterState {
 class ForgotPasswordState with _$ForgotPasswordState {
   const factory ForgotPasswordState.initial() = ForgotPasswordInitial;
   const factory ForgotPasswordState.loading() = ForgotPasswordLoading;
-  const factory ForgotPasswordState.success(String message) =
-      ForgotPasswordSuccess;
+  const factory ForgotPasswordState.success() = ForgotPasswordSuccess;
   const factory ForgotPasswordState.error(String message) = ForgotPasswordError;
 }
 
@@ -158,9 +157,7 @@ class ForgotPasswordNotifier extends _$ForgotPasswordNotifier {
 
     state = result.fold(
       (failure) => ForgotPasswordState.error(failure.message),
-      (_) => const ForgotPasswordState.success(
-        'Si ce numero est associe a un compte, des instructions seront envoyees.',
-      ),
+      (_) => const ForgotPasswordState.success(),
     );
   }
 

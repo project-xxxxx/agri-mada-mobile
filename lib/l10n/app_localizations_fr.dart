@@ -411,4 +411,168 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get journalNameRequired => 'Nom requis';
+
+  @override
+  String get registerTitle => 'Créer un compte';
+
+  @override
+  String get registerHeadline => 'Inscription agriculteur';
+
+  @override
+  String get registerDescription =>
+      'Renseignez vos informations pour créer votre accès.';
+
+  @override
+  String get registerNameLabel => 'Nom';
+
+  @override
+  String get registerFirstNameLabel => 'Prénom';
+
+  @override
+  String get registerRegionLabel => 'Région';
+
+  @override
+  String get registerPhoneLabel => 'Téléphone';
+
+  @override
+  String get registerPasswordLabel => 'Mot de passe';
+
+  @override
+  String get registerSubmit => 'Créer mon compte';
+
+  @override
+  String get registerAlreadyAccount => 'J’ai déjà un compte';
+
+  @override
+  String get registerSuccess => 'Inscription réussie';
+
+  @override
+  String get validationRequired => 'Champ requis';
+
+  @override
+  String get validationPhoneInvalid => 'Numéro invalide';
+
+  @override
+  String get validationPasswordMin => 'Minimum 6 caractères';
+
+  @override
+  String get resetTitle => 'Mot de passe oublié';
+
+  @override
+  String get resetHeadline => 'Réinitialiser le mot de passe';
+
+  @override
+  String get resetDescription =>
+      'Entrez votre numéro de téléphone pour recevoir les instructions.';
+
+  @override
+  String get resetBackToLogin => 'Retour à la connexion';
+
+  @override
+  String get resetSuccessMessage =>
+      'Si ce numéro est associé à un compte, des instructions seront envoyées.';
+
+  @override
+  String get splashInitializing => 'Initialisation en cours...';
+
+  @override
+  String get splashPartialInit => 'Initialisation partielle, mode dégradé.';
+
+  @override
+  String get splashAiReady => 'IA prête';
+
+  @override
+  String get splashAiUnavailable => 'IA indisponible';
+
+  @override
+  String get splashSessionActive => 'Session active';
+
+  @override
+  String get splashSessionGuest => 'Session invité';
+
+  @override
+  String splashStatus(String mode, String session) {
+    return '$mode • $session';
+  }
+
+  @override
+  String welcomeGreeting(String name) {
+    return 'Bonjour $name';
+  }
+
+  @override
+  String get welcomeAiReady => 'IA hors-ligne prête';
+
+  @override
+  String get welcomeAiUnavailable => 'Mode dégradé sans IA';
+
+  @override
+  String welcomeAiModelStatus(String status, String version) {
+    return '$status • Modèle v$version';
+  }
+
+  @override
+  String get onboardingSlide1Title => 'Photographiez la feuille malade';
+
+  @override
+  String get onboardingSlide1Description =>
+      'Placez la feuille dans le cadre. Gardez 20-30 cm de distance et une bonne lumière naturelle.';
+
+  @override
+  String get onboardingSlide2Title => 'L\'IA analyse hors ligne';
+
+  @override
+  String get onboardingSlide2Description =>
+      'Pas besoin d\'internet. Le diagnostic fonctionne directement sur votre téléphone.';
+
+  @override
+  String get onboardingSlide3Title => 'Consultez le diagnostic';
+
+  @override
+  String get onboardingSlide3Description =>
+      'Visualisez la gravité détectée, la confiance de l\'analyse et les recommandations adaptées.';
+
+  @override
+  String get onboardingSlide4Title => 'Suivez vos parcelles';
+
+  @override
+  String get onboardingSlide4Description =>
+      'Retrouvez l\'historique des analyses de chaque parcelle dans le journal agricole.';
+
+  @override
+  String get onboardingNext => 'Suivant';
+
+  @override
+  String get onboardingClose => 'Fermer';
+
+  @override
+  String get onboardingSkip => 'Passer';
+
+  @override
+  String get onboardingHelpTitle => 'Aide AgriMada';
+
+  @override
+  String get onboardingWelcomeTitle => 'Bienvenue';
+
+  @override
+  String get onboardingModelVersionTitle => 'Version du modèle IA';
+
+  @override
+  String onboardingSupportedDiseases(String diseases) {
+    return 'Maladies supportées: $diseases';
+  }
+
+  @override
+  String get onboardingAppStatusTitle => 'Statut de l\'application';
+
+  @override
+  String get onboardingAiAvailable => 'IA disponible sur cet appareil';
+
+  @override
+  String get onboardingAiUnavailable => 'IA indisponible, mode dégradé';
+
+  @override
+  String onboardingActiveVersion(String version) {
+    return 'Version active: v$version';
+  }
 }

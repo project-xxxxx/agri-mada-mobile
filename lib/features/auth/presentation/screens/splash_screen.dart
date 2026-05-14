@@ -104,20 +104,22 @@ class _SplashStatus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     final style = AppTypography.bodySmall.copyWith(
       color: AppColors.textSecondary,
       fontSize: 12,
     );
 
     return bootstrapAsync.when(
-      loading: () => Text('Initialisation en cours...', style: style),
-      error: (_, __) =>
-          Text('Initialisation partielle, mode degrade.', style: style),
+      loading: () => Text(loc.splashInitializing, style: style),
+      error: (_, __) => Text(loc.splashPartialInit, style: style),
       data: (snapshot) {
-        final mode = snapshot.isAiReady ? 'IA prete' : 'IA indisponible';
-        final session =
-            snapshot.isLoggedIn ? 'Session active' : 'Session invite';
-        return Text('$mode • $session', style: style);
+        final mode =
+            snapshot.isAiReady ? loc.splashAiReady : loc.splashAiUnavailable;
+        final session = snapshot.isLoggedIn
+            ? loc.splashSessionActive
+            : loc.splashSessionGuest;
+        return Text(loc.splashStatus(mode, session), style: style);
       },
     );
   }

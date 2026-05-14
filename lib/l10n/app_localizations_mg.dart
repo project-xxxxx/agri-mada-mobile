@@ -415,4 +415,168 @@ class AppLocalizationsMg extends AppLocalizations {
 
   @override
   String get journalNameRequired => 'Ilaina ny anarana';
+
+  @override
+  String get registerTitle => 'Mamorona kaonty';
+
+  @override
+  String get registerHeadline => 'Fisoratana anarana mpamboly';
+
+  @override
+  String get registerDescription =>
+      'Fenoy ny mombamomba anao mba hamoronana fidirana.';
+
+  @override
+  String get registerNameLabel => 'Anarana';
+
+  @override
+  String get registerFirstNameLabel => 'Fanampin\'anarana';
+
+  @override
+  String get registerRegionLabel => 'Faritra';
+
+  @override
+  String get registerPhoneLabel => 'Finday';
+
+  @override
+  String get registerPasswordLabel => 'Teny miafina';
+
+  @override
+  String get registerSubmit => 'Hamorona kaontiko';
+
+  @override
+  String get registerAlreadyAccount => 'Efa manana kaonty aho';
+
+  @override
+  String get registerSuccess => 'Vita ny fisoratana anarana';
+
+  @override
+  String get validationRequired => 'Tsy maintsy fenoina';
+
+  @override
+  String get validationPhoneInvalid => 'Tsy mety ny laharana';
+
+  @override
+  String get validationPasswordMin => 'Farafahakeliny tarehintsoratra 6';
+
+  @override
+  String get resetTitle => 'Hadino ny teny miafina';
+
+  @override
+  String get resetHeadline => 'Avereno ny teny miafina';
+
+  @override
+  String get resetDescription =>
+      'Ampidiro ny laharan-telefaoninao hahazoana toromarika.';
+
+  @override
+  String get resetBackToLogin => 'Hiverina amin\'ny fidirana';
+
+  @override
+  String get resetSuccessMessage =>
+      'Raha mifandray amin\'ny kaonty io laharana io dia halefa ny toromarika.';
+
+  @override
+  String get splashInitializing => 'Eo am-piomanana...';
+
+  @override
+  String get splashPartialInit => 'Fiomanana ampahany, fomba mihena.';
+
+  @override
+  String get splashAiReady => 'Vonona ny IA';
+
+  @override
+  String get splashAiUnavailable => 'Tsy misy IA';
+
+  @override
+  String get splashSessionActive => 'Session mavitrika';
+
+  @override
+  String get splashSessionGuest => 'Session vahiny';
+
+  @override
+  String splashStatus(String mode, String session) {
+    return '$mode • $session';
+  }
+
+  @override
+  String welcomeGreeting(String name) {
+    return 'Miarahaba $name';
+  }
+
+  @override
+  String get welcomeAiReady => 'Vonona ny IA ivelan\'ny aterineto';
+
+  @override
+  String get welcomeAiUnavailable => 'Fomba mihena tsy misy IA';
+
+  @override
+  String welcomeAiModelStatus(String status, String version) {
+    return '$status • Modely v$version';
+  }
+
+  @override
+  String get onboardingSlide1Title => 'Alaivo sary ny ravina marary';
+
+  @override
+  String get onboardingSlide1Description =>
+      'Ataovy ao anaty efijery ny ravina. Tazomy 20-30 sm ary hazavana voajanahary tsara.';
+
+  @override
+  String get onboardingSlide2Title => 'Manadihady ivelan\'ny aterineto ny IA';
+
+  @override
+  String get onboardingSlide2Description =>
+      'Tsy mila internet. Miasa mivantana amin\'ny findainao ny diagnostika.';
+
+  @override
+  String get onboardingSlide3Title => 'Jereo ny diagnostika';
+
+  @override
+  String get onboardingSlide3Description =>
+      'Jereo ny hamafin\'ny aretina, ny fitokisana ary ny soso-kevitra mifanaraka.';
+
+  @override
+  String get onboardingSlide4Title => 'Araho ny parcelle-nao';
+
+  @override
+  String get onboardingSlide4Description =>
+      'Jereo ao amin\'ny journal agricole ny tantaran\'ny fanadihadiana isaky ny parcelle.';
+
+  @override
+  String get onboardingNext => 'Manaraka';
+
+  @override
+  String get onboardingClose => 'Akatona';
+
+  @override
+  String get onboardingSkip => 'Hitsambikina';
+
+  @override
+  String get onboardingHelpTitle => 'Fanampiana AgriMada';
+
+  @override
+  String get onboardingWelcomeTitle => 'Tongasoa';
+
+  @override
+  String get onboardingModelVersionTitle => 'Kinovan\'ny modely IA';
+
+  @override
+  String onboardingSupportedDiseases(String diseases) {
+    return 'Aretina tohanana: $diseases';
+  }
+
+  @override
+  String get onboardingAppStatusTitle => 'Satan\'ny rindranasa';
+
+  @override
+  String get onboardingAiAvailable => 'Misy IA amin\'ity fitaovana ity';
+
+  @override
+  String get onboardingAiUnavailable => 'Tsy misy IA, fomba mihena';
+
+  @override
+  String onboardingActiveVersion(String version) {
+    return 'Kinova miasa: v$version';
+  }
 }

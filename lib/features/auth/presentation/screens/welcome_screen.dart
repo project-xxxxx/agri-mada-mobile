@@ -15,13 +15,14 @@ class WelcomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context);
     final bootstrapAsync = ref.watch(appBootstrapProvider);
     final snapshot = bootstrapAsync.valueOrNull;
     final prenom = snapshot?.profile['prenom'];
     final modelVersion = snapshot?.modelVersion?.version;
     final iaStatus = snapshot?.isAiReady == true
-        ? 'IA hors-ligne prete'
-        : 'Mode degrade sans IA';
+        ? loc.welcomeAiReady
+        : loc.welcomeAiUnavailable;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -47,7 +48,7 @@ class WelcomeScreen extends ConsumerWidget {
                         Padding(
                           padding: const EdgeInsets.only(top: AppSpacing.sm),
                           child: Text(
-                            'Bonjour $prenom',
+                            loc.welcomeGreeting(prenom),
                             style: AppTypography.bodyMedium.copyWith(
                               color: AppColors.primary,
                             ),
@@ -59,7 +60,8 @@ class WelcomeScreen extends ConsumerWidget {
                         child: Text(
                           modelVersion == null
                               ? iaStatus
-                              : '$iaStatus • Modele v$modelVersion',
+                              : loc.welcomeAiModelStatus(
+                                  iaStatus, modelVersion),
                           style: AppTypography.bodySmall,
                           textAlign: TextAlign.center,
                         ),

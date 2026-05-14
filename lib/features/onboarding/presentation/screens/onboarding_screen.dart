@@ -9,6 +9,7 @@ import '../../../../app/theme/app_typography.dart';
 import '../../../../core/ai/model_version_service.dart';
 import '../../../../core/local_db/session_service.dart';
 import '../../../../core/widgets/app_button/app_button.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/providers/session_provider.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -21,35 +22,9 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 }
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
+  static const int _slidesCount = 4;
   late final PageController _pageController;
   int _currentIndex = 0;
-
-  final List<_OnboardingSlideData> _slides = const [
-    _OnboardingSlideData(
-      title: 'Photographiez la feuille malade',
-      description:
-          'Placez la feuille dans le cadre. Gardez 20-30 cm de distance et une bonne lumière naturelle.',
-      icon: Icons.photo_camera_outlined,
-    ),
-    _OnboardingSlideData(
-      title: 'L\'IA analyse hors ligne',
-      description:
-          'Pas besoin d\'internet. Le diagnostic fonctionne directement sur votre téléphone.',
-      icon: Icons.psychology_outlined,
-    ),
-    _OnboardingSlideData(
-      title: 'Consultez le diagnostic',
-      description:
-          'Visualisez la gravité détectée, la confiance de l\'analyse et les recommandations adaptées.',
-      icon: Icons.fact_check_outlined,
-    ),
-    _OnboardingSlideData(
-      title: 'Suivez vos parcelles',
-      description:
-          'Retrouvez l\'historique des analyses de chaque parcelle dans le journal agricole.',
-      icon: Icons.map_outlined,
-    ),
-  ];
 
   @override
   void initState() {
@@ -63,7 +38,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
     super.dispose();
   }
 
-  bool get _isLastSlide => _currentIndex == _slides.length - 1;
+  bool get _isLastSlide => _currentIndex == _slidesCount - 1;
 
   Future<void> _skip() async {
     if (!widget.consultationMode) {
@@ -92,6 +67,30 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final slides = [
+      _OnboardingSlideData(
+        title: loc.onboardingSlide1Title,
+        description: loc.onboardingSlide1Description,
+        icon: Icons.photo_camera_outlined,
+      ),
+      _OnboardingSlideData(
+        title: loc.onboardingSlide2Title,
+        description: loc.onboardingSlide2Description,
+        icon: Icons.psychology_outlined,
+      ),
+      _OnboardingSlideData(
+        title: loc.onboardingSlide3Title,
+        description: loc.onboardingSlide3Description,
+        icon: Icons.fact_check_outlined,
+      ),
+      _OnboardingSlideData(
+        title: loc.onboardingSlide4Title,
+        description: loc.onboardingSlide4Description,
+        icon: Icons.map_outlined,
+      ),
+    ];
+
     final bootstrapAsync = ref.watch(appBootstrapProvider);
     final bootstrap = bootstrapAsync.valueOrNull;
 
@@ -112,18 +111,18 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               Expanded(
                 child: PageView.builder(
                   controller: _pageController,
-                  itemCount: _slides.length,
+                  itemCount: slides.length,
                   onPageChanged: (index) =>
                       setState(() => _currentIndex = index),
                   itemBuilder: (context, index) {
-                    final slide = _slides[index];
+                    final slide = slides[index];
                     return _OnboardingSlide(slide: slide);
                   },
                 ),
               ),
               const SizedBox(height: AppSpacing.md),
               _OnboardingIndicator(
-                total: _slides.length,
+                total: slides.length,
                 currentIndex: _currentIndex,
               ),
               const SizedBox(height: AppSpacing.md),
@@ -133,12 +132,12 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               const SizedBox(height: AppSpacing.lg),
               if (!widget.consultationMode)
                 AppButton(
-                  label: _isLastSlide ? 'Commencer' : 'Suivant',
+                  label: _isLastSlide ? loc.welcomeStart : loc.onboardingNext,
                   onPressed: _next,
                 )
               else
                 AppButton(
-                  label: 'Fermer',
+                  label: loc.onboardingClose,
                   variant: AppButtonVariant.secondary,
                   onPressed: () => context.pop(),
                 ),
@@ -162,17 +161,20 @@ class _OnboardingTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     return Row(
       children: [
         Text(
-          consultationMode ? 'Aide AgriMada' : 'Bienvenue',
+          consultationMode
+              ? loc.onboardingHelpTitle
+              : loc.onboardingWelcomeTitle,
           style: AppTypography.headlineMedium,
         ),
         const Spacer(),
         TextButton(
           onPressed: onSkip,
           child: Text(
-            consultationMode ? 'Fermer' : 'Passer',
+            consultationMode ? loc.onboardingClose : loc.onboardingSkip,
             style: AppTypography.bodyMedium.copyWith(color: AppColors.primary),
           ),
         ),
@@ -262,6 +264,7 @@ class _OnboardingIndicator extends StatelessWidget {
 class _ModelVersionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     return FutureBuilder<ModelVersionInfo>(
       future: ModelVersionService.instance.load(),
       builder: (context, snapshot) {
@@ -287,7 +290,8 @@ class _ModelVersionCard extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text('Version du modèle IA', style: AppTypography.bodyMedium),
+              Text(loc.onboardingModelVersionTitle,
+                  style: AppTypography.bodyMedium),
               const SizedBox(height: AppSpacing.xs),
               Text(
                 'v${info.version} - ${info.date}',
@@ -296,7 +300,7 @@ class _ModelVersionCard extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                'Maladies supportées: $maladies',
+                loc.onboardingSupportedDiseases(maladies),
                 style: AppTypography.bodySmall,
               ),
             ],
@@ -314,6 +318,7 @@ class _RuntimeStatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     final isAiReady = bootstrap?.isAiReady ?? false;
     final modelVersion = bootstrap?.modelVersion?.version;
 
@@ -328,18 +333,16 @@ class _RuntimeStatusCard extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Statut de l\'application', style: AppTypography.bodyMedium),
+          Text(loc.onboardingAppStatusTitle, style: AppTypography.bodyMedium),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            isAiReady
-                ? 'IA disponible sur cet appareil'
-                : 'IA indisponible, mode degrade',
+            isAiReady ? loc.onboardingAiAvailable : loc.onboardingAiUnavailable,
             style: AppTypography.bodySmall,
           ),
           if (modelVersion != null) ...[
             const SizedBox(height: AppSpacing.xs),
             Text(
-              'Version active: v$modelVersion',
+              loc.onboardingActiveVersion(modelVersion),
               style: AppTypography.bodySmall.copyWith(color: AppColors.primary),
             ),
           ],

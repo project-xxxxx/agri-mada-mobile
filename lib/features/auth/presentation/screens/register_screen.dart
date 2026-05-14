@@ -7,6 +7,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/widgets/app_button/app_button.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 
 class RegisterScreen extends ConsumerStatefulWidget {
@@ -47,6 +48,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+
     ref.listen<RegisterState>(registerNotifierProvider, (_, next) {
       next.whenOrNull(
         error: (message) {
@@ -61,7 +64,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         success: () {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Inscription reussie')),
+            SnackBar(content: Text(loc.registerSuccess)),
           );
           context.go(AppRoutes.login);
         },
@@ -76,7 +79,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       appBar: AppBar(
         backgroundColor: AppColors.scaffoldBackground,
         surfaceTintColor: Colors.transparent,
-        title: const Text('Créer un compte'),
+        title: Text(loc.registerTitle),
       ),
       body: SingleChildScrollView(
         padding: const EdgeInsets.all(AppSpacing.screenHorizontal),
@@ -86,64 +89,73 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Inscription agriculteur',
+                loc.registerHeadline,
                 style: AppTypography.headlineMedium,
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                'Renseignez vos informations pour créer votre accès.',
+                loc.registerDescription,
                 style: AppTypography.bodySmall,
               ),
               const SizedBox(height: AppSpacing.lg),
-              _Field(controller: _nomController, label: 'Nom', hint: 'Rakoto'),
+              _Field(
+                controller: _nomController,
+                label: loc.registerNameLabel,
+                hint: 'Rakoto',
+                requiredError: loc.validationRequired,
+              ),
               const SizedBox(height: AppSpacing.md),
               _Field(
                 controller: _prenomController,
-                label: 'Prénom',
+                label: loc.registerFirstNameLabel,
                 hint: 'Jean',
+                requiredError: loc.validationRequired,
               ),
               const SizedBox(height: AppSpacing.md),
               _Field(
                 controller: _regionController,
-                label: 'Région',
+                label: loc.registerRegionLabel,
                 hint: 'Analamanga',
+                requiredError: loc.validationRequired,
               ),
               const SizedBox(height: AppSpacing.md),
               _Field(
                 controller: _telController,
-                label: 'Téléphone',
+                label: loc.registerPhoneLabel,
                 hint: '0341234567',
                 keyboardType: TextInputType.phone,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Champ requis';
+                    return loc.validationRequired;
                   }
                   final normalized = value.replaceAll(RegExp(r'\s+'), '');
                   if (!RegExp(r'^[0-9]{6,20}$').hasMatch(normalized)) {
-                    return 'Numero invalide';
+                    return loc.validationPhoneInvalid;
                   }
                   return null;
                 },
+                requiredError: loc.validationRequired,
               ),
               const SizedBox(height: AppSpacing.md),
               _Field(
                 controller: _passwordController,
-                label: 'Mot de passe',
+                label: loc.registerPasswordLabel,
                 hint: '••••••••',
                 obscureText: true,
                 validator: (value) {
                   if (value == null || value.trim().isEmpty) {
-                    return 'Champ requis';
+                    return loc.validationRequired;
                   }
                   if (value.length < 6) {
-                    return 'Minimum 6 caracteres';
+                    return loc.validationPasswordMin;
                   }
                   return null;
                 },
+                requiredError: loc.validationRequired,
               ),
               const SizedBox(height: AppSpacing.lg),
               AppButton(
-                label: 'Créer mon compte',
+                label: loc.registerSubmit,
                 onPressed: isLoading ? null : _register,
                 isLoading: isLoading,
               ),
@@ -151,7 +163,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               Center(
                 child: TextButton(
                   onPressed: () => context.go(AppRoutes.login),
-                  child: const Text('J’ai déjà un compte'),
+                  child: Text(loc.registerAlreadyAccount),
                 ),
               ),
             ],
@@ -167,6 +179,7 @@ class _Field extends StatelessWidget {
     required this.controller,
     required this.label,
     required this.hint,
+    required this.requiredError,
     this.keyboardType,
     this.obscureText = false,
     this.validator,
@@ -175,6 +188,7 @@ class _Field extends StatelessWidget {
   final TextEditingController controller;
   final String label;
   final String hint;
+  final String requiredError;
   final TextInputType? keyboardType;
   final bool obscureText;
   final String? Function(String?)? validator;
@@ -192,7 +206,7 @@ class _Field extends StatelessWidget {
       validator: validator ??
           (value) {
             if (value == null || value.trim().isEmpty) {
-              return 'Champ requis';
+              return requiredError;
             }
             return null;
           },

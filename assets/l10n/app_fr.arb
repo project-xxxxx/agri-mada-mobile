@@ -278,5 +278,81 @@
   "journalSurfaceOptional": "Surface (ha, optionnel)",
   "@journalSurfaceOptional": { "description": "Libellé surface optionnelle" },
   "journalNameRequired": "Nom requis",
-  "@journalNameRequired": { "description": "Validation nom parcelle requis" }
+  "@journalNameRequired": { "description": "Validation nom parcelle requis" },
+  "registerTitle": "Créer un compte",
+  "registerHeadline": "Inscription agriculteur",
+  "registerDescription": "Renseignez vos informations pour créer votre accès.",
+  "registerNameLabel": "Nom",
+  "registerFirstNameLabel": "Prénom",
+  "registerRegionLabel": "Région",
+  "registerPhoneLabel": "Téléphone",
+  "registerPasswordLabel": "Mot de passe",
+  "registerSubmit": "Créer mon compte",
+  "registerAlreadyAccount": "J’ai déjà un compte",
+  "registerSuccess": "Inscription réussie",
+  "validationRequired": "Champ requis",
+  "validationPhoneInvalid": "Numéro invalide",
+  "validationPasswordMin": "Minimum 6 caractères",
+  "resetTitle": "Mot de passe oublié",
+  "resetHeadline": "Réinitialiser le mot de passe",
+  "resetDescription": "Entrez votre numéro de téléphone pour recevoir les instructions.",
+  "resetBackToLogin": "Retour à la connexion",
+  "resetSuccessMessage": "Si ce numéro est associé à un compte, des instructions seront envoyées.",
+  "splashInitializing": "Initialisation en cours...",
+  "splashPartialInit": "Initialisation partielle, mode dégradé.",
+  "splashAiReady": "IA prête",
+  "splashAiUnavailable": "IA indisponible",
+  "splashSessionActive": "Session active",
+  "splashSessionGuest": "Session invité",
+  "splashStatus": "{mode} • {session}",
+  "@splashStatus": {
+    "placeholders": {
+      "mode": { "type": "String" },
+      "session": { "type": "String" }
+    }
+  },
+  "welcomeGreeting": "Bonjour {name}",
+  "@welcomeGreeting": {
+    "placeholders": {
+      "name": { "type": "String" }
+    }
+  },
+  "welcomeAiReady": "IA hors-ligne prête",
+  "welcomeAiUnavailable": "Mode dégradé sans IA",
+  "welcomeAiModelStatus": "{status} • Modèle v{version}",
+  "@welcomeAiModelStatus": {
+    "placeholders": {
+      "status": { "type": "String" },
+      "version": { "type": "String" }
+    }
+  },
+  "onboardingSlide1Title": "Photographiez la feuille malade",
+  "onboardingSlide1Description": "Placez la feuille dans le cadre. Gardez 20-30 cm de distance et une bonne lumière naturelle.",
+  "onboardingSlide2Title": "L'IA analyse hors ligne",
+  "onboardingSlide2Description": "Pas besoin d'internet. Le diagnostic fonctionne directement sur votre téléphone.",
+  "onboardingSlide3Title": "Consultez le diagnostic",
+  "onboardingSlide3Description": "Visualisez la gravité détectée, la confiance de l'analyse et les recommandations adaptées.",
+  "onboardingSlide4Title": "Suivez vos parcelles",
+  "onboardingSlide4Description": "Retrouvez l'historique des analyses de chaque parcelle dans le journal agricole.",
+  "onboardingNext": "Suivant",
+  "onboardingClose": "Fermer",
+  "onboardingSkip": "Passer",
+  "onboardingHelpTitle": "Aide AgriMada",
+  "onboardingWelcomeTitle": "Bienvenue",
+  "onboardingModelVersionTitle": "Version du modèle IA",
+  "onboardingSupportedDiseases": "Maladies supportées: {diseases}",
+  "@onboardingSupportedDiseases": {
+    "placeholders": {
+      "diseases": { "type": "String" }
+    }
+  },
+  "onboardingAppStatusTitle": "Statut de l'application",
+  "onboardingAiAvailable": "IA disponible sur cet appareil",
+  "onboardingAiUnavailable": "IA indisponible, mode dégradé",
+  "onboardingActiveVersion": "Version active: v{version}",
+  "@onboardingActiveVersion": {
+    "placeholders": {
+      "version": { "type": "String" }
+    }
+  }
 }

@@ -9,6 +9,7 @@ import 'package:agri_mada/core/errors/failure.dart';
 import 'package:agri_mada/features/auth/domain/usecases/forgot_password_usecase.dart';
 import 'package:agri_mada/features/auth/presentation/providers/auth_provider.dart';
 import 'package:agri_mada/features/auth/presentation/screens/reset_password_screen.dart';
+import 'package:agri_mada/l10n/app_localizations.dart';
 
 class MockForgotPasswordUseCase extends Mock implements ForgotPasswordUseCase {}
 
@@ -32,7 +33,16 @@ void main() {
             forgotPasswordUseCaseProvider
                 .overrideWithValue(mockForgotPasswordUseCase),
           ],
-          child: const MaterialApp(home: ResetPasswordScreen()),
+          child: const MaterialApp(
+            home: ResetPasswordScreen(),
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: [Locale('fr'), Locale('mg')],
+          ),
         ),
       );
 
@@ -51,14 +61,15 @@ void main() {
             forgotPasswordUseCaseProvider
                 .overrideWithValue(mockForgotPasswordUseCase),
           ],
-          child: MaterialApp(
+          child: const MaterialApp(
             home: ResetPasswordScreen(),
             localizationsDelegates: [
+              AppLocalizations.delegate,
               GlobalMaterialLocalizations.delegate,
               GlobalWidgetsLocalizations.delegate,
               GlobalCupertinoLocalizations.delegate,
             ],
-            supportedLocales: [Locale('fr')],
+            supportedLocales: [Locale('fr'), Locale('mg')],
           ),
         ),
       );
@@ -72,7 +83,7 @@ void main() {
       // Assert
       expect(
         find.text(
-          'Si ce numero est associe a un compte, des instructions seront envoyees.',
+          'Si ce numéro est associé à un compte, des instructions seront envoyées.',
         ),
         findsOneWidget,
       );

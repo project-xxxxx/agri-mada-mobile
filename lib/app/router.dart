@@ -34,12 +34,12 @@ final routerProvider = Provider<GoRouter>((ref) {
   return GoRouter(
     initialLocation: AppRoutes.splash,
     redirect: (context, state) async {
-      final results = await Future.wait([
+      final results = await Future.wait<bool>([
         SessionService.instance.isOnboardingDone(),
         SessionService.instance.isLoggedIn(),
       ]);
-      final isOnboardingDone = results[0] as bool;
-      final isLoggedIn = results[1] as bool;
+      final isOnboardingDone = results[0];
+      final isLoggedIn = results[1];
       final route = state.matchedLocation;
       final isSplashRoute = route == AppRoutes.splash;
       final isAuthRoute = route == AppRoutes.welcome ||
@@ -107,7 +107,8 @@ final routerProvider = Provider<GoRouter>((ref) {
             pageBuilder: (context, state) => CustomTransitionPage(
               key: state.pageKey,
               child: const HomeScreen(),
-              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
                 return FadeTransition(opacity: animation, child: child);
               },
             ),
@@ -117,7 +118,8 @@ final routerProvider = Provider<GoRouter>((ref) {
             pageBuilder: (context, state) => CustomTransitionPage(
               key: state.pageKey,
               child: const JournalScreen(),
-              transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              transitionsBuilder:
+                  (context, animation, secondaryAnimation, child) {
                 return FadeTransition(opacity: animation, child: child);
               },
             ),

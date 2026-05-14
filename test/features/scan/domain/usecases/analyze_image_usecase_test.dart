@@ -17,7 +17,7 @@ class AnalyzeImageUseCase {
 
   final TFLiteService _tfliteService;
 
-  Future<Either<Object, DiagnosticResult>> call(File imageFile) async {
+  Future<Either<Object, TFLiteInferenceResult>> call(File imageFile) async {
     try {
       final result = await _tfliteService.analyzeImage(imageFile);
       return Right(result);
@@ -38,7 +38,7 @@ void main() {
   late AnalyzeImageUseCase useCase;
   late File imageFile;
 
-  const tResult = DiagnosticResult(
+  const tResult = TFLiteInferenceResult(
     maladieDetectee: 'Brown spot',
     confiance: 0.93,
     niveauGravite: 'modere',
@@ -66,7 +66,7 @@ void main() {
       final result = await useCase(imageFile);
 
       // Assert
-      expect(result, const Right<Object, DiagnosticResult>(tResult));
+      expect(result, const Right<Object, TFLiteInferenceResult>(tResult));
       verify(() => mockTfliteService.analyzeImage(imageFile)).called(1);
       verifyNoMoreInteractions(mockTfliteService);
     });

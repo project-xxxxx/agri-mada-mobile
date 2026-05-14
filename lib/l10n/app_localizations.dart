@@ -835,6 +835,300 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Nom requis'**
   String get journalNameRequired;
+
+  /// No description provided for @registerTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer un compte'**
+  String get registerTitle;
+
+  /// No description provided for @registerHeadline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inscription agriculteur'**
+  String get registerHeadline;
+
+  /// No description provided for @registerDescription.
+  ///
+  /// In fr, this message translates to:
+  /// **'Renseignez vos informations pour créer votre accès.'**
+  String get registerDescription;
+
+  /// No description provided for @registerNameLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom'**
+  String get registerNameLabel;
+
+  /// No description provided for @registerFirstNameLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prénom'**
+  String get registerFirstNameLabel;
+
+  /// No description provided for @registerRegionLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Région'**
+  String get registerRegionLabel;
+
+  /// No description provided for @registerPhoneLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléphone'**
+  String get registerPhoneLabel;
+
+  /// No description provided for @registerPasswordLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe'**
+  String get registerPasswordLabel;
+
+  /// No description provided for @registerSubmit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Créer mon compte'**
+  String get registerSubmit;
+
+  /// No description provided for @registerAlreadyAccount.
+  ///
+  /// In fr, this message translates to:
+  /// **'J’ai déjà un compte'**
+  String get registerAlreadyAccount;
+
+  /// No description provided for @registerSuccess.
+  ///
+  /// In fr, this message translates to:
+  /// **'Inscription réussie'**
+  String get registerSuccess;
+
+  /// No description provided for @validationRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Champ requis'**
+  String get validationRequired;
+
+  /// No description provided for @validationPhoneInvalid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro invalide'**
+  String get validationPhoneInvalid;
+
+  /// No description provided for @validationPasswordMin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Minimum 6 caractères'**
+  String get validationPasswordMin;
+
+  /// No description provided for @resetTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mot de passe oublié'**
+  String get resetTitle;
+
+  /// No description provided for @resetHeadline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Réinitialiser le mot de passe'**
+  String get resetHeadline;
+
+  /// No description provided for @resetDescription.
+  ///
+  /// In fr, this message translates to:
+  /// **'Entrez votre numéro de téléphone pour recevoir les instructions.'**
+  String get resetDescription;
+
+  /// No description provided for @resetBackToLogin.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retour à la connexion'**
+  String get resetBackToLogin;
+
+  /// No description provided for @resetSuccessMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Si ce numéro est associé à un compte, des instructions seront envoyées.'**
+  String get resetSuccessMessage;
+
+  /// No description provided for @splashInitializing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Initialisation en cours...'**
+  String get splashInitializing;
+
+  /// No description provided for @splashPartialInit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Initialisation partielle, mode dégradé.'**
+  String get splashPartialInit;
+
+  /// No description provided for @splashAiReady.
+  ///
+  /// In fr, this message translates to:
+  /// **'IA prête'**
+  String get splashAiReady;
+
+  /// No description provided for @splashAiUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'IA indisponible'**
+  String get splashAiUnavailable;
+
+  /// No description provided for @splashSessionActive.
+  ///
+  /// In fr, this message translates to:
+  /// **'Session active'**
+  String get splashSessionActive;
+
+  /// No description provided for @splashSessionGuest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Session invité'**
+  String get splashSessionGuest;
+
+  /// No description provided for @splashStatus.
+  ///
+  /// In fr, this message translates to:
+  /// **'{mode} • {session}'**
+  String splashStatus(String mode, String session);
+
+  /// No description provided for @welcomeGreeting.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour {name}'**
+  String welcomeGreeting(String name);
+
+  /// No description provided for @welcomeAiReady.
+  ///
+  /// In fr, this message translates to:
+  /// **'IA hors-ligne prête'**
+  String get welcomeAiReady;
+
+  /// No description provided for @welcomeAiUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Mode dégradé sans IA'**
+  String get welcomeAiUnavailable;
+
+  /// No description provided for @welcomeAiModelStatus.
+  ///
+  /// In fr, this message translates to:
+  /// **'{status} • Modèle v{version}'**
+  String welcomeAiModelStatus(String status, String version);
+
+  /// No description provided for @onboardingSlide1Title.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photographiez la feuille malade'**
+  String get onboardingSlide1Title;
+
+  /// No description provided for @onboardingSlide1Description.
+  ///
+  /// In fr, this message translates to:
+  /// **'Placez la feuille dans le cadre. Gardez 20-30 cm de distance et une bonne lumière naturelle.'**
+  String get onboardingSlide1Description;
+
+  /// No description provided for @onboardingSlide2Title.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'IA analyse hors ligne'**
+  String get onboardingSlide2Title;
+
+  /// No description provided for @onboardingSlide2Description.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas besoin d\'internet. Le diagnostic fonctionne directement sur votre téléphone.'**
+  String get onboardingSlide2Description;
+
+  /// No description provided for @onboardingSlide3Title.
+  ///
+  /// In fr, this message translates to:
+  /// **'Consultez le diagnostic'**
+  String get onboardingSlide3Title;
+
+  /// No description provided for @onboardingSlide3Description.
+  ///
+  /// In fr, this message translates to:
+  /// **'Visualisez la gravité détectée, la confiance de l\'analyse et les recommandations adaptées.'**
+  String get onboardingSlide3Description;
+
+  /// No description provided for @onboardingSlide4Title.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivez vos parcelles'**
+  String get onboardingSlide4Title;
+
+  /// No description provided for @onboardingSlide4Description.
+  ///
+  /// In fr, this message translates to:
+  /// **'Retrouvez l\'historique des analyses de chaque parcelle dans le journal agricole.'**
+  String get onboardingSlide4Description;
+
+  /// No description provided for @onboardingNext.
+  ///
+  /// In fr, this message translates to:
+  /// **'Suivant'**
+  String get onboardingNext;
+
+  /// No description provided for @onboardingClose.
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermer'**
+  String get onboardingClose;
+
+  /// No description provided for @onboardingSkip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Passer'**
+  String get onboardingSkip;
+
+  /// No description provided for @onboardingHelpTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aide AgriMada'**
+  String get onboardingHelpTitle;
+
+  /// No description provided for @onboardingWelcomeTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bienvenue'**
+  String get onboardingWelcomeTitle;
+
+  /// No description provided for @onboardingModelVersionTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Version du modèle IA'**
+  String get onboardingModelVersionTitle;
+
+  /// No description provided for @onboardingSupportedDiseases.
+  ///
+  /// In fr, this message translates to:
+  /// **'Maladies supportées: {diseases}'**
+  String onboardingSupportedDiseases(String diseases);
+
+  /// No description provided for @onboardingAppStatusTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Statut de l\'application'**
+  String get onboardingAppStatusTitle;
+
+  /// No description provided for @onboardingAiAvailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'IA disponible sur cet appareil'**
+  String get onboardingAiAvailable;
+
+  /// No description provided for @onboardingAiUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'IA indisponible, mode dégradé'**
+  String get onboardingAiUnavailable;
+
+  /// No description provided for @onboardingActiveVersion.
+  ///
+  /// In fr, this message translates to:
+  /// **'Version active: v{version}'**
+  String onboardingActiveVersion(String version);
 }
 
 class _AppLocalizationsDelegate

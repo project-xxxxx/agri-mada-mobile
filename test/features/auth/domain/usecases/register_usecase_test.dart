@@ -28,7 +28,11 @@ void main() {
       );
 
       expect(
-          result, const Left(ValidationFailure('Tous les champs sont requis')));
+        result,
+        const Left<Failure, Unit>(
+          ValidationFailure('Tous les champs sont requis'),
+        ),
+      );
       verifyZeroInteractions(repository);
     });
 
@@ -41,7 +45,7 @@ void main() {
           tel: '0341234567',
           password: '1234',
         ),
-      ).thenAnswer((_) async => const Right(unit));
+      ).thenAnswer((_) async => const Right<Failure, Unit>(unit));
 
       final result = await useCase(
         nom: 'Rakoto',
@@ -51,7 +55,7 @@ void main() {
         password: '1234',
       );
 
-      expect(result, const Right(unit));
+      expect(result, const Right<Failure, Unit>(unit));
       verify(
         () => repository.register(
           nom: 'Rakoto',

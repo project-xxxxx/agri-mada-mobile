@@ -10,7 +10,7 @@ final localeProvider = StateNotifierProvider<LocaleNotifier, Locale>(
 );
 
 class LocaleNotifier extends StateNotifier<Locale> {
-  LocaleNotifier(Locale initial) : super(initial);
+  LocaleNotifier(super.initial);
 
   Future<void> setLocale(Locale locale) async {
     state = locale;
