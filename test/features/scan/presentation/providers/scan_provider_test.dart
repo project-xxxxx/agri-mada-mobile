@@ -6,6 +6,8 @@ import 'package:mocktail/mocktail.dart';
 
 import 'package:agri_mada/core/ai/tflite_service.dart';
 import 'package:agri_mada/features/scan/data/repositories/diagnostic_local_repository.dart';
+import 'package:agri_mada/features/scan/domain/entities/diagnostic_result.dart'
+    as domain;
 import 'package:agri_mada/features/scan/presentation/providers/scan_provider.dart';
 import 'package:agri_mada/core/providers/tflite_provider.dart';
 
@@ -59,7 +61,7 @@ void main() {
       when(() => mockTfliteService.analyzeImage(any())).thenAnswer(
         (_) async {
           await Future<void>.delayed(const Duration(milliseconds: 10));
-          return tResult;
+          return tInferenceResult;
         },
       );
 
@@ -79,7 +81,7 @@ void main() {
     test('succes -> ScanState.success(result)', () async {
       when(() => mockTfliteService.isReady).thenReturn(true);
       when(() => mockTfliteService.analyzeImage(any())).thenAnswer(
-        (_) async => tResult,
+        (_) async => tInferenceResult,
       );
 
       final result = await container

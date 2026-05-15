@@ -10,6 +10,7 @@ import '../../../../core/ai/model_version_service.dart';
 import '../../../../core/local_db/session_service.dart';
 import '../../../../core/widgets/app_button/app_button.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../../../auth/presentation/providers/session_provider.dart';
 
 class OnboardingScreen extends ConsumerStatefulWidget {
@@ -22,6 +23,7 @@ class OnboardingScreen extends ConsumerStatefulWidget {
 }
 
 class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
+  static const int _slidesCount = 4;
   late final PageController _pageController;
   int _currentIndex = 0;
 
@@ -115,9 +117,11 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 child: PageView.builder(
                   controller: _pageController,
                   itemCount: slides.length,
+                  itemCount: slides.length,
                   onPageChanged: (index) =>
                       setState(() => _currentIndex = index),
                   itemBuilder: (context, index) {
+                    final slide = slides[index];
                     final slide = slides[index];
                     return _OnboardingSlide(slide: slide);
                   },
@@ -125,6 +129,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
               ),
               const SizedBox(height: AppSpacing.md),
               _OnboardingIndicator(
+                total: slides.length,
                 total: slides.length,
                 currentIndex: _currentIndex,
               ),
@@ -142,7 +147,7 @@ class _OnboardingScreenState extends ConsumerState<OnboardingScreen> {
                 )
               else
                 AppButton(
-                  label: 'Fermer',
+                  label: loc.onboardingClose,
                   variant: AppButtonVariant.secondary,
                   onPressed: () => context.pop(),
                 ),
@@ -166,17 +171,20 @@ class _OnboardingTopBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     return Row(
       children: [
         Text(
-          consultationMode ? 'Aide AgriMada' : 'Bienvenue',
+          consultationMode
+              ? loc.onboardingHelpTitle
+              : loc.onboardingWelcomeTitle,
           style: AppTypography.headlineMedium,
         ),
         const Spacer(),
         TextButton(
           onPressed: onSkip,
           child: Text(
-            consultationMode ? 'Fermer' : 'Passer',
+            consultationMode ? loc.onboardingClose : loc.onboardingSkip,
             style: AppTypography.bodyMedium.copyWith(color: AppColors.primary),
           ),
         ),
@@ -266,6 +274,7 @@ class _OnboardingIndicator extends StatelessWidget {
 class _ModelVersionCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     return FutureBuilder<ModelVersionInfo>(
       future: ModelVersionService.instance.load(),
       builder: (context, snapshot) {
@@ -300,7 +309,7 @@ class _ModelVersionCard extends StatelessWidget {
               ),
               const SizedBox(height: AppSpacing.xs),
               Text(
-                'Maladies supportées: $maladies',
+                loc.onboardingSupportedDiseases(maladies),
                 style: AppTypography.bodySmall,
               ),
             ],
@@ -318,6 +327,7 @@ class _RuntimeStatusCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     final isAiReady = bootstrap?.isAiReady ?? false;
     final modelVersion = bootstrap?.modelVersion?.version;
 
@@ -335,15 +345,13 @@ class _RuntimeStatusCard extends StatelessWidget {
           const Text('Statut de l\'application', style: AppTypography.bodyMedium),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            isAiReady
-                ? 'IA disponible sur cet appareil'
-                : 'IA indisponible, mode degrade',
+            isAiReady ? loc.onboardingAiAvailable : loc.onboardingAiUnavailable,
             style: AppTypography.bodySmall,
           ),
           if (modelVersion != null) ...[
             const SizedBox(height: AppSpacing.xs),
             Text(
-              'Version active: v$modelVersion',
+              loc.onboardingActiveVersion(modelVersion),
               style: AppTypography.bodySmall.copyWith(color: AppColors.primary),
             ),
           ],

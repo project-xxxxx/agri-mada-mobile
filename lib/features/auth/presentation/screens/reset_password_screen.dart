@@ -8,6 +8,7 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/widgets/app_button/app_button.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
 
 class ResetPasswordScreen extends ConsumerStatefulWidget {
@@ -37,6 +38,8 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+
     ref.listen<ForgotPasswordState>(forgotPasswordNotifierProvider, (_, next) {
       next.whenOrNull(
         error: (message) {
@@ -48,10 +51,10 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
             ),
           );
         },
-        success: (message) {
+        success: () {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(message)),
+            SnackBar(content: Text(loc.resetSuccessMessage)),
           );
         },
       );

@@ -9,7 +9,7 @@ import 'test_data.dart';
 class MockTFLiteService extends Mock implements TFLiteService {}
 
 MockTFLiteService buildMockTfliteService({
-  DiagnosticResult? result,
+  TFLiteInferenceResult? result,
   bool isReady = true,
 }) {
   final mock = MockTFLiteService();

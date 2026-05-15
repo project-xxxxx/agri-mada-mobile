@@ -107,6 +107,7 @@ class _SplashStatus extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     final style = AppTypography.bodySmall.copyWith(
       color: AppColors.textSecondary,
     );

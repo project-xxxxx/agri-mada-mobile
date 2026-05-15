@@ -8,7 +8,7 @@ import 'package:agri_mada/core/local_db/isar_service.dart';
 import 'package:agri_mada/core/local_db/models/diagnostic_local.dart';
 import 'package:agri_mada/core/local_db/models/parcelle_local.dart';
 import 'package:agri_mada/core/local_db/session_service.dart';
-import 'package:agri_mada/main.dart';
+import 'package:agri_mada/core/providers/tflite_provider.dart';
 import 'package:agri_mada/features/auth/presentation/providers/session_provider.dart';
 import 'package:agri_mada/features/scan/presentation/providers/scan_provider.dart';
 import 'package:flutter/services.dart';
@@ -147,7 +147,7 @@ Future<void> pumpApp(
   required bool loggedIn,
   required bool onboardingDone,
   bool isTfliteReady = true,
-  DiagnosticResult? tfliteResult,
+  TFLiteInferenceResult? tfliteResult,
   MockTFLiteService? tfliteService,
   MockSessionService? sessionService,
   TestImagePickerPlatform? imagePickerPlatform,

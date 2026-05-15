@@ -45,6 +45,7 @@ class _MockDiagnosticLocalRepository extends Mock
 class _TestScanNotifier extends ScanNotifier {
   _TestScanNotifier({
     required domain.DiagnosticResult result,
+    required domain.DiagnosticResult result,
     required DiagnosticLocal? persistReturn,
     DiagnosticLocal? lastSavedDiagnostic,
   })  : _persistReturn = persistReturn,
@@ -173,8 +174,8 @@ void main() {
         await pumpScreen(tester, notifier);
 
         // Act
-        await tester.ensureVisible(find.text('Partager le resultat'));
-        await tester.tap(find.text('Partager le resultat'));
+        await tester.ensureVisible(find.byIcon(Icons.share_outlined));
+        await tester.tap(find.byIcon(Icons.share_outlined));
         await tester.pumpAndSettle();
 
         // Assert

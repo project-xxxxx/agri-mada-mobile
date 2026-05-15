@@ -15,7 +15,7 @@ const mockRecommendations = <String>[
   'Éviter le stress hydrique',
 ];
 
-final mockTfliteResult = DiagnosticResult(
+const mockTfliteResult = TFLiteInferenceResult(
   maladieDetectee: mockDiseaseName,
   confiance: 0.91,
   niveauGravite: 'modéré',

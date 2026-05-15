@@ -16,7 +16,16 @@ void main() {
       // Arrange
       await tester.pumpWidget(
         const ProviderScope(
-          child: MaterialApp(home: RegisterScreen()),
+          child: MaterialApp(
+            home: RegisterScreen(),
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: [Locale('fr'), Locale('mg')],
+          ),
         ),
       );
 
