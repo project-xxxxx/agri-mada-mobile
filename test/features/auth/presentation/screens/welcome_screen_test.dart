@@ -5,7 +5,6 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 
 import 'package:agri_mada/app/router.dart';
-import 'package:agri_mada/features/auth/presentation/screens/login_screen.dart';
 import 'package:agri_mada/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:agri_mada/l10n/app_localizations.dart';
 

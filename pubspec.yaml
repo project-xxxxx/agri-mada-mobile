@@ -57,6 +57,7 @@ dev_dependencies:
   # --- Générateur de code Isar ---
   isar_generator: ^3.1.0+1
   patrol: ^4.5.0
+  image_picker_platform_interface: ^2.10.0
 
 flutter:
   generate: true

@@ -12,6 +12,7 @@ import '../features/prevention/presentation/screens/prevention_screen.dart';
 import '../features/scan/presentation/screens/scanning_screen.dart';
 import '../features/scan/presentation/screens/scan_result_screen.dart';
 import '../features/journal/presentation/screens/journal_screen.dart';
+import '../features/journal/presentation/screens/my_parcelles_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../core/local_db/session_service.dart';
 import '../core/widgets/main_layout.dart';
@@ -28,6 +29,7 @@ abstract final class AppRoutes {
   static const String scanning = '/scanning';
   static const String scanResult = '/scan-result';
   static const String journal = '/journal';
+  static const String myParcelles = '/my-parcelles';
   static const String prevention = '/prevention';
   static const String guides = '/guides';
   static const String onboarding = '/onboarding';
@@ -54,7 +56,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           route == AppRoutes.settings ||
           route == AppRoutes.scanning ||
           route == AppRoutes.scanResult ||
-          route == AppRoutes.journal;
+          route == AppRoutes.journal ||
+          route == AppRoutes.myParcelles;
       final isOnboardingConsultationMode =
           state.uri.queryParameters['mode'] == 'help';
 
@@ -127,6 +130,10 @@ final routerProvider = Provider<GoRouter>((ref) {
             ),
           ),
         ],
+      ),
+      GoRoute(
+        path: AppRoutes.myParcelles,
+        builder: (context, state) => const MyParcellesScreen(),
       ),
       GoRoute(
         path: AppRoutes.settings,

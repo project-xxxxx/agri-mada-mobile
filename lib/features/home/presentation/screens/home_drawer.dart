@@ -52,7 +52,7 @@ class HomeDrawer extends ConsumerWidget {
                           icon: Icons.map_outlined,
                           title: AppLocalizations.of(context).drawerPlotsTitle,
                           subtitle: AppLocalizations.of(context).drawerPlotsSubtitle,
-                          onTap: () => _navigate(context, AppRoutes.journal),
+                          onTap: () => _navigate(context, AppRoutes.myParcelles),
                         ),
                         const _MenuDivider(),
                         _MenuItem(

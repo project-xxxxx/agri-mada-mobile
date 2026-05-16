@@ -1,16 +1,13 @@
 import 'dart:io';
 
 import 'package:agri_mada/app/app.dart';
-import 'package:agri_mada/core/ai/tflite_service.dart';
 import 'package:agri_mada/features/scan/domain/entities/diagnostic_result.dart';
 import 'package:agri_mada/core/providers/tflite_provider.dart';
 import 'package:agri_mada/core/local_db/isar_service.dart';
 import 'package:agri_mada/core/local_db/models/diagnostic_local.dart';
 import 'package:agri_mada/core/local_db/models/parcelle_local.dart';
 import 'package:agri_mada/core/local_db/session_service.dart';
-import 'package:agri_mada/main.dart';
 import 'package:agri_mada/features/auth/presentation/providers/session_provider.dart';
-import 'package:agri_mada/features/scan/presentation/providers/scan_provider.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -41,15 +38,16 @@ Future<void> installTestHarness() async {
 
   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .setMockMethodCallHandler(_secureStorageChannel, (MethodCall call) async {
+    final args = call.arguments as Map<String, dynamic>;
     switch (call.method) {
       case 'write':
-        _secureStorage[call.arguments['key'] as String] =
-            call.arguments['value'] as String?;
+        _secureStorage[args['key'] as String] =
+            args['value'] as String?;
         return null;
       case 'read':
-        return _secureStorage[call.arguments['key'] as String];
+        return _secureStorage[args['key'] as String];
       case 'delete':
-        _secureStorage.remove(call.arguments['key'] as String);
+        _secureStorage.remove(args['key'] as String);
         return null;
       case 'readAll':
         return Map<String, String>.fromEntries(
@@ -61,7 +59,7 @@ Future<void> installTestHarness() async {
         _secureStorage.clear();
         return null;
       case 'containsKey':
-        return _secureStorage.containsKey(call.arguments['key'] as String);
+        return _secureStorage.containsKey(args['key'] as String);
       default:
         return null;
     }

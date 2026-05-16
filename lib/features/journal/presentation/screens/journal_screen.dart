@@ -1,29 +1,28 @@
-// Journal Agricole - Écran dynamique connecté à Isar (hors-ligne)
-// Affiche les vraies parcelles avec leur statut de santé calculé dynamiquement
-
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:share_plus/share_plus.dart';
 import 'package:agri_mada/l10n/app_localizations.dart';
 import '../../../../app/router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
-import '../../domain/entities/journal_entry.dart';
-import '../../domain/usecases/export_journal_usecase.dart';
-import '../../data/services/export_service.dart';
+import '../../../../core/local_db/models/diagnostic_local.dart';
 import '../providers/journal_provider.dart';
 
-class JournalScreen extends ConsumerWidget {
+class JournalScreen extends ConsumerStatefulWidget {
   const JournalScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<JournalScreen> createState() => _JournalScreenState();
+}
+
+class _JournalScreenState extends ConsumerState<JournalScreen> {
+  @override
+  Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final journalAsync = ref.watch(journalAgricoleProvider);
-    final journalData = journalAsync.valueOrNull;
+    final diagnosticsAsync = ref.watch(diagnosticsHistoryProvider);
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
@@ -31,308 +30,120 @@ class JournalScreen extends ConsumerWidget {
         backgroundColor: AppColors.scaffoldBackground,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        leading: GestureDetector(
-          onTap: () => context.go(AppRoutes.home),
-          child: const Icon(Icons.arrow_back_ios, size: 22),
+        leading: Builder(
+          builder: (context) => IconButton(
+            icon: const Icon(Icons.menu, size: 28),
+            onPressed: () => Scaffold.of(context).openDrawer(),
+          ),
         ),
         titleSpacing: 0,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(loc.journalTitle, style: AppTypography.headlineMedium),
-            Text(loc.journalSubtitle, style: AppTypography.bodySmall),
+            Text('État des cultures', style: AppTypography.headlineMedium.copyWith(color: AppColors.textPrimary)),
+            Text('Historique des analyses', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
           ],
         ),
-        actions: [
-          IconButton(
-            onPressed: journalData == null
-                ? null
-                : () {
-                    if (journalData.isEmpty) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Aucun diagnostic à exporter'),
-                        ),
-                      );
-                      return;
-                    }
-                    _showExportSheet(context, ref, parcelleId: null);
-                  },
-            icon: const Icon(Icons.download_outlined),
-            tooltip: 'Exporter',
-          ),
-        ],
       ),
-      body: Container(
-        width: double.infinity,
-        decoration: const BoxDecoration(
-          color: AppColors.background,
-          borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(AppSpacing.cardRadius),
-            topRight: Radius.circular(AppSpacing.cardRadius),
-          ),
-        ),
-        child: journalAsync.when(
-          loading: () => const Center(
-              child: CircularProgressIndicator(color: AppColors.primary)),
-          error: (e, _) => Center(child: Text(loc.journalError(e.toString()))),
-          data: (journal) {
-            if (journal.isEmpty) {
-              return _EmptyJournal(
-                  onAdd: () => _showAddParcelleSheet(context, ref));
-            }
-            // Tri : malades en premier
-            final sorted = [...journal]..sort((a, b) =>
-                (a.statut == 'malade' ? 0 : 1)
-                    .compareTo(b.statut == 'malade' ? 0 : 1));
-
-            return Column(
-              children: [
-                // Résumé rapide
-                _QuickStats(journal: journal),
-                // Liste des parcelles
-                Expanded(
-                  child: ListView.separated(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md,
-                      vertical: AppSpacing.md,
-                    ),
-                    itemCount: sorted.length,
-                    separatorBuilder: (_, __) =>
-                        const SizedBox(height: AppSpacing.sm),
-                    itemBuilder: (context, index) => TweenAnimationBuilder<double>(
-                      key: ValueKey(sorted[index].parcelle.id),
-                      duration: Duration(milliseconds: 400 + (index * 100).clamp(0, 500)),
-                      curve: Curves.easeOutCubic,
-                      tween: Tween(begin: 0.0, end: 1.0),
-                      builder: (context, value, _) {
-                        return Transform.translate(
-                          offset: Offset(0, 30 * (1 - value)),
-                          child: Opacity(
-                            opacity: value,
-                            child: _ParcelleCard(
-                              entry: sorted[index],
-                              onScan: () => context.go(AppRoutes.scanning),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-                  ),
-                ),
-              ],
-            );
-          },
-        ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () => _showAddParcelleSheet(context, ref),
-        backgroundColor: AppColors.primary,
-        icon: const Icon(Icons.add, color: AppColors.textOnPrimary),
-        label: Text(loc.journalNewPlot,
-            style: AppTypography.bodySmall
-                .copyWith(color: AppColors.textOnPrimary)),
-      ),
-    );
-  }
-
-  void _showAddParcelleSheet(BuildContext context, WidgetRef ref) {
-    final container = ProviderScope.containerOf(context);
-
-    showModalBottomSheet<void>(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: AppColors.background,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (_) => UncontrolledProviderScope(
-        container: container,
-        child: _AddParcelleSheet(
-          onSaved: () => ref.invalidate(journalAgricoleProvider),
-        ),
-      ),
-    );
-  }
-
-  Future<void> _showExportSheet(
-    BuildContext context,
-    WidgetRef ref, {
-    int? parcelleId,
-  }) async {
-    final choice = await showModalBottomSheet<ExportFormat>(
-      context: context,
-      backgroundColor: AppColors.background,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (sheetContext) {
-        return SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const SizedBox(height: 12),
-              Container(
-                width: 40,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.textSecondary,
-                  borderRadius: BorderRadius.circular(2),
-                ),
-              ),
-              const SizedBox(height: 16),
-              ListTile(
-                leading: const Icon(Icons.table_view_outlined),
-                title: const Text('Exporter en CSV'),
-                onTap: () => Navigator.of(sheetContext).pop(ExportFormat.csv),
-              ),
-              ListTile(
-                leading: const Icon(Icons.picture_as_pdf_outlined),
-                title: const Text('Exporter en PDF'),
-                onTap: () => Navigator.of(sheetContext).pop(ExportFormat.pdf),
-              ),
-              const SizedBox(height: 8),
-            ],
-          ),
-        );
-      },
-    );
-
-    if (choice == null || !context.mounted) return;
-    final loc = AppLocalizations.of(context);
-    final strings = ExportStrings(
-      csvDate: loc.exportCsvDate,
-      csvPlot: loc.exportCsvPlot,
-      csvDisease: loc.exportCsvDisease,
-      csvSeverity: loc.exportCsvSeverity,
-      csvConfidence: loc.exportCsvConfidence,
-      csvRecommendations: loc.exportCsvRecommendations,
-      csvTreatment: loc.exportCsvTreatment,
-      pdfGeneratedBy: loc.exportPdfGeneratedBy,
-      pdfTitle: loc.exportPdfTitle,
-      pdfAllPlots: loc.exportPdfAllPlots,
-      pdfPlotLabel: loc.exportPdfPlotLabel,
-      pdfDateLabel: loc.exportPdfDateLabel,
-    );
-
-    final result = await ref
-        .read(exportJournalUseCaseProvider)
-        .call(parcelleId: parcelleId, format: choice, strings: strings);
-
-    if (!context.mounted) return;
-
-    await result.fold(
-      (failure) async {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(failure.message)),
-        );
-      },
-      (path) async {
-        await Share.share('Export local AgriMada: $path');
-        if (!context.mounted) return;
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export terminé: $path')),
-        );
-      },
-    );
-  }
-}
-
-// ─── En-tête ────────────────────────────────────────────────────────────────
-
-// ─── Résumé rapide ──────────────────────────────────────────────────────────
-
-class _QuickStats extends StatelessWidget {
-  const _QuickStats({required this.journal});
-  final List<JournalEntry> journal;
-
-  @override
-  Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
-    final saines = journal.where((e) => e.statut == 'sain').length;
-    final malades = journal.where((e) => e.statut == 'malade').length;
-    final total = journal.length;
-
-    return Container(
-      margin: const EdgeInsets.fromLTRB(
-          AppSpacing.md, AppSpacing.md, AppSpacing.md, 0),
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.primaryLight,
-        borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+      body: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _StatItem(
-            label: loc.journalTotal,
-            value: '$total',
-            color: AppColors.primary,
+          // Filter Chips
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
+            child: Row(
+              children: [
+                _buildFilterChip('Tous', true),
+                const SizedBox(width: AppSpacing.sm),
+                _buildFilterChip('Cette semaine', false),
+                const SizedBox(width: AppSpacing.sm),
+                _buildFilterChip('Grave', false),
+                const SizedBox(width: AppSpacing.sm),
+                _buildFilterChip('Stable', false),
+              ],
+            ),
           ),
-          _StatItem(
-            label: loc.journalHealthyPlural,
-            value: '$saines',
-            color: AppColors.severityLow,
-          ),
-          _StatItem(
-            label: loc.journalSickPlural,
-            value: '$malades',
-            color: AppColors.severityHigh,
+          
+          Expanded(
+            child: Container(
+              width: double.infinity,
+              decoration: const BoxDecoration(
+                color: AppColors.background,
+                borderRadius: BorderRadius.only(
+                  topLeft: Radius.circular(AppSpacing.cardRadius),
+                  topRight: Radius.circular(AppSpacing.cardRadius),
+                ),
+              ),
+              child: diagnosticsAsync.when(
+                loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+                error: (e, _) => Center(child: Text(loc.journalError(e.toString()))),
+                data: (diagnostics) {
+                  if (diagnostics.isEmpty) {
+                    return _EmptyHistory(onScan: () => context.go(AppRoutes.scanning));
+                  }
+                  
+                  // TODO: Apply filters based on _activeFilter when backend is ready
+                  
+                  return ListView.separated(
+                    padding: const EdgeInsets.all(AppSpacing.md),
+                    itemCount: diagnostics.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+                    itemBuilder: (context, index) {
+                      final diag = diagnostics[index];
+                      return _DiagnosticCard(diagnostic: diag);
+                    },
+                  );
+                },
+              ),
+            ),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () => context.go(AppRoutes.scanning),
+        backgroundColor: AppColors.primary,
+        child: const Icon(Icons.add, color: AppColors.textOnPrimary),
+      ),
+    );
+  }
+
+  Widget _buildFilterChip(String label, bool isActive) {
+    return GestureDetector(
+      onTap: () {
+        setState(() {});
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.primary : AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(20),
+          border: isActive ? null : Border.all(color: AppColors.textSecondary.withAlpha(50)),
+        ),
+        child: Text(
+          label,
+          style: AppTypography.bodySmall.copyWith(
+            color: isActive ? AppColors.textOnPrimary : AppColors.textPrimary,
+            fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
+          ),
+        ),
       ),
     );
   }
 }
 
-class _StatItem extends StatelessWidget {
-  const _StatItem(
-      {required this.label, required this.value, required this.color});
-  final String label;
-  final String value;
-  final Color color;
+class _DiagnosticCard extends StatelessWidget {
+  const _DiagnosticCard({required this.diagnostic});
+  final DiagnosticLocal diagnostic;
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      children: [
-        Text(value,
-            style: AppTypography.displayMedium
-                .copyWith(color: color, fontWeight: FontWeight.bold)),
-        Text(label,
-            style: AppTypography.bodySmall
-                .copyWith(color: AppColors.textSecondary)),
-      ],
-    );
-  }
-}
-
-// ─── Carte parcelle ─────────────────────────────────────────────────────────
-
-class _ParcelleCard extends StatelessWidget {
-  const _ParcelleCard({required this.entry, required this.onScan});
-  final JournalEntry entry;
-  final VoidCallback onScan;
-
-  @override
-  Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
-    final parcelle = entry.parcelle;
-    final statut = entry.statut;
-    final dernierDiag = entry.dernierDiagnostic;
-    final nbDiag = entry.nbDiagnostics;
-
-    final isHealthy = statut == 'sain';
-    final isMalade = statut == 'malade';
-    final statusColor = isMalade
-        ? AppColors.severityHigh
-        : (isHealthy ? AppColors.severityLow : AppColors.textSecondary);
-    final statusLabel = isMalade
-        ? loc.journalStatusSick
-        : (isHealthy ? loc.journalStatusHealthy : loc.journalStatusNotAnalyzed);
-    final statusIcon = isMalade
-        ? Icons.warning_amber_outlined
-        : (isHealthy ? Icons.check_circle_outline : Icons.help_outline);
+    final bool isSevere = diagnostic.niveauGravite?.toLowerCase() == 'sévère' || diagnostic.niveauGravite?.toLowerCase() == 'élevé';
+    final bool isHealthy = diagnostic.maladieDetectee.toLowerCase().contains('sain') || diagnostic.maladieDetectee.toLowerCase() == 'healthy';
+    
+    final Color statusColor = isHealthy ? AppColors.severityLow : (isSevere ? AppColors.severityHigh : AppColors.severityMedium);
+    final String statusText = isHealthy ? 'Gravité faible' : (isSevere ? 'Évolution : aggravation' : 'Évolution : stable');
+    final IconData statusIcon = isHealthy ? Icons.check_circle_outline : (isSevere ? Icons.error_outline : Icons.warning_amber_outlined);
 
     return Container(
       decoration: BoxDecoration(
@@ -340,281 +151,121 @@ class _ParcelleCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
         boxShadow: [
           BoxShadow(
-              color: Colors.black.withAlpha(15),
-              blurRadius: 8,
-              offset: const Offset(0, 2))
+            color: Colors.black.withAlpha(15),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          )
         ],
-        border: isMalade
-            ? Border.all(color: AppColors.severityHigh.withAlpha(80), width: 1)
-            : null,
       ),
-      child: Column(
-        children: [
-          // Ligne principale
-          Padding(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            child: Row(
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.sm),
+        child: Row(
+          children: [
+            // Image
+            Container(
+              width: 80,
+              height: 80,
+              decoration: BoxDecoration(
+                color: AppColors.primaryLight,
+                borderRadius: BorderRadius.circular(AppSpacing.sm),
+              ),
+              clipBehavior: Clip.antiAlias,
+              child: diagnostic.imagePath != null && File(diagnostic.imagePath!).existsSync()
+                  ? Image.file(File(diagnostic.imagePath!), fit: BoxFit.cover)
+                  : const Icon(Icons.image_outlined, color: AppColors.primary),
+            ),
+            const SizedBox(width: AppSpacing.md),
+            
+            // Text Content
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    diagnostic.maladieDetectee,
+                    style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  Text(
+                    _getScientificName(diagnostic.maladieDetectee),
+                    style: AppTypography.caption.copyWith(color: AppColors.textSecondary, fontStyle: FontStyle.italic),
+                  ),
+                  const SizedBox(height: AppSpacing.sm),
+                  Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: statusColor.withAlpha(25),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(statusIcon, color: statusColor, size: 12),
+                        const SizedBox(width: 4),
+                        Text(
+                          statusText,
+                          style: AppTypography.caption.copyWith(color: statusColor, fontWeight: FontWeight.w600),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            
+            // Date
+            Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: statusColor.withAlpha(30),
-                    borderRadius: BorderRadius.circular(AppSpacing.sm),
-                  ),
-                  child: Icon(Icons.map_outlined, color: statusColor, size: 28),
+                Text(
+                  DateFormat('dd MMM').format(diagnostic.dateDiagnostic),
+                  style: AppTypography.caption.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w500),
                 ),
-                const SizedBox(width: AppSpacing.md),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(parcelle.nomParcelle,
-                          style: AppTypography.bodyMedium
-                              .copyWith(fontWeight: FontWeight.w600)),
-                      if (parcelle.description != null)
-                        Text(parcelle.description!,
-                            style: AppTypography.bodySmall,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis),
-                      const SizedBox(height: 4),
-                      Row(children: [
-                        if (parcelle.surface != null) ...[
-                          const Icon(Icons.crop_square_outlined,
-                              size: 12, color: AppColors.textSecondary),
-                          const SizedBox(width: 2),
-                          Text(loc.journalAreaHa(parcelle.surface.toString()),
-                              style: AppTypography.caption
-                                  .copyWith(color: AppColors.textSecondary)),
-                          const SizedBox(width: AppSpacing.sm),
-                        ],
-                        Text(loc.journalAnalysesCount(nbDiag),
-                            style: AppTypography.caption
-                                .copyWith(color: AppColors.textSecondary)),
-                      ]),
-                    ],
-                  ),
-                ),
-                // Badge statut
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: statusColor.withAlpha(25),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: Row(mainAxisSize: MainAxisSize.min, children: [
-                    Icon(statusIcon, color: statusColor, size: 12),
-                    const SizedBox(width: 3),
-                    Text(statusLabel,
-                        style: AppTypography.caption.copyWith(
-                            color: statusColor, fontWeight: FontWeight.w600)),
-                  ]),
+                Text(
+                  DateFormat('yyyy').format(diagnostic.dateDiagnostic),
+                  style: AppTypography.caption.copyWith(color: AppColors.textSecondary.withAlpha(150)),
                 ),
               ],
             ),
-          ),
-          // Dernier diagnostic
-          if (dernierDiag != null) ...[
-            const Divider(height: 1),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md, vertical: AppSpacing.sm),
-              child: Row(
-                children: [
-                  const Icon(Icons.history,
-                      size: 14, color: AppColors.textSecondary),
-                  const SizedBox(width: 4),
-                  Expanded(
-                    child: Text(
-                      loc.journalLastDiagnostic(
-                        dernierDiag.maladieDetectee,
-                        DateFormat('dd/MM/yyyy')
-                            .format(dernierDiag.dateDiagnostic),
-                      ),
-                      style: AppTypography.caption
-                          .copyWith(color: AppColors.textSecondary),
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                  GestureDetector(
-                    onTap: onScan,
-                    child: Text(loc.journalScan,
-                        style: AppTypography.caption.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w600)),
-                  ),
-                ],
-              ),
-            ),
-          ] else ...[
-            const Divider(height: 1),
-            Padding(
-              padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.md, vertical: AppSpacing.sm),
-              child: Row(
-                children: [
-                  const Icon(Icons.info_outline,
-                      size: 14, color: AppColors.textSecondary),
-                  const SizedBox(width: 4),
-                  Text(loc.journalNoDiagnosticYet,
-                      style: AppTypography.caption),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: onScan,
-                    child: Text(loc.journalScanNow,
-                        style: AppTypography.caption.copyWith(
-                            color: AppColors.primary,
-                            fontWeight: FontWeight.w600)),
-                  ),
-                ],
-              ),
-            ),
+            const SizedBox(width: AppSpacing.xs),
           ],
-        ],
+        ),
       ),
     );
   }
+
+  String _getScientificName(String commonName) {
+    // Mapping basique pour l'UI, idéalement cela viendrait d'une base de données locale des maladies
+    if (commonName.toLowerCase().contains('pyriculariose') || commonName.toLowerCase().contains('blast')) return 'Magnaporthe oryzae';
+    if (commonName.toLowerCase().contains('helminthosporiose') || commonName.toLowerCase().contains('brown spot')) return 'Cochliobolus miyabeanus';
+    if (commonName.toLowerCase().contains('bacterial') || commonName.toLowerCase().contains('blight')) return 'Xanthomonas oryzae';
+    return '';
+  }
 }
 
-// ─── Journal vide ───────────────────────────────────────────────────────────
-
-class _EmptyJournal extends StatelessWidget {
-  const _EmptyJournal({required this.onAdd});
-  final VoidCallback onAdd;
+class _EmptyHistory extends StatelessWidget {
+  const _EmptyHistory({required this.onScan});
+  final VoidCallback onScan;
 
   @override
   Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          const Icon(Icons.map_outlined,
-              size: 80, color: AppColors.primaryLight),
+          const Icon(Icons.history, size: 80, color: AppColors.primaryLight),
           const SizedBox(height: AppSpacing.md),
-          Text(loc.journalEmptyTitle,
-              style: AppTypography.headlineMedium
-                  .copyWith(color: AppColors.textSecondary)),
+          Text('Aucune analyse', style: AppTypography.headlineMedium.copyWith(color: AppColors.textSecondary)),
           const SizedBox(height: AppSpacing.sm),
-          Text(loc.journalEmptyDescription,
-              style: AppTypography.bodySmall, textAlign: TextAlign.center),
+          const Text('Vos diagnostics récents apparaîtront ici', style: AppTypography.bodySmall, textAlign: TextAlign.center),
           const SizedBox(height: AppSpacing.xl),
           ElevatedButton.icon(
-            onPressed: onAdd,
-            icon: const Icon(Icons.add),
-            label: Text(loc.journalAddPlot),
+            onPressed: onScan,
+            icon: const Icon(Icons.camera_alt_outlined),
+            label: const Text('Faire un diagnostic'),
           ),
         ],
-      ),
-    );
-  }
-}
-
-// ─── Formulaire Nouvelle Parcelle ────────────────────────────────────────────
-
-class _AddParcelleSheet extends ConsumerStatefulWidget {
-  const _AddParcelleSheet({required this.onSaved});
-  final VoidCallback onSaved;
-
-  @override
-  ConsumerState<_AddParcelleSheet> createState() => _AddParcelleSheetState();
-}
-
-class _AddParcelleSheetState extends ConsumerState<_AddParcelleSheet> {
-  final _formKey = GlobalKey<FormState>();
-  final _nomController = TextEditingController();
-  final _descController = TextEditingController();
-  final _surfaceController = TextEditingController();
-
-  @override
-  void dispose() {
-    _nomController.dispose();
-    _descController.dispose();
-    _surfaceController.dispose();
-    super.dispose();
-  }
-
-  Future<void> _save() async {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
-    await ref.read(parcelleNotifierProvider.notifier).createParcelle(
-          nom: _nomController.text.trim(),
-          description: _descController.text.trim().isEmpty
-              ? null
-              : _descController.text.trim(),
-          surface: double.tryParse(_surfaceController.text.trim()),
-        );
-    widget.onSaved();
-    if (mounted) Navigator.of(context).pop();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
-    final state = ref.watch(parcelleNotifierProvider);
-    final isLoading = state is AsyncLoading;
-    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
-
-    return Padding(
-      padding: EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.md, AppSpacing.md,
-          AppSpacing.md + bottomInset),
-      child: Form(
-        key: _formKey,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Center(
-                child: Container(
-                    width: 40,
-                    height: 4,
-                    decoration: BoxDecoration(
-                        color: AppColors.textSecondary,
-                        borderRadius: BorderRadius.circular(2)))),
-            const SizedBox(height: AppSpacing.md),
-            Text(loc.journalNewPlot, style: AppTypography.headlineMedium),
-            const SizedBox(height: AppSpacing.md),
-            TextFormField(
-              controller: _nomController,
-              decoration: InputDecoration(
-                  labelText: loc.journalPlotNameLabel,
-                  prefixIcon: const Icon(Icons.map_outlined)),
-              validator: (v) =>
-                  (v == null || v.isEmpty) ? loc.journalNameRequired : null,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            TextFormField(
-              controller: _descController,
-              decoration: InputDecoration(
-                  labelText: loc.journalDescriptionOptional,
-                  prefixIcon: const Icon(Icons.notes_outlined)),
-              maxLines: 2,
-            ),
-            const SizedBox(height: AppSpacing.sm),
-            TextFormField(
-              controller: _surfaceController,
-              decoration: InputDecoration(
-                  labelText: loc.journalSurfaceOptional,
-                  prefixIcon: const Icon(Icons.crop_square_outlined)),
-              keyboardType:
-                  const TextInputType.numberWithOptions(decimal: true),
-            ),
-            const SizedBox(height: AppSpacing.lg),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: isLoading ? null : _save,
-                child: isLoading
-                    ? const SizedBox(
-                        width: 20,
-                        height: 20,
-                        child: CircularProgressIndicator(
-                            strokeWidth: 2, color: Colors.white))
-                    : Text(loc.commonSave),
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

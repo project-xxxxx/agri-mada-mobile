@@ -1,4 +1,3 @@
-import 'package:cross_file/cross_file.dart';
 import 'package:image_picker_platform_interface/image_picker_platform_interface.dart';
 
 class TestImagePickerPlatform extends ImagePickerPlatform {

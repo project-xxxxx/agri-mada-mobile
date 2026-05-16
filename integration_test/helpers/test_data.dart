@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:agri_mada/core/ai/tflite_service.dart';
 import 'package:agri_mada/features/scan/domain/entities/diagnostic_result.dart';
 import 'package:agri_mada/core/local_db/models/diagnostic_local.dart';
 import 'package:agri_mada/core/local_db/models/parcelle_local.dart';

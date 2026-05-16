@@ -51,7 +51,7 @@ void main() {
             forgotPasswordUseCaseProvider
                 .overrideWithValue(mockForgotPasswordUseCase),
           ],
-          child: MaterialApp(
+          child: const MaterialApp(
             home: ResetPasswordScreen(),
             localizationsDelegates: [
               GlobalMaterialLocalizations.delegate,

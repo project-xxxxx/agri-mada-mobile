@@ -367,12 +367,35 @@ class _SearchBar extends StatelessWidget {
                     overflow: TextOverflow.ellipsis,
                   ),
                 ),
-          ],
+              ],
+            ),
+          ),
         ),
-      ),
-      ),
-    ],
-  );
+        const SizedBox(width: AppSpacing.sm),
+        Container(
+          height: 49,
+          width: 49,
+          decoration: BoxDecoration(
+            color: AppColors.primary,
+            borderRadius: BorderRadius.circular(AppSpacing.sm),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.primary.withAlpha(50),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: IconButton(
+            icon: const Icon(Icons.tune, color: AppColors.textOnPrimary),
+            onPressed: () {
+              // Action pour le filtre (Nom, Culture, Date)
+            },
+            tooltip: 'Filtre',
+          ),
+        ),
+      ],
+    );
   }
 }
 

@@ -37,15 +37,16 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(secureStorageChannel,
             (MethodCall call) async {
+      final args = call.arguments as Map<String, dynamic>;
       switch (call.method) {
         case 'write':
-          secureStorage[call.arguments['key'] as String] =
-              call.arguments['value'] as String;
+          secureStorage[args['key'] as String] =
+              args['value'] as String;
           return null;
         case 'read':
-          return secureStorage[call.arguments['key'] as String];
+          return secureStorage[args['key'] as String];
         case 'delete':
-          secureStorage.remove(call.arguments['key'] as String);
+          secureStorage.remove(args['key'] as String);
           return null;
         default:
           return null;

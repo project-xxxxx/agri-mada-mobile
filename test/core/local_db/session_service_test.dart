@@ -12,15 +12,16 @@ void main() {
   setUpAll(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall call) async {
+      final args = call.arguments as Map<String, dynamic>;
       switch (call.method) {
         case 'write':
-          storage[call.arguments['key'] as String] =
-              call.arguments['value'] as String;
+          storage[args['key'] as String] =
+              args['value'] as String;
           return null;
         case 'read':
-          return storage[call.arguments['key'] as String];
+          return storage[args['key'] as String];
         case 'delete':
-          storage.remove(call.arguments['key'] as String);
+          storage.remove(args['key'] as String);
           return null;
         case 'deleteAll':
           storage.clear();

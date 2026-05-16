@@ -27,15 +27,16 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(secureStorageChannel,
             (MethodCall call) async {
+      final args = call.arguments as Map<String, dynamic>;
       switch (call.method) {
         case 'write':
-          storage[call.arguments['key'] as String] =
-              call.arguments['value'] as String;
+          storage[args['key'] as String] =
+              args['value'] as String;
           return null;
         case 'read':
-          return storage[call.arguments['key'] as String];
+          return storage[args['key'] as String];
         case 'delete':
-          storage.remove(call.arguments['key'] as String);
+          storage.remove(args['key'] as String);
           return null;
         case 'deleteAll':
           storage.clear();
@@ -55,7 +56,7 @@ void main() {
     storage.clear();
   });
 
-  Future<(ProviderContainer, GoRouter)> _pumpApp(WidgetTester tester) async {
+  Future<(ProviderContainer, GoRouter)> pumpApp(WidgetTester tester) async {
     final container = ProviderContainer(
       overrides: [
         syncNotifierProvider.overrideWith(_FakeSyncNotifier.new),
@@ -88,7 +89,7 @@ void main() {
       storage['onboarding_done'] = 'false';
 
       // Act
-      final (container, _) = await _pumpApp(tester);
+      final (container, _) = await pumpApp(tester);
 
       // Assert
       expect(find.text('Passer'), findsOneWidget);
@@ -102,7 +103,7 @@ void main() {
       storage['onboarding_done'] = 'true';
 
       // Act
-      final (container, _) = await _pumpApp(tester);
+      final (container, _) = await pumpApp(tester);
 
       // Assert
       expect(find.text('Commencer'), findsOneWidget);
@@ -116,7 +117,7 @@ void main() {
       storage['onboarding_done'] = 'true';
 
       // Act
-      final (container, router) = await _pumpApp(tester);
+      final (container, router) = await pumpApp(tester);
       router.go(AppRoutes.home);
       await tester.pumpAndSettle();
 
@@ -133,7 +134,7 @@ void main() {
       storage['auth_token_type'] = 'bearer';
 
       // Act
-      final (container, router) = await _pumpApp(tester);
+      final (container, router) = await pumpApp(tester);
       router.go(AppRoutes.login);
       await tester.pumpAndSettle();
 

@@ -1,6 +1,7 @@
 // Providers Riverpod pour la gestion du journal agricole (Isar)
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/local_db/models/diagnostic_local.dart';
 import '../../../../core/local_db/models/parcelle_local.dart';
 import '../../data/repositories/parcelle_local_repository.dart';
 import '../../data/services/export_service.dart';
@@ -63,6 +64,11 @@ final parcellesProvider = FutureProvider<List<ParcelleLocal>>((ref) async {
         )
         .toList(),
   );
+});
+
+/// Liste complète de l'historique des diagnostics
+final diagnosticsHistoryProvider = FutureProvider<List<DiagnosticLocal>>((ref) async {
+  return ref.read(diagnosticRepositoryProvider).getAllDiagnostics();
 });
 
 /// Notifier pour les actions de création / mise à jour des parcelles
