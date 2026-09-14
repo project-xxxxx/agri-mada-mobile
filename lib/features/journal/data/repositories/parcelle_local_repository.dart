@@ -74,6 +74,7 @@ class ParcelleLocalRepository implements JournalRepository {
     double? surface,
     double? latitude,
     double? longitude,
+    String? photoPath,
   }) async {
     final parcelle = ParcelleLocal()
       ..nomParcelle = nomParcelle
@@ -81,6 +82,7 @@ class ParcelleLocalRepository implements JournalRepository {
       ..surface = surface
       ..latitude = latitude
       ..longitude = longitude
+      ..photoPath = photoPath
       ..createdAt = DateTime.now()
       ..isSynced = false;
 
@@ -105,6 +107,7 @@ class ParcelleLocalRepository implements JournalRepository {
         ..id = parsedId ?? Isar.autoIncrement
         ..nomParcelle = parcelle.nom
         ..surface = parcelle.surface
+        ..photoPath = parcelle.photoPath
         ..createdAt = createdAt
         ..isSynced = parcelle.isSynced;
 

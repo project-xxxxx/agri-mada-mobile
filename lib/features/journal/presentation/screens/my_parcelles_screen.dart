@@ -14,6 +14,7 @@ import '../../../../app/theme/app_typography.dart';
 import '../../domain/entities/journal_entry.dart';
 import '../../domain/usecases/export_journal_usecase.dart';
 import '../../data/services/export_service.dart';
+import '../../../../core/widgets/app_sidebar.dart';
 import '../providers/journal_provider.dart';
 import '../widgets/add_parcelle_sheet.dart';
 
@@ -32,10 +33,10 @@ class MyParcellesScreen extends ConsumerWidget {
         backgroundColor: AppColors.scaffoldBackground,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        leading: Builder(
-          builder: (context) => IconButton(
+        leading: Consumer(
+          builder: (context, ref, _) => IconButton(
             icon: const Icon(Icons.menu, size: 28),
-            onPressed: () => Scaffold.of(context).openDrawer(),
+            onPressed: () => ref.read(sidebarControllerProvider.notifier).state = true,
           ),
         ),
         titleSpacing: 0,
@@ -337,7 +338,9 @@ class _ParcelleCard extends StatelessWidget {
         ? Icons.warning_amber_outlined
         : (isHealthy ? Icons.check_circle_outline : Icons.help_outline);
 
-    return Container(
+    return GestureDetector(
+      onTap: () => context.push('${AppRoutes.parcelleDetail}/${parcelle.id}'),
+      child: Container(
       decoration: BoxDecoration(
         color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
@@ -476,6 +479,7 @@ class _ParcelleCard extends StatelessWidget {
           ],
         ],
       ),
+    ),
     );
   }
 }

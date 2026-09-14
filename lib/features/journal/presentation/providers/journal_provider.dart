@@ -83,6 +83,7 @@ class ParcelleNotifier extends StateNotifier<AsyncValue<void>> {
     double? surface,
     double? latitude,
     double? longitude,
+    String? photoPath,
   }) async {
     state = const AsyncValue.loading();
     try {
@@ -93,6 +94,7 @@ class ParcelleNotifier extends StateNotifier<AsyncValue<void>> {
           surface: surface,
           culture: 'Riz',
           isSynced: false,
+          photoPath: photoPath,
         ),
       );
 

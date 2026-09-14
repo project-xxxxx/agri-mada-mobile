@@ -1,5 +1,8 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
@@ -19,6 +22,8 @@ class _AddParcelleSheetState extends ConsumerState<AddParcelleSheet> {
   final _cultureController = TextEditingController();
   final _surfaceController = TextEditingController();
   final _emplacementController = TextEditingController();
+  final _picker = ImagePicker();
+  XFile? _selectedPhoto;
 
   @override
   void dispose() {
@@ -29,14 +34,64 @@ class _AddParcelleSheetState extends ConsumerState<AddParcelleSheet> {
     super.dispose();
   }
 
+  Future<void> _pickPhoto() async {
+    final source = await showModalBottomSheet<ImageSource>(
+      context: context,
+      builder: (context) => SafeArea(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ListTile(
+              leading: const Icon(Icons.camera_alt_outlined),
+              title: const Text('Prendre une photo'),
+              onTap: () => Navigator.of(context).pop(ImageSource.camera),
+            ),
+            ListTile(
+              leading: const Icon(Icons.photo_library_outlined),
+              title: const Text('Choisir depuis la galerie'),
+              onTap: () => Navigator.of(context).pop(ImageSource.gallery),
+            ),
+          ],
+        ),
+      ),
+    );
+
+    if (source == null || !mounted) return;
+
+    final xFile = await _picker.pickImage(source: source, imageQuality: 80, maxWidth: 800);
+    if (xFile != null && mounted) {
+      setState(() => _selectedPhoto = xFile);
+    }
+  }
+
+  Future<String?> _savePhotoLocally() async {
+    if (_selectedPhoto == null) return null;
+    try {
+      final dir = await getApplicationDocumentsDirectory();
+      final photosDir = Directory('${dir.path}/parcelle_photos');
+      if (!await photosDir.exists()) await photosDir.create(recursive: true);
+
+      final fileName = 'parcelle_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final savedFile = File('${photosDir.path}/$fileName');
+      await File(_selectedPhoto!.path).copy(savedFile.path);
+      return savedFile.path;
+    } catch (e) {
+      return null;
+    }
+  }
+
   Future<void> _save() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
+
+    final photoPath = await _savePhotoLocally();
+
     await ref.read(parcelleNotifierProvider.notifier).createParcelle(
           nom: _nomController.text.trim(),
           description: _emplacementController.text.trim().isEmpty
               ? null
-              : _emplacementController.text.trim(), // On utilise description pour l'emplacement pour le moment
+              : _emplacementController.text.trim(),
           surface: double.tryParse(_surfaceController.text.trim()),
+          photoPath: photoPath,
         );
     widget.onSaved();
     if (mounted) Navigator.of(context).pop();
@@ -58,7 +113,6 @@ class _AddParcelleSheetState extends ConsumerState<AddParcelleSheet> {
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Ligne de drag (handle)
               Center(
                   child: Container(
                       width: 40,
@@ -67,45 +121,65 @@ class _AddParcelleSheetState extends ConsumerState<AddParcelleSheet> {
                           color: AppColors.textSecondary.withAlpha(100),
                           borderRadius: BorderRadius.circular(2)))),
               const SizedBox(height: AppSpacing.md),
-              
-              // Header
+
               Text('Ajouter une parcelle', style: AppTypography.headlineMedium.copyWith(color: AppColors.textPrimary)),
               Text('Nouvelle parcelle', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
               const SizedBox(height: AppSpacing.lg),
 
-              // Photo de la parcelle
               Text('Photo de la parcelle', style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
               const SizedBox(height: AppSpacing.xs),
-              CustomPaint(
-                painter: _DashedBorderPainter(color: AppColors.primary, strokeWidth: 1.5, dashWidth: 6, dashSpace: 4),
-                child: Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
-                  decoration: BoxDecoration(
-                    color: AppColors.primaryLight.withAlpha(30),
-                    borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
-                  ),
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(8),
-                        decoration: const BoxDecoration(
-                          color: AppColors.primaryLight,
-                          shape: BoxShape.circle,
-                        ),
-                        child: const Icon(Icons.add_a_photo_outlined, color: AppColors.primary),
-                      ),
-                      const SizedBox(height: AppSpacing.sm),
-                      Text('Ajouter une photo', style: AppTypography.bodyMedium.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600)),
-                      const SizedBox(height: 4),
-                      Text('Uploadez une photo de votre parcelle', style: AppTypography.caption.copyWith(color: AppColors.textSecondary)),
-                    ],
+              GestureDetector(
+                onTap: _pickPhoto,
+                child: CustomPaint(
+                  painter: _DashedBorderPainter(color: AppColors.primary, strokeWidth: 1.5, dashWidth: 6, dashSpace: 4),
+                  child: Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.symmetric(vertical: AppSpacing.lg),
+                    decoration: BoxDecoration(
+                      color: AppColors.primaryLight.withAlpha(30),
+                      borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+                    ),
+                    child: _selectedPhoto != null
+                        ? ClipRRect(
+                            borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+                            child: Image.file(
+                              File(_selectedPhoto!.path),
+                              height: 160,
+                              width: double.infinity,
+                              fit: BoxFit.cover,
+                            ),
+                          )
+                        : Column(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(8),
+                                decoration: const BoxDecoration(
+                                  color: AppColors.primaryLight,
+                                  shape: BoxShape.circle,
+                                ),
+                                child: const Icon(Icons.add_a_photo_outlined, color: AppColors.primary),
+                              ),
+                              const SizedBox(height: AppSpacing.sm),
+                              Text('Ajouter une photo', style: AppTypography.bodyMedium.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600)),
+                              const SizedBox(height: 4),
+                              Text('Uploadez une photo de votre parcelle', style: AppTypography.caption.copyWith(color: AppColors.textSecondary)),
+                            ],
+                          ),
                   ),
                 ),
               ),
+              if (_selectedPhoto != null) ...[
+                const SizedBox(height: AppSpacing.xs),
+                Center(
+                  child: TextButton.icon(
+                    onPressed: () => setState(() => _selectedPhoto = null),
+                    icon: const Icon(Icons.delete_outline, size: 16),
+                    label: const Text('Retirer la photo'),
+                  ),
+                ),
+              ],
               const SizedBox(height: AppSpacing.lg),
 
-              // Formulaire
               _buildLabel('Nom de la parcelle'),
               TextFormField(
                 controller: _nomController,
@@ -194,7 +268,6 @@ class _AddParcelleSheetState extends ConsumerState<AddParcelleSheet> {
               ),
               const SizedBox(height: AppSpacing.xl),
 
-              // Actions
               Row(
                 children: [
                   Expanded(

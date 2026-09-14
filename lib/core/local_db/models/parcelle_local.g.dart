@@ -47,13 +47,18 @@ const ParcelleLocalSchema = CollectionSchema(
       name: r'nomParcelle',
       type: IsarType.string,
     ),
-    r'serverId': PropertySchema(
+    r'photoPath': PropertySchema(
       id: 6,
+      name: r'photoPath',
+      type: IsarType.string,
+    ),
+    r'serverId': PropertySchema(
+      id: 7,
       name: r'serverId',
       type: IsarType.long,
     ),
     r'surface': PropertySchema(
-      id: 7,
+      id: 8,
       name: r'surface',
       type: IsarType.double,
     )
@@ -85,6 +90,12 @@ int _parcelleLocalEstimateSize(
     }
   }
   bytesCount += 3 + object.nomParcelle.length * 3;
+  {
+    final value = object.photoPath;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   return bytesCount;
 }
 
@@ -100,8 +111,9 @@ void _parcelleLocalSerialize(
   writer.writeDouble(offsets[3], object.latitude);
   writer.writeDouble(offsets[4], object.longitude);
   writer.writeString(offsets[5], object.nomParcelle);
-  writer.writeLong(offsets[6], object.serverId);
-  writer.writeDouble(offsets[7], object.surface);
+  writer.writeString(offsets[6], object.photoPath);
+  writer.writeLong(offsets[7], object.serverId);
+  writer.writeDouble(offsets[8], object.surface);
 }
 
 ParcelleLocal _parcelleLocalDeserialize(
@@ -118,8 +130,9 @@ ParcelleLocal _parcelleLocalDeserialize(
   object.latitude = reader.readDoubleOrNull(offsets[3]);
   object.longitude = reader.readDoubleOrNull(offsets[4]);
   object.nomParcelle = reader.readString(offsets[5]);
-  object.serverId = reader.readLongOrNull(offsets[6]);
-  object.surface = reader.readDoubleOrNull(offsets[7]);
+  object.photoPath = reader.readStringOrNull(offsets[6]);
+  object.serverId = reader.readLongOrNull(offsets[7]);
+  object.surface = reader.readDoubleOrNull(offsets[8]);
   return object;
 }
 
@@ -143,8 +156,10 @@ P _parcelleLocalDeserializeProp<P>(
     case 5:
       return (reader.readString(offset)) as P;
     case 6:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 7:
+      return (reader.readLongOrNull(offset)) as P;
+    case 8:
       return (reader.readDoubleOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -826,6 +841,160 @@ extension ParcelleLocalQueryFilter
   }
 
   QueryBuilder<ParcelleLocal, ParcelleLocal, QAfterFilterCondition>
+      photoPathIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'photoPath',
+      ));
+    });
+  }
+
+  QueryBuilder<ParcelleLocal, ParcelleLocal, QAfterFilterCondition>
+      photoPathIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'photoPath',
+      ));
+    });
+  }
+
+  QueryBuilder<ParcelleLocal, ParcelleLocal, QAfterFilterCondition>
+      photoPathEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'photoPath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ParcelleLocal, ParcelleLocal, QAfterFilterCondition>
+      photoPathGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'photoPath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ParcelleLocal, ParcelleLocal, QAfterFilterCondition>
+      photoPathLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'photoPath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ParcelleLocal, ParcelleLocal, QAfterFilterCondition>
+      photoPathBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'photoPath',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ParcelleLocal, ParcelleLocal, QAfterFilterCondition>
+      photoPathStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'photoPath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ParcelleLocal, ParcelleLocal, QAfterFilterCondition>
+      photoPathEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'photoPath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ParcelleLocal, ParcelleLocal, QAfterFilterCondition>
+      photoPathContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'photoPath',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ParcelleLocal, ParcelleLocal, QAfterFilterCondition>
+      photoPathMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'photoPath',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<ParcelleLocal, ParcelleLocal, QAfterFilterCondition>
+      photoPathIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'photoPath',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ParcelleLocal, ParcelleLocal, QAfterFilterCondition>
+      photoPathIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'photoPath',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<ParcelleLocal, ParcelleLocal, QAfterFilterCondition>
       serverIdIsNull() {
     return QueryBuilder.apply(this, (query) {
       return query.addFilterCondition(const FilterCondition.isNull(
@@ -1070,6 +1239,19 @@ extension ParcelleLocalQuerySortBy
     });
   }
 
+  QueryBuilder<ParcelleLocal, ParcelleLocal, QAfterSortBy> sortByPhotoPath() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'photoPath', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ParcelleLocal, ParcelleLocal, QAfterSortBy>
+      sortByPhotoPathDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'photoPath', Sort.desc);
+    });
+  }
+
   QueryBuilder<ParcelleLocal, ParcelleLocal, QAfterSortBy> sortByServerId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'serverId', Sort.asc);
@@ -1188,6 +1370,19 @@ extension ParcelleLocalQuerySortThenBy
     });
   }
 
+  QueryBuilder<ParcelleLocal, ParcelleLocal, QAfterSortBy> thenByPhotoPath() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'photoPath', Sort.asc);
+    });
+  }
+
+  QueryBuilder<ParcelleLocal, ParcelleLocal, QAfterSortBy>
+      thenByPhotoPathDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'photoPath', Sort.desc);
+    });
+  }
+
   QueryBuilder<ParcelleLocal, ParcelleLocal, QAfterSortBy> thenByServerId() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'serverId', Sort.asc);
@@ -1254,6 +1449,13 @@ extension ParcelleLocalQueryWhereDistinct
     });
   }
 
+  QueryBuilder<ParcelleLocal, ParcelleLocal, QDistinct> distinctByPhotoPath(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'photoPath', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<ParcelleLocal, ParcelleLocal, QDistinct> distinctByServerId() {
     return QueryBuilder.apply(this, (query) {
       return query.addDistinctBy(r'serverId');
@@ -1308,6 +1510,12 @@ extension ParcelleLocalQueryProperty
   QueryBuilder<ParcelleLocal, String, QQueryOperations> nomParcelleProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'nomParcelle');
+    });
+  }
+
+  QueryBuilder<ParcelleLocal, String?, QQueryOperations> photoPathProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'photoPath');
     });
   }
 

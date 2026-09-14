@@ -99,7 +99,7 @@ final forgotPasswordUseCaseProvider =
 
 typedef ForgotPasswordUseCaseRef
     = AutoDisposeProviderRef<ForgotPasswordUseCase>;
-String _$authNotifierHash() => r'd74c39f58569d6f2b811cd4fb4c8eebf356cdb05';
+String _$authNotifierHash() => r'38c2d8aff48dc7935fcc5b602d212a733e858cdf';
 
 /// See also [AuthNotifier].
 @ProviderFor(AuthNotifier)

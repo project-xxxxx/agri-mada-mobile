@@ -13,6 +13,7 @@ class ParcelleLocal {
   double? surface;
   double? latitude;
   double? longitude;
+  String? photoPath;
   late DateTime createdAt;
 
   // Clé pour identifier la parcelle dans le serveur après synchro

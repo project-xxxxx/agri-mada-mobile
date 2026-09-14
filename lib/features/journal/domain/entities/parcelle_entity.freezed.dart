@@ -22,6 +22,7 @@ mixin _$ParcelleEntity {
   String get culture => throw _privateConstructorUsedError;
   DateTime? get lastDiagnosticDate => throw _privateConstructorUsedError;
   bool get isSynced => throw _privateConstructorUsedError;
+  String? get photoPath => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $ParcelleEntityCopyWith<ParcelleEntity> get copyWith =>
@@ -40,7 +41,8 @@ abstract class $ParcelleEntityCopyWith<$Res> {
       double? surface,
       String culture,
       DateTime? lastDiagnosticDate,
-      bool isSynced});
+      bool isSynced,
+      String? photoPath});
 }
 
 /// @nodoc
@@ -62,6 +64,7 @@ class _$ParcelleEntityCopyWithImpl<$Res, $Val extends ParcelleEntity>
     Object? culture = null,
     Object? lastDiagnosticDate = freezed,
     Object? isSynced = null,
+    Object? photoPath = freezed,
   }) {
     return _then(_value.copyWith(
       id: null == id
@@ -88,6 +91,10 @@ class _$ParcelleEntityCopyWithImpl<$Res, $Val extends ParcelleEntity>
           ? _value.isSynced
           : isSynced // ignore: cast_nullable_to_non_nullable
               as bool,
+      photoPath: freezed == photoPath
+          ? _value.photoPath
+          : photoPath // ignore: cast_nullable_to_non_nullable
+              as String?,
     ) as $Val);
   }
 }
@@ -106,7 +113,8 @@ abstract class _$$ParcelleEntityImplCopyWith<$Res>
       double? surface,
       String culture,
       DateTime? lastDiagnosticDate,
-      bool isSynced});
+      bool isSynced,
+      String? photoPath});
 }
 
 /// @nodoc
@@ -126,6 +134,7 @@ class __$$ParcelleEntityImplCopyWithImpl<$Res>
     Object? culture = null,
     Object? lastDiagnosticDate = freezed,
     Object? isSynced = null,
+    Object? photoPath = freezed,
   }) {
     return _then(_$ParcelleEntityImpl(
       id: null == id
@@ -152,6 +161,10 @@ class __$$ParcelleEntityImplCopyWithImpl<$Res>
           ? _value.isSynced
           : isSynced // ignore: cast_nullable_to_non_nullable
               as bool,
+      photoPath: freezed == photoPath
+          ? _value.photoPath
+          : photoPath // ignore: cast_nullable_to_non_nullable
+              as String?,
     ));
   }
 }
@@ -165,7 +178,8 @@ class _$ParcelleEntityImpl implements _ParcelleEntity {
       this.surface,
       this.culture = 'Riz',
       this.lastDiagnosticDate,
-      this.isSynced = false});
+      this.isSynced = false,
+      this.photoPath});
 
   @override
   final String id;
@@ -181,10 +195,12 @@ class _$ParcelleEntityImpl implements _ParcelleEntity {
   @override
   @JsonKey()
   final bool isSynced;
+  @override
+  final String? photoPath;
 
   @override
   String toString() {
-    return 'ParcelleEntity(id: $id, nom: $nom, surface: $surface, culture: $culture, lastDiagnosticDate: $lastDiagnosticDate, isSynced: $isSynced)';
+    return 'ParcelleEntity(id: $id, nom: $nom, surface: $surface, culture: $culture, lastDiagnosticDate: $lastDiagnosticDate, isSynced: $isSynced, photoPath: $photoPath)';
   }
 
   @override
@@ -199,12 +215,14 @@ class _$ParcelleEntityImpl implements _ParcelleEntity {
             (identical(other.lastDiagnosticDate, lastDiagnosticDate) ||
                 other.lastDiagnosticDate == lastDiagnosticDate) &&
             (identical(other.isSynced, isSynced) ||
-                other.isSynced == isSynced));
+                other.isSynced == isSynced) &&
+            (identical(other.photoPath, photoPath) ||
+                other.photoPath == photoPath));
   }
 
   @override
-  int get hashCode => Object.hash(
-      runtimeType, id, nom, surface, culture, lastDiagnosticDate, isSynced);
+  int get hashCode => Object.hash(runtimeType, id, nom, surface, culture,
+      lastDiagnosticDate, isSynced, photoPath);
 
   @JsonKey(ignore: true)
   @override
@@ -221,7 +239,8 @@ abstract class _ParcelleEntity implements ParcelleEntity {
       final double? surface,
       final String culture,
       final DateTime? lastDiagnosticDate,
-      final bool isSynced}) = _$ParcelleEntityImpl;
+      final bool isSynced,
+      final String? photoPath}) = _$ParcelleEntityImpl;
 
   @override
   String get id;
@@ -235,6 +254,8 @@ abstract class _ParcelleEntity implements ParcelleEntity {
   DateTime? get lastDiagnosticDate;
   @override
   bool get isSynced;
+  @override
+  String? get photoPath;
   @override
   @JsonKey(ignore: true)
   _$$ParcelleEntityImplCopyWith<_$ParcelleEntityImpl> get copyWith =>

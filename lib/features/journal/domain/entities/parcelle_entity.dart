@@ -11,5 +11,6 @@ class ParcelleEntity with _$ParcelleEntity {
     @Default('Riz') String culture,
     DateTime? lastDiagnosticDate,
     @Default(false) bool isSynced,
+    String? photoPath,
   }) = _ParcelleEntity;
 }

@@ -12,6 +12,7 @@ import '../../../../core/providers/locale_provider.dart';
 import '../../../auth/presentation/providers/session_provider.dart';
 import '../../../journal/presentation/providers/journal_provider.dart';
 import '../../../../core/sync/providers/sync_provider.dart';
+import '../../../../core/widgets/app_sidebar.dart';
 import 'home_drawer.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -24,7 +25,6 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
-  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
@@ -79,10 +79,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
 
-    return Scaffold(
-      key: _scaffoldKey,
-      drawer: const HomeDrawer(),
-      backgroundColor: AppColors.scaffoldBackground,
+    return AppSidebarOverlay(
+      child: Scaffold(
+        drawer: const HomeDrawer(),
+        backgroundColor: AppColors.scaffoldBackground,
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
@@ -98,7 +98,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     _buildAnimatedItem(
                         _HomeHeader(
                           onMenuTap: () =>
-                              _scaffoldKey.currentState?.openDrawer(),
+                              ref.read(sidebarControllerProvider.notifier).state = true,
                         ),
                         0),
                     const SizedBox(height: AppSpacing.md),
@@ -122,6 +122,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           ],
         ),
       ),
+    ),
     );
   }
 }
@@ -197,7 +198,7 @@ class _HomeHeader extends ConsumerWidget {
       onLocaleSelected: (value) {
         ref.read(localeProvider.notifier).setLocale(Locale(value));
       },
-      onHelpTap: () => context.go('${AppRoutes.onboarding}?mode=help'),
+      onHelpTap: () => context.push('${AppRoutes.onboarding}?mode=help'),
     );
 
     return LayoutBuilder(
@@ -514,14 +515,14 @@ class _ServicesGrid extends StatelessWidget {
           description: loc.homeServicePlotsDescription,
           iconPath: 'assets/images/service_parcelles.png',
           iconFallback: Icons.map_outlined,
-          onTap: () => context.go(AppRoutes.journal),
+          onTap: () => context.go(AppRoutes.myParcelles),
         ),
         _ServiceCard(
           title: loc.homeServiceCropsTitle,
           description: loc.homeServiceCropsDescription,
           iconPath: 'assets/images/service_cultures.png',
           iconFallback: Icons.bar_chart_outlined,
-          onTap: () => context.go(AppRoutes.scanning),
+          onTap: () => context.go(AppRoutes.journal),
         ),
         _ServiceCard(
           title: loc.homeServiceSolutionsTitle,

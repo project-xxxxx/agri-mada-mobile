@@ -13,6 +13,7 @@ import '../features/scan/presentation/screens/scanning_screen.dart';
 import '../features/scan/presentation/screens/scan_result_screen.dart';
 import '../features/journal/presentation/screens/journal_screen.dart';
 import '../features/journal/presentation/screens/my_parcelles_screen.dart';
+import '../features/journal/presentation/screens/parcelle_detail_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../core/local_db/session_service.dart';
 import '../core/widgets/main_layout.dart';
@@ -30,6 +31,7 @@ abstract final class AppRoutes {
   static const String scanResult = '/scan-result';
   static const String journal = '/journal';
   static const String myParcelles = '/my-parcelles';
+  static const String parcelleDetail = '/parcelle/:id';
   static const String prevention = '/prevention';
   static const String guides = '/guides';
   static const String onboarding = '/onboarding';
@@ -136,12 +138,40 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const MyParcellesScreen(),
       ),
       GoRoute(
+        path: AppRoutes.parcelleDetail,
+        pageBuilder: (context, state) => CustomTransitionPage(
+          key: state.pageKey,
+          child: ParcelleDetailScreen(
+            parcelleId: int.tryParse(state.pathParameters['id'] ?? '0') ?? 0,
+          ),
+          transitionsBuilder: (context, animation, secondaryAnimation, child) {
+            return SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(1, 0),
+                end: Offset.zero,
+              ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut)),
+              child: child,
+            );
+          },
+        ),
+      ),
+      GoRoute(
         path: AppRoutes.settings,
         builder: (context, state) => const SettingsScreen(),
       ),
       GoRoute(
         path: AppRoutes.scanning,
-        builder: (context, state) => const ScanningScreen(),
+        pageBuilder: (context, state) {
+          final parcelleIdParam = state.uri.queryParameters['parcelleId'];
+          final preselectedId = parcelleIdParam != null ? int.tryParse(parcelleIdParam) : null;
+          return CustomTransitionPage(
+            key: state.pageKey,
+            child: ScanningScreen(preselectedParcelleId: preselectedId),
+            transitionsBuilder: (context, animation, secondaryAnimation, child) {
+              return FadeTransition(opacity: animation, child: child);
+            },
+          );
+        },
       ),
       GoRoute(
         path: AppRoutes.scanResult,

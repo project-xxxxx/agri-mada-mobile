@@ -9,6 +9,7 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/local_db/models/diagnostic_local.dart';
+import '../../../../core/widgets/app_sidebar.dart';
 import '../providers/journal_provider.dart';
 
 class JournalScreen extends ConsumerStatefulWidget {
@@ -30,10 +31,10 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
         backgroundColor: AppColors.scaffoldBackground,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        leading: Builder(
-          builder: (context) => IconButton(
+        leading: Consumer(
+          builder: (context, ref, _) => IconButton(
             icon: const Icon(Icons.menu, size: 28),
-            onPressed: () => Scaffold.of(context).openDrawer(),
+            onPressed: () => ref.read(sidebarControllerProvider.notifier).state = true,
           ),
         ),
         titleSpacing: 0,

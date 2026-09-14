@@ -1,21 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:agri_mada/app/router.dart';
 import 'package:agri_mada/l10n/app_localizations.dart';
 import '../../app/theme/app_colors.dart';
 import '../../app/theme/app_typography.dart';
+import 'app_sidebar.dart';
 
-class MainLayout extends StatelessWidget {
+class MainLayout extends ConsumerWidget {
   const MainLayout({super.key, required this.child});
   final Widget child;
 
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: child,
-      floatingActionButton: _PulsatingScanFab(onTap: () => context.go(AppRoutes.scanning)),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: const _AppBottomNav(),
+  Widget build(BuildContext context, WidgetRef ref) {
+    return AppSidebarOverlay(
+      child: Scaffold(
+        body: child,
+        floatingActionButton: _PulsatingScanFab(onTap: () => context.go(AppRoutes.scanning)),
+        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+        bottomNavigationBar: const _AppBottomNav(),
+      ),
     );
   }
 }

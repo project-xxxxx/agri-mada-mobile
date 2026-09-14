@@ -16,7 +16,8 @@ import '../../../../core/local_db/models/parcelle_local.dart';
 import '../providers/scan_provider.dart';
 
 class ScanningScreen extends ConsumerStatefulWidget {
-  const ScanningScreen({super.key});
+  const ScanningScreen({super.key, this.preselectedParcelleId});
+  final int? preselectedParcelleId;
 
   @override
   ConsumerState<ScanningScreen> createState() => _ScanningScreenState();
@@ -26,32 +27,46 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
   final _picker = ImagePicker();
   ParcelleLocal? _selectedParcelle;
   bool _isPickerActive = false;
+  bool _showParcelleSelector = true;
 
   @override
   void initState() {
     super.initState();
-    // Auto-lancer le sélecteur de parcelle puis la caméra pour une UX fluide si on a la db prête
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      _checkAndStart();
-    });
+    WidgetsBinding.instance.addPostFrameCallback((_) => _checkAndStart());
   }
 
   Future<void> _checkAndStart() async {
+    if (widget.preselectedParcelleId != null) {
+      final parcelles = await ref.read(parcelleRepositoryProvider).getAllParcelles();
+      final preselected = parcelles.where((p) => p.id == widget.preselectedParcelleId).firstOrNull;
+      if (preselected != null && mounted) {
+        setState(() {
+          _selectedParcelle = preselected;
+          _showParcelleSelector = false;
+        });
+        _pickAndAnalyze(ImageSource.camera);
+        return;
+      }
+    }
+
     final parcelles = await ref.read(parcelleRepositoryProvider).getAllParcelles();
     if (!mounted) return;
-    
+
     if (parcelles.isEmpty) {
-      _showNoParcelleDailog();
+      _showNoParcelleDialog();
       return;
     }
-    
+
     if (_selectedParcelle == null) {
-      final selected = await _showParcelleSelector(parcelles);
+      final selected = await _showParcelleSelectorDialog(parcelles);
       if (selected == null) {
         if (mounted) context.go(AppRoutes.home);
         return;
       }
-      setState(() => _selectedParcelle = selected);
+      setState(() {
+        _selectedParcelle = selected;
+        _showParcelleSelector = false;
+      });
       _pickAndAnalyze(ImageSource.camera);
     }
   }
@@ -73,7 +88,7 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
 
   Future<void> _pickAndAnalyze(ImageSource source) async {
     if (_isPickerActive) return;
-    
+
     final loc = AppLocalizations.of(context);
     final isAiReady = await _ensureAiReady();
     if (!isAiReady) {
@@ -85,24 +100,24 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
     if (_selectedParcelle == null) return;
 
     setState(() => _isPickerActive = true);
-    
+
     try {
       final xFile = await _picker.pickImage(
         source: source,
         imageQuality: 85,
         maxWidth: 1024,
       );
-      
+
       if (xFile == null) {
         setState(() => _isPickerActive = false);
         return;
       }
-      
+
       final imageFile = File(xFile.path);
 
       if (!mounted) return;
       final result = await ref.read(scanNotifierProvider.notifier).analyzeImage(imageFile);
-      
+
       if (result == null) {
         setState(() => _isPickerActive = false);
         return;
@@ -127,14 +142,13 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
     final isLoading = scanState is ScanLoading;
 
     return Scaffold(
-      backgroundColor: Colors.black, // Simule l'arrière-plan de la caméra
+      backgroundColor: Colors.black,
       body: Stack(
         fit: StackFit.expand,
         children: [
-          // Background cliquable pour relancer la caméra si l'utilisateur a annulé le picker natif
           GestureDetector(
             onTap: () {
-              if (!isLoading) _pickAndAnalyze(ImageSource.camera);
+              if (!isLoading && _selectedParcelle != null) _pickAndAnalyze(ImageSource.camera);
             },
             child: Container(
               color: Colors.transparent,
@@ -143,8 +157,6 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
               ),
             ),
           ),
-          
-          // Bouton Annuler en bas
           if (!isLoading)
             Positioned(
               bottom: 60,
@@ -176,7 +188,7 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
     );
   }
 
-  void _showNoParcelleDailog() {
+  void _showNoParcelleDialog() {
     final loc = AppLocalizations.of(context);
     showDialog<void>(
       context: context,
@@ -195,7 +207,7 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
           ElevatedButton(
             onPressed: () {
               Navigator.of(context).pop();
-              context.go(AppRoutes.myParcelles); // Redirige vers Mes Parcelles pour en créer une
+              context.go(AppRoutes.myParcelles);
             },
             child: const Text('Créer une parcelle'),
           ),
@@ -204,7 +216,7 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
     );
   }
 
-  Future<ParcelleLocal?> _showParcelleSelector(List<ParcelleLocal> parcelles) {
+  Future<ParcelleLocal?> _showParcelleSelectorDialog(List<ParcelleLocal> parcelles) {
     return showModalBottomSheet<ParcelleLocal>(
       context: context,
       isDismissible: false,
