@@ -176,6 +176,18 @@ abstract class AppLocalizations {
   /// **'Veuillez entrer votre mot de passe'**
   String get loginPasswordRequired;
 
+  /// Champ numéro de téléphone
+  ///
+  /// In fr, this message translates to:
+  /// **'Téléphone'**
+  String get loginPhoneLabel;
+
+  /// Validation numéro requis
+  ///
+  /// In fr, this message translates to:
+  /// **'Veuillez entrer votre numéro'**
+  String get loginPhoneRequired;
+
   /// Lien mot de passe oublié
   ///
   /// In fr, this message translates to:
@@ -230,6 +242,12 @@ abstract class AppLocalizations {
   /// **'Commencer'**
   String get welcomeStart;
 
+  /// Version du modèle embarqué
+  ///
+  /// In fr, this message translates to:
+  /// **'Modèle v{version}'**
+  String welcomeModelVersion(String version);
+
   /// Snack bar bientôt disponible
   ///
   /// In fr, this message translates to:
@@ -272,11 +290,11 @@ abstract class AppLocalizations {
   /// **'Mode hors ligne'**
   String get homeOfflineMode;
 
-  /// Placeholder recherche
+  /// Libellé d'accessibilité du bouton d'aide
   ///
   /// In fr, this message translates to:
-  /// **'recherche...'**
-  String get homeSearchPlaceholder;
+  /// **'Aide'**
+  String get homeHelpSemantics;
 
   /// Titre carte résumé
   ///
@@ -284,11 +302,17 @@ abstract class AppLocalizations {
   /// **'Résumé de votre exploitation'**
   String get homeSummaryTitle;
 
-  /// Statut système prêt
+  /// Statut quand le modèle embarqué est chargé
   ///
   /// In fr, this message translates to:
-  /// **'Système prêt'**
+  /// **'Analyse photo prête'**
   String get homeSystemReady;
+
+  /// Statut quand le modèle embarqué n'a pas pu être chargé
+  ///
+  /// In fr, this message translates to:
+  /// **'Analyse photo indisponible'**
+  String get homeSystemAiUnavailable;
 
   /// Nombre de parcelles
   ///
@@ -320,16 +344,16 @@ abstract class AppLocalizations {
   /// **'Consultez l\'état global de vos cultures et les niveaux de risque actuels'**
   String get homeServiceCropsDescription;
 
-  /// Service solutions agricoles
+  /// Service guide des maladies
   ///
   /// In fr, this message translates to:
-  /// **'Solutions agricoles'**
+  /// **'Maladies du riz'**
   String get homeServiceSolutionsTitle;
 
-  /// Description service solutions
+  /// Description du service guide des maladies
   ///
   /// In fr, this message translates to:
-  /// **'Découvrez les traitements biologiques et solutions locales recommandées'**
+  /// **'Reconnaître chaque maladie : symptômes, causes et gestes de prévention'**
   String get homeServiceSolutionsDescription;
 
   /// Service prevention
@@ -458,16 +482,16 @@ abstract class AppLocalizations {
   /// **'Analyse hors ligne terminée'**
   String get scanResultSubtitle;
 
-  /// Nom localisé maladie BLB
+  /// Nom localisé maladie BLB (terme de la fiche FOFIFA)
   ///
   /// In fr, this message translates to:
-  /// **'Brûlure bactérienne'**
+  /// **'Flétrissement bactérien (BLB)'**
   String get diseaseBacterialLeafBlight;
 
   /// Nom localisé maladie brown spot
   ///
   /// In fr, this message translates to:
-  /// **'Tache brune'**
+  /// **'Helminthosporiose (tache brune)'**
   String get diseaseBrownSpot;
 
   /// Nom localisé maladie leaf smut
@@ -481,12 +505,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Plante saine'**
   String get diseaseHealthy;
-
-  /// Badge de confiance
-  ///
-  /// In fr, this message translates to:
-  /// **'{value}% de confiance'**
-  String scanResultConfidence(String value);
 
   /// Titre partage diagnostic
   ///
@@ -506,11 +524,11 @@ abstract class AppLocalizations {
   /// **'Maladie: {disease}'**
   String scanShareDisease(String disease);
 
-  /// Ligne confiance partage
+  /// Ligne certitude partage
   ///
   /// In fr, this message translates to:
-  /// **'Confiance: {value}%'**
-  String scanShareConfidence(String value);
+  /// **'Certitude : {value}'**
+  String scanShareCertainty(String value);
 
   /// Ligne date partage
   ///
@@ -518,53 +536,155 @@ abstract class AppLocalizations {
   /// **'Date: {date}'**
   String scanShareDate(String date);
 
-  /// Titre carte gravité
+  /// Certitude : classe nettement en tête
   ///
   /// In fr, this message translates to:
-  /// **'Niveau de gravité'**
-  String get scanSeverityTitle;
+  /// **'Diagnostic probable'**
+  String get scanCertaintyProbable;
 
-  /// Niveau faible
+  /// Certitude : classe en tête mais proche d'autres
   ///
   /// In fr, this message translates to:
-  /// **'Faible'**
-  String get scanSeverityLow;
+  /// **'Diagnostic possible, à confirmer'**
+  String get scanCertaintyPossible;
 
-  /// Niveau moyen
+  /// Certitude : aucune maladie retenue
   ///
   /// In fr, this message translates to:
-  /// **'Moyen'**
-  String get scanSeverityMedium;
+  /// **'Résultat incertain'**
+  String get scanCertaintyUncertain;
 
-  /// Niveau élevé
+  /// Explication certitude probable
   ///
   /// In fr, this message translates to:
-  /// **'Élevé'**
-  String get scanSeverityHigh;
+  /// **'Les symptômes reconnus sont nets. Vérifiez sur la plante avant d\'agir.'**
+  String get scanCertaintyExplainProbable;
 
-  /// Texte statut gravité aucune
+  /// Explication certitude possible
   ///
   /// In fr, this message translates to:
-  /// **'Aucune - Plante saine'**
-  String get scanSeverityNoneStatus;
+  /// **'Plusieurs maladies se ressemblent sur cette photo. Faites confirmer par un technicien agricole.'**
+  String get scanCertaintyExplainPossible;
 
-  /// Texte statut gravité faible
+  /// Titre résultat incertain
   ///
   /// In fr, this message translates to:
-  /// **'Faible - Surveiller'**
-  String get scanSeverityLowStatus;
+  /// **'L\'application ne reconnaît pas cette photo'**
+  String get scanUncertainTitle;
 
-  /// Texte statut gravité modérée
+  /// Explication résultat incertain
   ///
   /// In fr, this message translates to:
-  /// **'Modéré - Intervention conseillée'**
-  String get scanSeverityMediumStatus;
+  /// **'Ce n\'est peut-être pas du riz, ou la photo est floue ou mal éclairée. Aucune maladie n\'est retenue et rien n\'est enregistré.'**
+  String get scanUncertainBody;
 
-  /// Texte statut gravité élevée
+  /// Conseils pour reprendre la photo
   ///
   /// In fr, this message translates to:
-  /// **'Élevé - Intervention urgente'**
-  String get scanSeverityHighStatus;
+  /// **'Pour une nouvelle photo : une seule feuille bien nette, à 20-30 cm, en lumière naturelle, sans contre-jour.'**
+  String get scanRetakeTips;
+
+  /// Bouton reprendre la photo
+  ///
+  /// In fr, this message translates to:
+  /// **'Reprendre la photo'**
+  String get scanRetakePhoto;
+
+  /// Autres maladies proches selon le modèle
+  ///
+  /// In fr, this message translates to:
+  /// **'Autres possibilités : {names}'**
+  String scanOtherCandidates(String names);
+
+  /// Écran résultat sans analyse en cours
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun résultat à afficher'**
+  String get scanNoResult;
+
+  /// Question gravité déclarée
+  ///
+  /// In fr, this message translates to:
+  /// **'Quelle part de la parcelle est touchée ?'**
+  String get scanSeverityQuestion;
+
+  /// Gravité déclarée : quelques plants
+  ///
+  /// In fr, this message translates to:
+  /// **'Quelques plants'**
+  String get scanSeverityFewPlants;
+
+  /// Gravité déclarée : moins d'un tiers de la parcelle
+  ///
+  /// In fr, this message translates to:
+  /// **'Moins d\'un tiers'**
+  String get scanSeverityUnderThird;
+
+  /// Gravité déclarée : plus d'un tiers de la parcelle
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus d\'un tiers'**
+  String get scanSeverityOverThird;
+
+  /// Gravité absente ou issue de l'ancien calcul
+  ///
+  /// In fr, this message translates to:
+  /// **'Part touchée non renseignée'**
+  String get scanSeverityUnknown;
+
+  /// Titre section conseils
+  ///
+  /// In fr, this message translates to:
+  /// **'Que faire ?'**
+  String get scanAdviceTitle;
+
+  /// Mention : aucun produit chimique conseillé
+  ///
+  /// In fr, this message translates to:
+  /// **'AgriMada ne recommande aucun produit ni dosage. Avant tout traitement, demandez conseil à un technicien agricole.'**
+  String get scanAdviceNoChemical;
+
+  /// Conseil fiche FOFIFA bactérioses
+  ///
+  /// In fr, this message translates to:
+  /// **'Utiliser des semences saines'**
+  String get scanAdviceHealthySeeds;
+
+  /// Conseil fiche FOFIFA bactérioses
+  ///
+  /// In fr, this message translates to:
+  /// **'Enlever et détruire les résidus des parcelles atteintes'**
+  String get scanAdviceRemoveResidues;
+
+  /// Conseil fiche FOFIFA bactérioses
+  ///
+  /// In fr, this message translates to:
+  /// **'Enlever et détruire les mauvaises herbes qui hébergent la bactérie'**
+  String get scanAdviceRemoveHostWeeds;
+
+  /// Conseil fiche FOFIFA bactérioses
+  ///
+  /// In fr, this message translates to:
+  /// **'Nettoyer les outils au savon après chaque utilisation'**
+  String get scanAdviceCleanTools;
+
+  /// Conseil fiche FOFIFA bactérioses
+  ///
+  /// In fr, this message translates to:
+  /// **'Prévenir le technicien agricole le plus proche'**
+  String get scanAdviceAlertTechnician;
+
+  /// Bouton écarter le résultat
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce résultat me semble faux'**
+  String get scanDiscard;
+
+  /// Message résultat écarté
+  ///
+  /// In fr, this message translates to:
+  /// **'Résultat écarté, rien n\'a été enregistré'**
+  String get scanDiscarded;
 
   /// Titre recommandations
   ///
@@ -578,77 +698,29 @@ abstract class AppLocalizations {
   /// **'Recommandation'**
   String get scanRecommendationItemTitle;
 
-  /// Recommandation BLB 1
-  ///
-  /// In fr, this message translates to:
-  /// **'Évacuer l\'eau des rizières infectées'**
-  String get scanRecBlbEvacuateWater;
-
-  /// Recommandation BLB 2
-  ///
-  /// In fr, this message translates to:
-  /// **'Appliquer du cuivre hydroxyde (2-3 g/L)'**
-  String get scanRecBlbApplyCopper;
-
-  /// Recommandation BLB 3
+  /// Recommandation BLB
   ///
   /// In fr, this message translates to:
   /// **'Éviter l\'excès d\'azote'**
   String get scanRecBlbAvoidNitrogen;
 
-  /// Recommandation BLB 4
+  /// Recommandation BLB
   ///
   /// In fr, this message translates to:
   /// **'Utiliser des variétés résistantes lors du prochain cycle'**
   String get scanRecBlbUseResistantVarieties;
 
-  /// Recommandation Brown Spot 1
+  /// Recommandation helminthosporiose
   ///
   /// In fr, this message translates to:
   /// **'Améliorer la fertilisation (potassium)'**
   String get scanRecBrownSpotFertilize;
 
-  /// Recommandation Brown Spot 2
+  /// Recommandation helminthosporiose
   ///
   /// In fr, this message translates to:
-  /// **'Appliquer un fongicide à base de mancozèbe'**
-  String get scanRecBrownSpotApplyFungicide;
-
-  /// Recommandation Brown Spot 3
-  ///
-  /// In fr, this message translates to:
-  /// **'Assurer un drainage correct'**
-  String get scanRecBrownSpotDrainage;
-
-  /// Recommandation Brown Spot 4
-  ///
-  /// In fr, this message translates to:
-  /// **'Éviter le stress hydrique'**
+  /// **'Éviter que le riz manque d\'eau'**
   String get scanRecBrownSpotAvoidStress;
-
-  /// Recommandation Leaf Smut 1
-  ///
-  /// In fr, this message translates to:
-  /// **'Traiter les semences avant plantation'**
-  String get scanRecLeafSmutTreatSeeds;
-
-  /// Recommandation Leaf Smut 2
-  ///
-  /// In fr, this message translates to:
-  /// **'Appliquer des fongicides systémiques'**
-  String get scanRecLeafSmutApplyFungicide;
-
-  /// Recommandation Leaf Smut 3
-  ///
-  /// In fr, this message translates to:
-  /// **'Retirer et brûler les plants infectés'**
-  String get scanRecLeafSmutRemovePlants;
-
-  /// Recommandation Leaf Smut 4
-  ///
-  /// In fr, this message translates to:
-  /// **'Rotation des cultures recommandée'**
-  String get scanRecLeafSmutRotation;
 
   /// Recommandation plante saine
   ///
@@ -679,12 +751,6 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Rotation des cultures'**
   String get scanRecHealthyRotation;
-
-  /// Astuce résultat scan
-  ///
-  /// In fr, this message translates to:
-  /// **'Astuce : évitez l\'arrosage excessif pendant 3 jours'**
-  String get scanTip;
 
   /// Sémantique bouton refaire scan
   ///
@@ -721,6 +787,18 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Partager le résultat'**
   String get scanShare;
+
+  /// Titre carte version du modèle
+  ///
+  /// In fr, this message translates to:
+  /// **'Version du modèle IA'**
+  String get modelVersionTitle;
+
+  /// Liste des maladies reconnues par le modèle
+  ///
+  /// In fr, this message translates to:
+  /// **'Maladies reconnues : {diseases}'**
+  String modelSupportedDiseases(String diseases);
 
   /// Message d'erreur écran journal
   ///
@@ -859,6 +937,108 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Nom requis'**
   String get journalNameRequired;
+
+  /// Formulaire parcelle : photo depuis la caméra
+  ///
+  /// In fr, this message translates to:
+  /// **'Prendre une photo'**
+  String get plotPhotoTake;
+
+  /// Formulaire parcelle : photo depuis la galerie
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir dans la galerie'**
+  String get plotPhotoGallery;
+
+  /// Formulaire parcelle : titre photo
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo de la parcelle'**
+  String get plotPhotoLabel;
+
+  /// Formulaire parcelle : bouton photo
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter une photo'**
+  String get plotPhotoAdd;
+
+  /// Formulaire parcelle : la photo est facultative
+  ///
+  /// In fr, this message translates to:
+  /// **'Facultative'**
+  String get plotPhotoHint;
+
+  /// Formulaire parcelle : retirer la photo
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer la photo'**
+  String get plotPhotoRemove;
+
+  /// Formulaire parcelle : nom
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom de la parcelle'**
+  String get plotNameLabel;
+
+  /// Formulaire parcelle : exemple de nom
+  ///
+  /// In fr, this message translates to:
+  /// **'Ex. : rizière du bas-fond'**
+  String get plotNameHint;
+
+  /// Formulaire parcelle : culture
+  ///
+  /// In fr, this message translates to:
+  /// **'Culture'**
+  String get plotCropLabel;
+
+  /// Formulaire parcelle : culture par défaut
+  ///
+  /// In fr, this message translates to:
+  /// **'Riz'**
+  String get plotCropHint;
+
+  /// Formulaire parcelle : surface
+  ///
+  /// In fr, this message translates to:
+  /// **'Surface cultivée'**
+  String get plotSurfaceLabel;
+
+  /// Formulaire parcelle : exemple de surface
+  ///
+  /// In fr, this message translates to:
+  /// **'En hectares, ex. : 0,55'**
+  String get plotSurfaceHint;
+
+  /// Unité de surface
+  ///
+  /// In fr, this message translates to:
+  /// **'ha'**
+  String get plotSurfaceSuffix;
+
+  /// Formulaire parcelle : surface invalide
+  ///
+  /// In fr, this message translates to:
+  /// **'Surface invalide. Exemple : 0,55'**
+  String get plotSurfaceInvalid;
+
+  /// Formulaire parcelle : emplacement
+  ///
+  /// In fr, this message translates to:
+  /// **'Emplacement'**
+  String get plotLocationLabel;
+
+  /// Formulaire parcelle : exemple d'emplacement
+  ///
+  /// In fr, this message translates to:
+  /// **'Village, fokontany, repère'**
+  String get plotLocationHint;
+
+  /// Formulaire parcelle : échec d'enregistrement
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible d\'enregistrer la parcelle'**
+  String get plotSaveFailed;
 
   /// Titre écran inscription
   ///
@@ -1205,7 +1385,7 @@ abstract class AppLocalizations {
   /// Erreur numéro invalide
   ///
   /// In fr, this message translates to:
-  /// **'Numero invalide'**
+  /// **'Numéro invalide'**
   String get resetPasswordPhoneInvalid;
 
   /// Lien retour connexion
@@ -1225,6 +1405,42 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Commencer'**
   String get onboardingStart;
+
+  /// Bouton passer l'onboarding
+  ///
+  /// In fr, this message translates to:
+  /// **'Passer'**
+  String get onboardingSkip;
+
+  /// Titre de l'onboarding
+  ///
+  /// In fr, this message translates to:
+  /// **'Bienvenue'**
+  String get onboardingWelcome;
+
+  /// Titre de l'onboarding en mode aide
+  ///
+  /// In fr, this message translates to:
+  /// **'Aide AgriMada'**
+  String get onboardingHelpTitle;
+
+  /// Le modèle embarqué est chargé
+  ///
+  /// In fr, this message translates to:
+  /// **'Analyse photo disponible sur ce téléphone'**
+  String get onboardingAiAvailable;
+
+  /// Le modèle embarqué n'a pas pu être chargé
+  ///
+  /// In fr, this message translates to:
+  /// **'Analyse photo indisponible sur ce téléphone'**
+  String get onboardingAiUnavailable;
+
+  /// Action fermer
+  ///
+  /// In fr, this message translates to:
+  /// **'Fermer'**
+  String get commonClose;
 
   /// Titre slide 1
   ///
@@ -1259,7 +1475,7 @@ abstract class AppLocalizations {
   /// Desc slide 3
   ///
   /// In fr, this message translates to:
-  /// **'Visualisez la gravité détectée, la confiance de l\'analyse et les recommandations adaptées.'**
+  /// **'Voyez la maladie probable, le niveau de certitude et les gestes de prévention.'**
   String get onboardingSlide3Desc;
 
   /// Titre slide 4
@@ -1313,7 +1529,7 @@ abstract class AppLocalizations {
   /// Statut splash dégradé
   ///
   /// In fr, this message translates to:
-  /// **'Initialisation partielle, mode degradé.'**
+  /// **'Initialisation partielle, mode dégradé.'**
   String get splashStatusDegraded;
 
   /// Statut splash IA prête
@@ -1469,7 +1685,7 @@ abstract class AppLocalizations {
   /// No description provided for @guideDisease3Desc.
   ///
   /// In fr, this message translates to:
-  /// **'Maladie fongique qui se manifeste par des tiges noires sur les feuilles de riz. Le champignon se développe dans les tissus foliaires et forme des sores noirs remplis de spores.'**
+  /// **'Maladie fongique qui se manifeste par de petites taches noires sur les feuilles de riz. Le champignon se développe dans les tissus foliaires et forme des sores noirs remplis de spores.'**
   String get guideDisease3Desc;
 
   /// No description provided for @guideDisease3Symptoms.
@@ -1507,6 +1723,174 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Bonnes pratiques agricoles :'**
   String get guideDisease4Causes;
+
+  /// No description provided for @guidesDisclaimer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ces fiches aident à reconnaître une maladie. Avant tout traitement, demandez conseil à un technicien agricole.'**
+  String get guidesDisclaimer;
+
+  /// No description provided for @guidesAdvice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Gestes recommandés'**
+  String get guidesAdvice;
+
+  /// No description provided for @guidesHealthySigns.
+  ///
+  /// In fr, this message translates to:
+  /// **'Signes d\'une plante saine'**
+  String get guidesHealthySigns;
+
+  /// No description provided for @journalHistorySubtitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Historique des analyses'**
+  String get journalHistorySubtitle;
+
+  /// No description provided for @journalHistoryEmptyTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune analyse'**
+  String get journalHistoryEmptyTitle;
+
+  /// No description provided for @journalHistoryEmptyDescription.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos diagnostics récents apparaîtront ici'**
+  String get journalHistoryEmptyDescription;
+
+  /// No description provided for @journalStartDiagnosis.
+  ///
+  /// In fr, this message translates to:
+  /// **'Faire un diagnostic'**
+  String get journalStartDiagnosis;
+
+  /// No description provided for @exportNothing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun diagnostic à exporter'**
+  String get exportNothing;
+
+  /// No description provided for @exportAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter'**
+  String get exportAction;
+
+  /// No description provided for @exportAsCsv.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter en CSV'**
+  String get exportAsCsv;
+
+  /// No description provided for @exportAsPdf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Exporter en PDF'**
+  String get exportAsPdf;
+
+  /// No description provided for @exportShareText.
+  ///
+  /// In fr, this message translates to:
+  /// **'Journal agricole AgriMada'**
+  String get exportShareText;
+
+  /// No description provided for @exportDone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Export prêt à être partagé'**
+  String get exportDone;
+
+  /// No description provided for @parcelDetailTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détail de la parcelle'**
+  String get parcelDetailTitle;
+
+  /// No description provided for @parcelDetailNewAnalysis.
+  ///
+  /// In fr, this message translates to:
+  /// **'Faire une nouvelle analyse'**
+  String get parcelDetailNewAnalysis;
+
+  /// No description provided for @parcelDetailNotFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Parcelle introuvable'**
+  String get parcelDetailNotFound;
+
+  /// No description provided for @parcelDetailNoAnalysis.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune analyse pour cette parcelle'**
+  String get parcelDetailNoAnalysis;
+
+  /// No description provided for @parcelDetailNotAnalyzedYet.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette parcelle n\'a pas encore été analysée'**
+  String get parcelDetailNotAnalyzedYet;
+
+  /// No description provided for @parcelDetailHealthStatus.
+  ///
+  /// In fr, this message translates to:
+  /// **'État de santé'**
+  String get parcelDetailHealthStatus;
+
+  /// No description provided for @registerLastNameLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Nom'**
+  String get registerLastNameLabel;
+
+  /// No description provided for @registerFirstNameLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prénom'**
+  String get registerFirstNameLabel;
+
+  /// No description provided for @registerRegionLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Région'**
+  String get registerRegionLabel;
+
+  /// No description provided for @registerFieldRequired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Champ requis'**
+  String get registerFieldRequired;
+
+  /// No description provided for @registerPhoneInvalid.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro invalide'**
+  String get registerPhoneInvalid;
+
+  /// No description provided for @registerPasswordTooShort.
+  ///
+  /// In fr, this message translates to:
+  /// **'Minimum 8 caractères'**
+  String get registerPasswordTooShort;
+
+  /// No description provided for @registerPasswordMismatch.
+  ///
+  /// In fr, this message translates to:
+  /// **'Les mots de passe ne correspondent pas'**
+  String get registerPasswordMismatch;
+
+  /// No description provided for @splashLogoSemantics.
+  ///
+  /// In fr, this message translates to:
+  /// **'Logo AgriMada'**
+  String get splashLogoSemantics;
+
+  /// No description provided for @syncInProgress.
+  ///
+  /// In fr, this message translates to:
+  /// **'Synchronisation…'**
+  String get syncInProgress;
 }
 
 class _AppLocalizationsDelegate

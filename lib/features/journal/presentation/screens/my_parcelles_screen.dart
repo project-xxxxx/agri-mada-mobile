@@ -17,6 +17,8 @@ import '../../data/services/export_service.dart';
 import '../../../../core/widgets/app_sidebar.dart';
 import '../providers/journal_provider.dart';
 import '../widgets/add_parcelle_sheet.dart';
+import '../../../../core/ai/disease_catalog.dart';
+import '../../../scan/presentation/diagnosis_labels.dart';
 
 class MyParcellesScreen extends ConsumerWidget {
   const MyParcellesScreen({super.key});
@@ -29,22 +31,24 @@ class MyParcellesScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
+      drawer: const AppMenuDrawer(),
       appBar: AppBar(
         backgroundColor: AppColors.scaffoldBackground,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        leading: Consumer(
-          builder: (context, ref, _) => IconButton(
+        leading: Builder(
+          builder: (context) => IconButton(
             icon: const Icon(Icons.menu, size: 28),
-            onPressed: () => ref.read(sidebarControllerProvider.notifier).state = true,
+            tooltip: loc.homeMenuSemantics,
+            onPressed: () => openAppMenu(context),
           ),
         ),
         titleSpacing: 0,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Mes parcelles', style: AppTypography.headlineMedium.copyWith(color: AppColors.textPrimary)),
-            Text('Suivi des rizières', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
+            Text(loc.homeServicePlotsTitle, style: AppTypography.headlineMedium.copyWith(color: AppColors.textPrimary)),
+            Text(loc.journalSubtitle, style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
           ],
         ),
         actions: [
@@ -54,8 +58,8 @@ class MyParcellesScreen extends ConsumerWidget {
                 : () {
                     if (journalData.isEmpty) {
                       ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(
-                          content: Text('Aucun diagnostic à exporter'),
+                        SnackBar(
+                          content: Text(loc.exportNothing),
                         ),
                       );
                       return;
@@ -63,7 +67,7 @@ class MyParcellesScreen extends ConsumerWidget {
                     _showExportSheet(context, ref, parcelleId: null);
                   },
             icon: const Icon(Icons.download_outlined),
-            tooltip: 'Exporter',
+            tooltip: loc.exportAction,
           ),
         ],
       ),
@@ -187,12 +191,12 @@ class MyParcellesScreen extends ConsumerWidget {
               const SizedBox(height: 16),
               ListTile(
                 leading: const Icon(Icons.table_view_outlined),
-                title: const Text('Exporter en CSV'),
+                title: Text(AppLocalizations.of(sheetContext).exportAsCsv),
                 onTap: () => Navigator.of(sheetContext).pop(ExportFormat.csv),
               ),
               ListTile(
                 leading: const Icon(Icons.picture_as_pdf_outlined),
-                title: const Text('Exporter en PDF'),
+                title: Text(AppLocalizations.of(sheetContext).exportAsPdf),
                 onTap: () => Navigator.of(sheetContext).pop(ExportFormat.pdf),
               ),
               const SizedBox(height: 8),
@@ -217,6 +221,8 @@ class MyParcellesScreen extends ConsumerWidget {
       pdfAllPlots: loc.exportPdfAllPlots,
       pdfPlotLabel: loc.exportPdfPlotLabel,
       pdfDateLabel: loc.exportPdfDateLabel,
+      diseaseName: (label) => DiseaseCatalog.displayName(label, loc),
+      severityLabel: (code) => declaredSeverityLabel(code, loc),
     );
 
     final result = await ref
@@ -232,10 +238,11 @@ class MyParcellesScreen extends ConsumerWidget {
         );
       },
       (path) async {
-        await Share.share('Export local AgriMada: $path');
+        // Partage le fichier lui-même, et non plus son seul chemin (P1.10).
+        await Share.shareXFiles([XFile(path)], text: loc.exportShareText);
         if (!context.mounted) return;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Export terminé: $path')),
+          SnackBar(content: Text(loc.exportDone)),
         );
       },
     );
@@ -434,7 +441,7 @@ class _ParcelleCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       loc.journalLastDiagnostic(
-                        dernierDiag.maladieDetectee,
+                        DiseaseCatalog.displayName(dernierDiag.maladieDetectee, loc),
                         DateFormat('dd/MM/yyyy')
                             .format(dernierDiag.dateDiagnostic),
                       ),
@@ -443,8 +450,8 @@ class _ParcelleCard extends StatelessWidget {
                       overflow: TextOverflow.ellipsis,
                     ),
                   ),
-                  GestureDetector(
-                    onTap: onScan,
+                  TextButton(
+                    onPressed: onScan,
                     child: Text(loc.journalScan,
                         style: AppTypography.caption.copyWith(
                             color: AppColors.primary,
@@ -463,11 +470,13 @@ class _ParcelleCard extends StatelessWidget {
                   const Icon(Icons.info_outline,
                       size: 14, color: AppColors.textSecondary),
                   const SizedBox(width: 4),
-                  Text(loc.journalNoDiagnosticYet,
-                      style: AppTypography.caption),
-                  const Spacer(),
-                  GestureDetector(
-                    onTap: onScan,
+                  Expanded(
+                    child: Text(loc.journalNoDiagnosticYet,
+                        style: AppTypography.caption,
+                        overflow: TextOverflow.ellipsis),
+                  ),
+                  TextButton(
+                    onPressed: onScan,
                     child: Text(loc.journalScanNow,
                         style: AppTypography.caption.copyWith(
                             color: AppColors.primary,

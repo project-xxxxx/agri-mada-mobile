@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:agri_mada/l10n/app_localizations.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../app/theme/app_spacing.dart';
@@ -24,17 +25,23 @@ class SyncStatusIndicator extends ConsumerWidget {
             ),
             const SizedBox(width: AppSpacing.xs),
             Text(
-              'Synchronisation...',
+              AppLocalizations.of(context).syncInProgress,
               style: AppTypography.caption.copyWith(
                 color: AppColors.primary,
               ),
             ),
           ],
         ),
-      SyncError() => const Icon(
-          Icons.sync_problem,
-          color: AppColors.severityHigh,
-          size: 18,
+      SyncError(:final message) => Tooltip(
+          message: message,
+          child: Semantics(
+            label: message,
+            child: const Icon(
+              Icons.sync_problem,
+              color: AppColors.severityHigh,
+              size: 18,
+            ),
+          ),
         ),
       SyncSuccess() => const Icon(
           Icons.cloud_done_outlined,

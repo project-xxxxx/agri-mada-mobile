@@ -14,6 +14,9 @@ import '../../../../core/local_db/models/diagnostic_local.dart';
 import '../../../../core/widgets/app_sidebar.dart';
 import '../../../scan/presentation/providers/scan_provider.dart';
 import '../providers/journal_provider.dart';
+import '../../../../core/ai/diagnosis_certainty.dart';
+import '../../../../core/ai/disease_catalog.dart';
+import '../../../scan/presentation/diagnosis_labels.dart';
 
 class ParcelleDetailScreen extends ConsumerWidget {
   const ParcelleDetailScreen({super.key, required this.parcelleId});
@@ -21,11 +24,13 @@ class ParcelleDetailScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context);
     final parcellesAsync = ref.watch(parcellesProvider);
     final diagnosticsAsync = ref.watch(diagnosticsParParcelleProvider(parcelleId));
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
+      drawer: const AppMenuDrawer(),
       appBar: AppBar(
         backgroundColor: AppColors.scaffoldBackground,
         surfaceTintColor: Colors.transparent,
@@ -34,28 +39,29 @@ class ParcelleDetailScreen extends ConsumerWidget {
           icon: const Icon(Icons.arrow_back),
           onPressed: () => context.pop(),
         ),
-        title: Text('Détail parcelle', style: AppTypography.headlineMedium),
+        title: Text(loc.parcelDetailTitle, style: AppTypography.headlineMedium),
         actions: [
-          Consumer(
-            builder: (context, ref, _) => IconButton(
+          Builder(
+            builder: (context) => IconButton(
               icon: const Icon(Icons.menu, size: 28),
-              onPressed: () => ref.read(sidebarControllerProvider.notifier).state = true,
+              tooltip: AppLocalizations.of(context).homeMenuSemantics,
+              onPressed: () => openAppMenu(context),
             ),
           ),
           IconButton(
             icon: const Icon(Icons.camera_alt_outlined),
             onPressed: () => context.push('${AppRoutes.scanning}?parcelleId=$parcelleId'),
-            tooltip: 'Faire une nouvelle analyse',
+            tooltip: loc.parcelDetailNewAnalysis,
           ),
         ],
       ),
       body: parcellesAsync.when(
         loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
-        error: (e, _) => Center(child: Text('Erreur: $e')),
+        error: (e, _) => Center(child: Text(loc.journalError('$e'))),
         data: (parcelles) {
           final parcelle = parcelles.where((p) => p.id == parcelleId).firstOrNull;
           if (parcelle == null) {
-            return const Center(child: Text('Parcelle introuvable'));
+            return Center(child: Text(loc.parcelDetailNotFound));
           }
           return CustomScrollView(
             slivers: [
@@ -67,7 +73,7 @@ class ParcelleDetailScreen extends ConsumerWidget {
                     padding: EdgeInsets.all(AppSpacing.xl),
                     child: CircularProgressIndicator(color: AppColors.primary),
                   )),
-                  error: (e, _) => Center(child: Text('Erreur: $e')),
+                  error: (e, _) => Center(child: Text(loc.journalError('$e'))),
                   data: (diagnostics) => _ParcelleHealthCard(
                     parcelle: parcelle,
                     diagnostics: diagnostics,
@@ -78,7 +84,7 @@ class ParcelleDetailScreen extends ConsumerWidget {
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenHorizontal),
-                  child: Text('Historique des analyses', style: AppTypography.headlineMedium),
+                  child: Text(loc.journalHistorySubtitle, style: AppTypography.headlineMedium),
                 ),
               ),
               const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
@@ -95,12 +101,12 @@ class ParcelleDetailScreen extends ConsumerWidget {
                             children: [
                               const Icon(Icons.history_outlined, size: 64, color: AppColors.textSecondary),
                               const SizedBox(height: AppSpacing.md),
-                              Text('Aucune analyse pour cette parcelle', style: AppTypography.bodyMedium),
+                              Text(loc.parcelDetailNoAnalysis, style: AppTypography.bodyMedium, textAlign: TextAlign.center),
                               const SizedBox(height: AppSpacing.md),
                               ElevatedButton.icon(
                                 onPressed: () => context.push('${AppRoutes.scanning}?parcelleId=$parcelleId'),
                                 icon: const Icon(Icons.camera_alt_outlined),
-                                label: const Text('Faire une analyse'),
+                                label: Text(loc.journalStartDiagnosis),
                               ),
                             ],
                           ),
@@ -134,6 +140,7 @@ class _ParcelleHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.screenHorizontal),
@@ -169,7 +176,7 @@ class _ParcelleHeader extends StatelessWidget {
               if (parcelle.surface != null) ...[
                 const Icon(Icons.crop_square_outlined, size: 16, color: AppColors.textSecondary),
                 const SizedBox(width: 4),
-                Text('${parcelle.surface} ha', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
+                Text(loc.journalAreaHa('${parcelle.surface}'), style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
                 const SizedBox(width: AppSpacing.md),
               ],
               const Icon(Icons.calendar_today_outlined, size: 14, color: AppColors.textSecondary),
@@ -200,17 +207,18 @@ class _ParcelleHealthCard extends StatelessWidget {
           children: [
             const Icon(Icons.info_outline, color: AppColors.primary, size: 24),
             const SizedBox(width: AppSpacing.md),
-            Expanded(child: Text('Cette parcelle n\'a pas encore été analysée', style: AppTypography.bodyMedium)),
+            Expanded(child: Text(loc.parcelDetailNotAnalyzedYet, style: AppTypography.bodyMedium)),
           ],
         ),
       );
     }
 
     final latest = diagnostics.first;
-    final isHealthy = latest.maladieDetectee.toLowerCase().contains('sain') || latest.maladieDetectee.toLowerCase() == 'healthy';
+    final isHealthy = DiseaseCatalog.isHealthy(latest.maladieDetectee);
     final statusColor = isHealthy ? AppColors.severityLow : AppColors.severityHigh;
     final statusIcon = isHealthy ? Icons.check_circle_outline : Icons.warning_amber_outlined;
     final statusLabel = isHealthy ? loc.journalStatusHealthy : loc.journalStatusSick;
+    final certainty = DiagnosisCertainty.fromName(latest.certitude);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.screenHorizontal, vertical: AppSpacing.md),
@@ -227,7 +235,7 @@ class _ParcelleHealthCard extends StatelessWidget {
             children: [
               Icon(statusIcon, color: statusColor, size: 24),
               const SizedBox(width: AppSpacing.sm),
-              Text('État de santé', style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+              Text(loc.parcelDetailHealthStatus, style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
               const Spacer(),
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -237,17 +245,11 @@ class _ParcelleHealthCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
-          Text(latest.maladieDetectee, style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w500)),
-          if (latest.confiance != null) ...[
-            const SizedBox(height: 4),
-            Text('Confiance: ${(latest.confiance! * 100).toStringAsFixed(1)}%', style: AppTypography.caption.copyWith(color: AppColors.textSecondary)),
-          ],
-          if (latest.recommandations != null && latest.recommandations!.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.sm),
-            Text('Recommandations:', style: AppTypography.bodySmall.copyWith(fontWeight: FontWeight.w600)),
-            const SizedBox(height: 4),
-            Text(latest.recommandations!, style: AppTypography.caption),
-          ],
+          Text(DiseaseCatalog.displayName(latest.maladieDetectee, loc), style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w500)),
+          const SizedBox(height: 4),
+          Text(declaredSeverityLabel(latest.niveauGravite, loc), style: AppTypography.caption.copyWith(color: AppColors.textSecondary)),
+          if (certainty != null)
+            Text(certainty.label(loc), style: AppTypography.caption.copyWith(color: AppColors.textSecondary)),
         ],
       ),
     );
@@ -260,7 +262,8 @@ class _DiagnosticHistoryItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isHealthy = diagnostic.maladieDetectee.toLowerCase().contains('sain') || diagnostic.maladieDetectee.toLowerCase() == 'healthy';
+    final loc = AppLocalizations.of(context);
+    final isHealthy = DiseaseCatalog.isHealthy(diagnostic.maladieDetectee);
     final statusColor = isHealthy ? AppColors.severityLow : AppColors.severityHigh;
 
     return Container(
@@ -286,10 +289,9 @@ class _DiagnosticHistoryItem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(diagnostic.maladieDetectee, style: AppTypography.bodySmall.copyWith(fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(DiseaseCatalog.displayName(diagnostic.maladieDetectee, loc), style: AppTypography.bodySmall.copyWith(fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 2),
-                if (diagnostic.confiance != null)
-                  Text('Confiance: ${(diagnostic.confiance! * 100).toStringAsFixed(1)}%', style: AppTypography.caption.copyWith(color: AppColors.textSecondary)),
+                Text(declaredSeverityLabel(diagnostic.niveauGravite, loc), style: AppTypography.caption.copyWith(color: AppColors.textSecondary)),
               ],
             ),
           ),

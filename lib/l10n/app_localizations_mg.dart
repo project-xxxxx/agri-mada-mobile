@@ -9,7 +9,8 @@ class AppLocalizationsMg extends AppLocalizations {
   AppLocalizationsMg([String locale = 'mg']) : super(locale);
 
   @override
-  String get splashSubtitle => 'Mamorona aretina vary, tsy misy aterineto';
+  String get splashSubtitle =>
+      'Mamantatra ny aretin\'ny vary, na tsy misy aterineto';
 
   @override
   String get loginForgotPasswordTitle => 'Hadino ny teny miafina ?';
@@ -48,6 +49,12 @@ class AppLocalizationsMg extends AppLocalizations {
   String get loginPasswordRequired => 'Ampidiro azafady ny teny miafina';
 
   @override
+  String get loginPhoneLabel => 'Laharana finday';
+
+  @override
+  String get loginPhoneRequired => 'Ampidiro azafady ny laharan\'ny findainao';
+
+  @override
   String get loginForgotPassword => 'Hadino ny teny miafina ?';
 
   @override
@@ -76,6 +83,11 @@ class AppLocalizationsMg extends AppLocalizations {
   String get welcomeStart => 'Hanomboka';
 
   @override
+  String welcomeModelVersion(String version) {
+    return 'Modely v$version';
+  }
+
+  @override
   String get homeSoonMessage => 'Tsy ho ela dia ho tonga';
 
   @override
@@ -96,16 +108,19 @@ class AppLocalizationsMg extends AppLocalizations {
   String get homeReadyForAnalysis => 'Vonona hanao fanadihadiana ?';
 
   @override
-  String get homeOfflineMode => 'Fomba ivelan\'ny tambajotra';
+  String get homeOfflineMode => 'Tsy misy aterineto';
 
   @override
-  String get homeSearchPlaceholder => 'mitady...';
+  String get homeHelpSemantics => 'Fanampiana';
 
   @override
   String get homeSummaryTitle => 'Topi-maso ny toeram-pamokaranao';
 
   @override
-  String get homeSystemReady => 'Vonona ny rafitra';
+  String get homeSystemReady => 'Vonona ny fanadihadiana sary';
+
+  @override
+  String get homeSystemAiUnavailable => 'Tsy azo atao ny fanadihadiana sary';
 
   @override
   String homeRegisteredPlots(int count) {
@@ -127,11 +142,11 @@ class AppLocalizationsMg extends AppLocalizations {
       'Jereo ny sata ankapobeny sy ny haavon\'ny loza amin\'izao fotoana';
 
   @override
-  String get homeServiceSolutionsTitle => 'Vahaolana ara-pambolena';
+  String get homeServiceSolutionsTitle => 'Aretin\'ny vary';
 
   @override
   String get homeServiceSolutionsDescription =>
-      'Fantaro ireo fitsaboana biolojika sy vahaolana eo an-toerana soso-kevitra';
+      'Fantaro ny aretina tsirairay : soritr\'aretina, antony ary fihetsika fisorohana';
 
   @override
   String get homeServicePreventionTitle => 'Fisorohana aretina';
@@ -154,14 +169,14 @@ class AppLocalizationsMg extends AppLocalizations {
       'Tsy misy ny diagnostika IA, andramo indray azafady';
 
   @override
-  String get scanSelectPlot => 'Hisafidy parcelle (parcelle)';
+  String get scanSelectPlot => 'Hisafidy tanimbary';
 
   @override
-  String get scanNoPlotTitle => 'Tsy misy parcelle (parcelle)';
+  String get scanNoPlotTitle => 'Tsy misy tanimbary';
 
   @override
   String get scanNoPlotDescription =>
-      'Mamorona parcelle (parcelle) aloha ao amin\'ny boky ara-pambolena vao manao scan.';
+      'Mamorona tanimbary aloha ao amin\'ny boky ara-pambolena vao manao scan.';
 
   @override
   String get commonOk => 'OK';
@@ -179,7 +194,7 @@ class AppLocalizationsMg extends AppLocalizations {
   String get scanOfflineAnalysis => 'Atao eto an-toerana ny fanadihadiana';
 
   @override
-  String get scanHeaderTitle => 'Hijery ravina';
+  String get scanHeaderTitle => 'Hanadihady ravina';
 
   @override
   String get scanCancel => 'HANAFOANA';
@@ -202,21 +217,16 @@ class AppLocalizationsMg extends AppLocalizations {
 
   @override
   String get diseaseBacterialLeafBlight =>
-      'May bakteria amin\'ny ravina (Brulure bacterienne)';
+      'Malazo ravina vokatry ny bakteria (BLB)';
 
   @override
-  String get diseaseBrownSpot => 'Tasy volontany (Tache brune)';
+  String get diseaseBrownSpot => 'Helminthosporiose (pentina volontany)';
 
   @override
-  String get diseaseLeafSmut => 'Arina amin\'ny ravina (Charbon foliaire)';
+  String get diseaseLeafSmut => 'Arina amin\'ny ravina';
 
   @override
   String get diseaseHealthy => 'Zavamaniry salama';
-
-  @override
-  String scanResultConfidence(String value) {
-    return '$value% fitokisana';
-  }
 
   @override
   String get scanShareTitle => 'Diagnostika AgriMada';
@@ -230,8 +240,8 @@ class AppLocalizationsMg extends AppLocalizations {
   }
 
   @override
-  String scanShareConfidence(String value) {
-    return 'Fitokisana: $value%';
+  String scanShareCertainty(String value) {
+    return 'Fahatokisana: $value';
   }
 
   @override
@@ -240,29 +250,91 @@ class AppLocalizationsMg extends AppLocalizations {
   }
 
   @override
-  String get scanSeverityTitle => 'Haavon\'ny hamafin\'ny aretina';
+  String get scanCertaintyProbable => 'Tena mety ho izy';
 
   @override
-  String get scanSeverityLow => 'Ambany';
+  String get scanCertaintyPossible => 'Mety ho izy, mila hamafisina';
 
   @override
-  String get scanSeverityMedium => 'Antonony';
+  String get scanCertaintyUncertain => 'Vokatra tsy azo antoka';
 
   @override
-  String get scanSeverityHigh => 'Avo';
+  String get scanCertaintyExplainProbable =>
+      'Mazava tsara ireo soritr\'aretina fantarina. Hamarino eo amin\'ny zavamaniry alohan\'ny hanaovana zavatra.';
 
   @override
-  String get scanSeverityNoneStatus => 'Tsy misy - Zavamaniry salama';
+  String get scanCertaintyExplainPossible =>
+      'Mifanahaka ny aretina maromaro amin\'ity sary ity. Asao teknisianina momba ny fambolena hanamafy.';
 
   @override
-  String get scanSeverityLowStatus => 'Ambany - Araho maso';
+  String get scanUncertainTitle => 'Tsy fantatry ny rindranasa ity sary ity';
 
   @override
-  String get scanSeverityMediumStatus =>
-      'Antonony - Mila fandraisana andraikitra';
+  String get scanUncertainBody =>
+      'Mety tsy vary izy, na manjavozavo na tsy ampy hazavana ny sary. Tsy misy aretina voatazona ary tsy misy voatahiry.';
 
   @override
-  String get scanSeverityHighStatus => 'Avo - Mila vonjy maika';
+  String get scanRetakeTips =>
+      'Ho an\'ny sary vaovao: ravina iray mazava tsara, 20-30 cm, amin\'ny hazavana voajanahary, tsy manoloana ny masoandro.';
+
+  @override
+  String get scanRetakePhoto => 'Haka sary indray';
+
+  @override
+  String scanOtherCandidates(String names) {
+    return 'Mety ho: $names';
+  }
+
+  @override
+  String get scanNoResult => 'Tsy misy vokatra aseho';
+
+  @override
+  String get scanSeverityQuestion =>
+      'Ohatrinona ny ampahan\'ny tanimbary voan\'ny aretina ?';
+
+  @override
+  String get scanSeverityFewPlants => 'Foto-bary vitsivitsy';
+
+  @override
+  String get scanSeverityUnderThird => 'Latsaky ny ampahatelony';
+
+  @override
+  String get scanSeverityOverThird => 'Mihoatra ny ampahatelony';
+
+  @override
+  String get scanSeverityUnknown => 'Tsy voalaza ny ampahany voa';
+
+  @override
+  String get scanAdviceTitle => 'Inona no atao ?';
+
+  @override
+  String get scanAdviceNoChemical =>
+      'Tsy manoro vokatra na fatrany ny AgriMada. Alohan\'ny fitsaboana rehetra, manontania teknisianina momba ny fambolena.';
+
+  @override
+  String get scanAdviceHealthySeeds => 'Mampiasà masomboly salama';
+
+  @override
+  String get scanAdviceRemoveResidues =>
+      'Esory avokoa ireo mololo eo amin\'ny toerana nahitana soritr\'aretina';
+
+  @override
+  String get scanAdviceRemoveHostWeeds =>
+      'Esory avokoa ireo ahi-dratsy mety iveloman\'ny bakteria';
+
+  @override
+  String get scanAdviceCleanTools =>
+      'Sasao amin\'ny savony ireo fitaovam-pambolena isaky ny avy nampiasana';
+
+  @override
+  String get scanAdviceAlertTechnician =>
+      'Ilazao haingana ny teknisianina akaiky indrindra';
+
+  @override
+  String get scanDiscard => 'Toa diso ity vokatra ity';
+
+  @override
+  String get scanDiscarded => 'Nolavina ny vokatra, tsy nisy voatahiry';
 
   @override
   String get scanRecommendationsTitle => 'Soso-kevitra mifanaraka';
@@ -271,50 +343,23 @@ class AppLocalizationsMg extends AppLocalizations {
   String get scanRecommendationItemTitle => 'Soso-kevitra';
 
   @override
-  String get scanRecBlbEvacuateWater =>
-      'Avoahy ny rano ao amin\'ny tanimbary misy aretina';
-
-  @override
-  String get scanRecBlbApplyCopper => 'Ampiharo hydroxyde de cuivre (2-3 g/L)';
-
-  @override
   String get scanRecBlbAvoidNitrogen => 'Hialao ny azota be loatra';
 
   @override
   String get scanRecBlbUseResistantVarieties =>
-      'Ampiasao karazana vary mafy orina amin\'ny fiainana manaraka';
+      'Ampiasao karazam-bary mahatohitra ny aretina amin\'ny fambolena manaraka';
 
   @override
   String get scanRecBrownSpotFertilize =>
-      'Hamafiso ny fanatsarana ny fertilisation (potassium)';
+      'Hatsarao ny fanomezan-jezika, indrindra ny potasioma';
 
   @override
-  String get scanRecBrownSpotApplyFungicide =>
-      'Ampiharo fongicide mifototra amin\'ny mancozèbe';
-
-  @override
-  String get scanRecBrownSpotDrainage => 'Antoka ny drainage tsara';
-
-  @override
-  String get scanRecBrownSpotAvoidStress => 'Hialao ny stress hydrique';
-
-  @override
-  String get scanRecLeafSmutTreatSeeds =>
-      'Tsabohy ny voan-bary alohan\'ny fambolena';
-
-  @override
-  String get scanRecLeafSmutApplyFungicide => 'Ampiharo fongicide systémique';
-
-  @override
-  String get scanRecLeafSmutRemovePlants =>
-      'Esory ary doavy ny zavamaniry misy aretina';
-
-  @override
-  String get scanRecLeafSmutRotation => 'Soso-kevitr\'ny fihodinana voly';
+  String get scanRecBrownSpotAvoidStress =>
+      'Aza avela ho tsy ampy rano ny vary';
 
   @override
   String get scanRecHealthy =>
-      'Zavamaniry salama. Tohizy ny fanao tsara amin\'ny fambolena.';
+      'Zavamaniry salama. Tohizo ny fanao tsara amin\'ny fambolena.';
 
   @override
   String get scanRecHealthyWater => 'Ataovy tsara ny fitantanana ny rano';
@@ -327,10 +372,6 @@ class AppLocalizationsMg extends AppLocalizations {
 
   @override
   String get scanRecHealthyRotation => 'Fihodinana voly';
-
-  @override
-  String get scanTip =>
-      'Torohevitra : aza manondraka be loatra mandritra ny 3 andro';
 
   @override
   String get scanRescanSemantics => 'Hanao scan indray';
@@ -351,18 +392,26 @@ class AppLocalizationsMg extends AppLocalizations {
   String get scanShare => 'Hizara ny vokatra';
 
   @override
+  String get modelVersionTitle => 'Dikan\'ny modely IA';
+
+  @override
+  String modelSupportedDiseases(String diseases) {
+    return 'Aretina fantarina: $diseases';
+  }
+
+  @override
   String journalError(String error) {
     return 'Hadisoana: $error';
   }
 
   @override
-  String get journalNewPlot => 'Parcelle vaovao (parcelle)';
+  String get journalNewPlot => 'Tanimbary vaovao';
 
   @override
   String get journalTitle => 'Boky ara-pambolena';
 
   @override
-  String get journalSubtitle => 'Fanaraha-maso ny parcelle (parcelle)';
+  String get journalSubtitle => 'Fanaraha-maso ny tanimbarinao';
 
   @override
   String get journalTotal => 'Fitambarany';
@@ -398,26 +447,26 @@ class AppLocalizationsMg extends AppLocalizations {
   }
 
   @override
-  String get journalScan => 'Hijery';
+  String get journalScan => 'Hanadihady';
 
   @override
   String get journalNoDiagnosticYet => 'Tsy mbola misy diagnostika';
 
   @override
-  String get journalScanNow => 'Hijery izao';
+  String get journalScanNow => 'Hanadihady izao';
 
   @override
-  String get journalEmptyTitle => 'Tsy misy parcelle (parcelle)';
+  String get journalEmptyTitle => 'Tsy misy tanimbary';
 
   @override
   String get journalEmptyDescription =>
-      'Ampio ny parcelle (parcelle) voalohany\nhanombohana ny fanaraha-maso.';
+      'Ampio ny tanimbary voalohany\nhanombohana ny fanaraha-maso.';
 
   @override
-  String get journalAddPlot => 'Hanampy parcelle (parcelle)';
+  String get journalAddPlot => 'Hanampy tanimbary';
 
   @override
-  String get journalPlotNameLabel => 'Anaran\'ny parcelle (parcelle) *';
+  String get journalPlotNameLabel => 'Anaran\'ny tanimbary *';
 
   @override
   String get journalDescriptionOptional => 'Fanazavana (tsy voatery)';
@@ -427,6 +476,57 @@ class AppLocalizationsMg extends AppLocalizations {
 
   @override
   String get journalNameRequired => 'Ilaina ny anarana';
+
+  @override
+  String get plotPhotoTake => 'Haka sary';
+
+  @override
+  String get plotPhotoGallery => 'Hisafidy ao amin\'ny sary voatahiry';
+
+  @override
+  String get plotPhotoLabel => 'Sarin\'ny tanimbary';
+
+  @override
+  String get plotPhotoAdd => 'Hanampy sary';
+
+  @override
+  String get plotPhotoHint => 'Tsy voatery';
+
+  @override
+  String get plotPhotoRemove => 'Hanala ny sary';
+
+  @override
+  String get plotNameLabel => 'Anaran\'ny tanimbary';
+
+  @override
+  String get plotNameHint => 'Ohatra: tanimbary eny an-dohasaha';
+
+  @override
+  String get plotCropLabel => 'Voly';
+
+  @override
+  String get plotCropHint => 'Vary';
+
+  @override
+  String get plotSurfaceLabel => 'Velarana volena';
+
+  @override
+  String get plotSurfaceHint => 'Amin\'ny hekitara, ohatra: 0,55';
+
+  @override
+  String get plotSurfaceSuffix => 'ha';
+
+  @override
+  String get plotSurfaceInvalid => 'Velarana tsy mety. Ohatra: 0,55';
+
+  @override
+  String get plotLocationLabel => 'Toerana';
+
+  @override
+  String get plotLocationHint => 'Tanàna, fokontany, marika';
+
+  @override
+  String get plotSaveFailed => 'Tsy afaka mitahiry ny tanimbary';
 
   @override
   String get registerTitle => 'Hisoratra anarana';
@@ -621,6 +721,26 @@ class AppLocalizationsMg extends AppLocalizations {
   String get onboardingStart => 'Hanomboka';
 
   @override
+  String get onboardingSkip => 'Handingana';
+
+  @override
+  String get onboardingWelcome => 'Tongasoa';
+
+  @override
+  String get onboardingHelpTitle => 'Fanampiana AgriMada';
+
+  @override
+  String get onboardingAiAvailable =>
+      'Azo atao amin\'ity finday ity ny fanadihadiana sary';
+
+  @override
+  String get onboardingAiUnavailable =>
+      'Tsy azo atao amin\'ity finday ity ny fanadihadiana sary';
+
+  @override
+  String get commonClose => 'Hanidy';
+
+  @override
   String get onboardingSlide1Title => 'Alao sary ny ravina marary';
 
   @override
@@ -639,7 +759,7 @@ class AppLocalizationsMg extends AppLocalizations {
 
   @override
   String get onboardingSlide3Desc =>
-      'Jereo ny hamafin\'ny aretina, ny fahamendrehan\'ny vokatra ary ny toro-hevitra mifanaraka aminy.';
+      'Jereo ny aretina mety ho izy, ny haavon\'ny fahatokisana ary ny fomba fisorohana.';
 
   @override
   String get onboardingSlide4Title => 'Araho ny tanimbarinao';
@@ -747,11 +867,11 @@ class AppLocalizationsMg extends AppLocalizations {
 
   @override
   String get guideDisease2Desc =>
-      'Aretin\'ny holatra matetika amin\'ny vary, indrindra amin\'ny tany mahantra. Mipoitra eo amin\'ny ravina ny pentina mainty lavalava, ka mampihena ny fahafahan\'ny zavamaniry mamelona.';
+      'Aretin\'ny holatra matetika amin\'ny vary, indrindra amin\'ny tany mahantra. Mipoitra eo amin\'ny ravina ny pentina volontany lavalava, ka mampihena ny fahafahan\'ny zavamaniry mamelona.';
 
   @override
   String get guideDisease2Symptoms =>
-      '• Pentina mainty lavalava eo amin\'ny ravina\n• Misy faribolana eo amin\'ny fery\n• Voam-bary misy pentina raha mafy ny aretina\n• Mihena ny vokatra';
+      '• Pentina volontany lavalava eo amin\'ny ravina\n• Misy faribolana eo amin\'ny fery\n• Voam-bary misy pentina raha mafy ny aretina\n• Mihena ny vokatra';
 
   @override
   String get guideDisease2Causes =>
@@ -762,7 +882,7 @@ class AppLocalizationsMg extends AppLocalizations {
 
   @override
   String get guideDisease3Desc =>
-      'Aretin\'ny holatra izay hita amin\'ny tsorakazo mainty eo amin\'ny ravin-bary. Mivoatra ao anatin\'ny ravina ny holatra ary mamorona faritra mainty feno voany.';
+      'Aretin\'ny holatra izay hita amin\'ny pentina mainty kely eo amin\'ny ravin-bary. Mivoatra ao anatin\'ny ravina ny holatra ary mamorona faritra mainty feno voany.';
 
   @override
   String get guideDisease3Symptoms =>
@@ -785,4 +905,92 @@ class AppLocalizationsMg extends AppLocalizations {
 
   @override
   String get guideDisease4Causes => 'Fomba fambolena tsara :';
+
+  @override
+  String get guidesDisclaimer =>
+      'Ireo takelaka ireo dia manampy amin\'ny famantarana aretina. Alohan\'ny fitsaboana rehetra, manontania teknisianina momba ny fambolena.';
+
+  @override
+  String get guidesAdvice => 'Fihetsika atoro';
+
+  @override
+  String get guidesHealthySigns => 'Famantarana ny vary salama';
+
+  @override
+  String get journalHistorySubtitle => 'Tantaran\'ny fanadihadiana';
+
+  @override
+  String get journalHistoryEmptyTitle => 'Tsy misy fanadihadiana';
+
+  @override
+  String get journalHistoryEmptyDescription =>
+      'Hiseho eto ireo fanadihadiana natao farany';
+
+  @override
+  String get journalStartDiagnosis => 'Hanao fanadihadiana';
+
+  @override
+  String get exportNothing => 'Tsy misy fanadihadiana azo alefa';
+
+  @override
+  String get exportAction => 'Hanondrana';
+
+  @override
+  String get exportAsCsv => 'Hanondrana ho CSV';
+
+  @override
+  String get exportAsPdf => 'Hanondrana ho PDF';
+
+  @override
+  String get exportShareText => 'Boky ara-pambolena AgriMada';
+
+  @override
+  String get exportDone => 'Vonona hozaraina ny rakitra';
+
+  @override
+  String get parcelDetailTitle => 'Antsipirian\'ny tanimbary';
+
+  @override
+  String get parcelDetailNewAnalysis => 'Hanao fanadihadiana vaovao';
+
+  @override
+  String get parcelDetailNotFound => 'Tsy hita ny tanimbary';
+
+  @override
+  String get parcelDetailNoAnalysis =>
+      'Tsy mbola nisy fanadihadiana tamin\'ity tanimbary ity';
+
+  @override
+  String get parcelDetailNotAnalyzedYet =>
+      'Mbola tsy nohadihadiana ity tanimbary ity';
+
+  @override
+  String get parcelDetailHealthStatus => 'Toe-pahasalamana';
+
+  @override
+  String get registerLastNameLabel => 'Anarana';
+
+  @override
+  String get registerFirstNameLabel => 'Fanampin\'anarana';
+
+  @override
+  String get registerRegionLabel => 'Faritra';
+
+  @override
+  String get registerFieldRequired => 'Tsy maintsy fenoina';
+
+  @override
+  String get registerPhoneInvalid => 'Laharana tsy mety';
+
+  @override
+  String get registerPasswordTooShort => 'Litera 8 farafahakeliny';
+
+  @override
+  String get registerPasswordMismatch => 'Tsy mitovy ny teny miafina roa';
+
+  @override
+  String get splashLogoSemantics => 'Sary famantarana AgriMada';
+
+  @override
+  String get syncInProgress => 'Fandefasana ny angona…';
 }

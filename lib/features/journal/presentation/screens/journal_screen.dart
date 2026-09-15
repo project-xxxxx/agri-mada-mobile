@@ -8,20 +8,18 @@ import '../../../../app/router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../core/ai/disease_catalog.dart';
 import '../../../../core/local_db/models/diagnostic_local.dart';
 import '../../../../core/widgets/app_sidebar.dart';
+import '../../../scan/domain/entities/declared_severity.dart';
+import '../../../scan/presentation/diagnosis_labels.dart';
 import '../providers/journal_provider.dart';
 
-class JournalScreen extends ConsumerStatefulWidget {
+class JournalScreen extends ConsumerWidget {
   const JournalScreen({super.key});
 
   @override
-  ConsumerState<JournalScreen> createState() => _JournalScreenState();
-}
-
-class _JournalScreenState extends ConsumerState<JournalScreen> {
-  @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final loc = AppLocalizations.of(context);
     final diagnosticsAsync = ref.watch(diagnosticsHistoryProvider);
 
@@ -31,103 +29,57 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
         backgroundColor: AppColors.scaffoldBackground,
         surfaceTintColor: Colors.transparent,
         elevation: 0,
-        leading: Consumer(
-          builder: (context, ref, _) => IconButton(
+        leading: Builder(
+          builder: (context) => IconButton(
             icon: const Icon(Icons.menu, size: 28),
-            onPressed: () => ref.read(sidebarControllerProvider.notifier).state = true,
+            tooltip: loc.homeMenuSemantics,
+            onPressed: () => openAppMenu(context),
           ),
         ),
         titleSpacing: 0,
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('État des cultures', style: AppTypography.headlineMedium.copyWith(color: AppColors.textPrimary)),
-            Text('Historique des analyses', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
+            Text(loc.homeServiceCropsTitle, style: AppTypography.headlineMedium.copyWith(color: AppColors.textPrimary)),
+            Text(loc.journalHistorySubtitle, style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
           ],
         ),
       ),
-      body: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Filter Chips
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: AppSpacing.sm),
-            child: Row(
-              children: [
-                _buildFilterChip('Tous', true),
-                const SizedBox(width: AppSpacing.sm),
-                _buildFilterChip('Cette semaine', false),
-                const SizedBox(width: AppSpacing.sm),
-                _buildFilterChip('Grave', false),
-                const SizedBox(width: AppSpacing.sm),
-                _buildFilterChip('Stable', false),
-              ],
-            ),
+      // Les puces de filtre factices (« Cette semaine », « Grave »…) ont été
+      // retirées : elles ne filtraient rien (tâche P1.10).
+      body: Container(
+        width: double.infinity,
+        decoration: const BoxDecoration(
+          color: AppColors.background,
+          borderRadius: BorderRadius.only(
+            topLeft: Radius.circular(AppSpacing.cardRadius),
+            topRight: Radius.circular(AppSpacing.cardRadius),
           ),
-          
-          Expanded(
-            child: Container(
-              width: double.infinity,
-              decoration: const BoxDecoration(
-                color: AppColors.background,
-                borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(AppSpacing.cardRadius),
-                  topRight: Radius.circular(AppSpacing.cardRadius),
-                ),
-              ),
-              child: diagnosticsAsync.when(
-                loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
-                error: (e, _) => Center(child: Text(loc.journalError(e.toString()))),
-                data: (diagnostics) {
-                  if (diagnostics.isEmpty) {
-                    return _EmptyHistory(onScan: () => context.go(AppRoutes.scanning));
-                  }
-                  
-                  // TODO: Apply filters based on _activeFilter when backend is ready
-                  
-                  return ListView.separated(
-                    padding: const EdgeInsets.all(AppSpacing.md),
-                    itemCount: diagnostics.length,
-                    separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
-                    itemBuilder: (context, index) {
-                      final diag = diagnostics[index];
-                      return _DiagnosticCard(diagnostic: diag);
-                    },
-                  );
-                },
-              ),
-            ),
-          ),
-        ],
+        ),
+        child: diagnosticsAsync.when(
+          loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
+          error: (e, _) => Center(child: Text(loc.journalError(e.toString()))),
+          data: (diagnostics) {
+            if (diagnostics.isEmpty) {
+              return _EmptyHistory(onScan: () => context.go(AppRoutes.scanning));
+            }
+
+            return ListView.separated(
+              padding: const EdgeInsets.all(AppSpacing.md),
+              itemCount: diagnostics.length,
+              separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+              itemBuilder: (context, index) {
+                final diag = diagnostics[index];
+                return _DiagnosticCard(diagnostic: diag);
+              },
+            );
+          },
+        ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () => context.go(AppRoutes.scanning),
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.add, color: AppColors.textOnPrimary),
-      ),
-    );
-  }
-
-  Widget _buildFilterChip(String label, bool isActive) {
-    return GestureDetector(
-      onTap: () {
-        setState(() {});
-      },
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-        decoration: BoxDecoration(
-          color: isActive ? AppColors.primary : AppColors.cardBackground,
-          borderRadius: BorderRadius.circular(20),
-          border: isActive ? null : Border.all(color: AppColors.textSecondary.withAlpha(50)),
-        ),
-        child: Text(
-          label,
-          style: AppTypography.bodySmall.copyWith(
-            color: isActive ? AppColors.textOnPrimary : AppColors.textPrimary,
-            fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
-          ),
-        ),
       ),
     );
   }
@@ -139,12 +91,27 @@ class _DiagnosticCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final bool isSevere = diagnostic.niveauGravite?.toLowerCase() == 'sévère' || diagnostic.niveauGravite?.toLowerCase() == 'élevé';
-    final bool isHealthy = diagnostic.maladieDetectee.toLowerCase().contains('sain') || diagnostic.maladieDetectee.toLowerCase() == 'healthy';
-    
-    final Color statusColor = isHealthy ? AppColors.severityLow : (isSevere ? AppColors.severityHigh : AppColors.severityMedium);
-    final String statusText = isHealthy ? 'Gravité faible' : (isSevere ? 'Évolution : aggravation' : 'Évolution : stable');
-    final IconData statusIcon = isHealthy ? Icons.check_circle_outline : (isSevere ? Icons.error_outline : Icons.warning_amber_outlined);
+    final loc = AppLocalizations.of(context);
+    final info = DiseaseCatalog.of(diagnostic.maladieDetectee);
+    final isHealthy = info?.isHealthy ?? false;
+    final severity = DeclaredSeverity.fromCode(diagnostic.niveauGravite);
+
+    // La couleur suit la part de parcelle déclarée par l'agriculteur,
+    // jamais la confiance du modèle (tâche P1.3).
+    final Color statusColor = isHealthy
+        ? AppColors.severityLow
+        : switch (severity) {
+            DeclaredSeverity.quelquesPlants => AppColors.severityLow,
+            DeclaredSeverity.moinsDunTiers => AppColors.severityMedium,
+            DeclaredSeverity.plusDunTiers => AppColors.severityHigh,
+            null => AppColors.textSecondary,
+          };
+    final String statusText = isHealthy
+        ? loc.journalStatusHealthy
+        : declaredSeverityLabel(diagnostic.niveauGravite, loc);
+    final IconData statusIcon = isHealthy
+        ? Icons.check_circle_outline
+        : (severity == null ? Icons.help_outline : Icons.warning_amber_outlined);
 
     return Container(
       decoration: BoxDecoration(
@@ -176,22 +143,23 @@ class _DiagnosticCard extends StatelessWidget {
                   : const Icon(Icons.image_outlined, color: AppColors.primary),
             ),
             const SizedBox(width: AppSpacing.md),
-            
+
             // Text Content
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    diagnostic.maladieDetectee,
+                    DiseaseCatalog.displayName(diagnostic.maladieDetectee, loc),
                     style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
-                  Text(
-                    _getScientificName(diagnostic.maladieDetectee),
-                    style: AppTypography.caption.copyWith(color: AppColors.textSecondary, fontStyle: FontStyle.italic),
-                  ),
+                  if (info != null && info.scientificName.isNotEmpty)
+                    Text(
+                      info.scientificName,
+                      style: AppTypography.caption.copyWith(color: AppColors.textSecondary, fontStyle: FontStyle.italic),
+                    ),
                   const SizedBox(height: AppSpacing.sm),
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
@@ -204,9 +172,12 @@ class _DiagnosticCard extends StatelessWidget {
                       children: [
                         Icon(statusIcon, color: statusColor, size: 12),
                         const SizedBox(width: 4),
-                        Text(
-                          statusText,
-                          style: AppTypography.caption.copyWith(color: statusColor, fontWeight: FontWeight.w600),
+                        Flexible(
+                          child: Text(
+                            statusText,
+                            style: AppTypography.caption.copyWith(color: statusColor, fontWeight: FontWeight.w600),
+                            overflow: TextOverflow.ellipsis,
+                          ),
                         ),
                       ],
                     ),
@@ -214,7 +185,7 @@ class _DiagnosticCard extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // Date
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
@@ -235,14 +206,6 @@ class _DiagnosticCard extends StatelessWidget {
       ),
     );
   }
-
-  String _getScientificName(String commonName) {
-    // Mapping basique pour l'UI, idéalement cela viendrait d'une base de données locale des maladies
-    if (commonName.toLowerCase().contains('pyriculariose') || commonName.toLowerCase().contains('blast')) return 'Magnaporthe oryzae';
-    if (commonName.toLowerCase().contains('helminthosporiose') || commonName.toLowerCase().contains('brown spot')) return 'Cochliobolus miyabeanus';
-    if (commonName.toLowerCase().contains('bacterial') || commonName.toLowerCase().contains('blight')) return 'Xanthomonas oryzae';
-    return '';
-  }
 }
 
 class _EmptyHistory extends StatelessWidget {
@@ -251,20 +214,21 @@ class _EmptyHistory extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     return Center(
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
           const Icon(Icons.history, size: 80, color: AppColors.primaryLight),
           const SizedBox(height: AppSpacing.md),
-          Text('Aucune analyse', style: AppTypography.headlineMedium.copyWith(color: AppColors.textSecondary)),
+          Text(loc.journalHistoryEmptyTitle, style: AppTypography.headlineMedium.copyWith(color: AppColors.textSecondary)),
           const SizedBox(height: AppSpacing.sm),
-          const Text('Vos diagnostics récents apparaîtront ici', style: AppTypography.bodySmall, textAlign: TextAlign.center),
+          Text(loc.journalHistoryEmptyDescription, style: AppTypography.bodySmall, textAlign: TextAlign.center),
           const SizedBox(height: AppSpacing.xl),
           ElevatedButton.icon(
             onPressed: onScan,
             icon: const Icon(Icons.camera_alt_outlined),
-            label: const Text('Faire un diagnostic'),
+            label: Text(loc.journalStartDiagnosis),
           ),
         ],
       ),

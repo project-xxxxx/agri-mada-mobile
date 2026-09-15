@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:agri_mada/l10n/app_localizations.dart';
 
 import '../../../../app/router.dart';
 import '../../../../app/theme/app_colors.dart';
@@ -43,8 +44,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     if (!(_formKey.currentState?.validate() ?? false)) return;
     if (!_acceptTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Veuillez accepter les Conditions d\'utilisation'),
+        SnackBar(
+          content: Text(AppLocalizations.of(context).registerAcceptError),
           backgroundColor: AppColors.error,
         ),
       );
@@ -75,13 +76,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
         success: () {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Inscription réussie')),
+            SnackBar(content: Text(AppLocalizations.of(context).registerSuccess)),
           );
           context.go(AppRoutes.login);
         },
       );
     });
 
+    final loc = AppLocalizations.of(context);
     final registerState = ref.watch(registerNotifierProvider);
     final isLoading = registerState is RegisterLoading;
 
@@ -111,7 +113,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
-                        'Inscription',
+                        loc.registerTitle,
                         style: AppTypography.titleLarge.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
@@ -119,11 +121,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       const SizedBox(height: AppSpacing.xl),
                       _RegisterTextField(
                         controller: _nomController,
-                        hintText: 'Nom',
+                        hintText: loc.registerLastNameLabel,
                         prefixIcon: Icons.person_outline,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Champ requis';
+                            return loc.registerFieldRequired;
                           }
                           return null;
                         },
@@ -131,11 +133,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       const SizedBox(height: AppSpacing.md),
                       _RegisterTextField(
                         controller: _prenomController,
-                        hintText: 'Prénom',
+                        hintText: loc.registerFirstNameLabel,
                         prefixIcon: Icons.person_outline,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Champ requis';
+                            return loc.registerFieldRequired;
                           }
                           return null;
                         },
@@ -143,11 +145,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       const SizedBox(height: AppSpacing.md),
                       _RegisterTextField(
                         controller: _regionController,
-                        hintText: 'Région',
+                        hintText: loc.registerRegionLabel,
                         prefixIcon: Icons.map_outlined,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Champ requis';
+                            return loc.registerFieldRequired;
                           }
                           return null;
                         },
@@ -155,16 +157,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       const SizedBox(height: AppSpacing.md),
                       _RegisterTextField(
                         controller: _telController,
-                        hintText: 'Téléphone',
+                        hintText: loc.loginPhoneLabel,
                         prefixIcon: Icons.phone_outlined,
                         keyboardType: TextInputType.phone,
                         validator: (value) {
                           if (value == null || value.trim().isEmpty) {
-                            return 'Champ requis';
+                            return loc.registerFieldRequired;
                           }
                           final normalized = value.replaceAll(RegExp(r'\s+'), '');
                           if (!RegExp(r'^[0-9]{6,20}$').hasMatch(normalized)) {
-                            return 'Numéro invalide';
+                            return loc.registerPhoneInvalid;
                           }
                           return null;
                         },
@@ -172,7 +174,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       const SizedBox(height: AppSpacing.md),
                       _RegisterTextField(
                         controller: _passwordController,
-                        hintText: 'Mot de passe',
+                        hintText: loc.registerPasswordLabel,
                         prefixIcon: Icons.lock_outline,
                         obscureText: !_passwordVisible,
                         suffixIcon: IconButton(
@@ -187,10 +189,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Champ requis';
+                            return loc.registerFieldRequired;
                           }
-                          if (value.length < 6) {
-                            return 'Minimum 6 caractères';
+                          // Même minimum que le serveur (tâche P1.11).
+                          if (value.length < 8) {
+                            return loc.registerPasswordTooShort;
                           }
                           return null;
                         },
@@ -198,7 +201,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       const SizedBox(height: AppSpacing.md),
                       _RegisterTextField(
                         controller: _confirmPasswordController,
-                        hintText: 'Confirmer mot de passe',
+                        hintText: loc.registerConfirmPasswordLabel,
                         prefixIcon: Icons.lock_outline,
                         obscureText: !_confirmPasswordVisible,
                         suffixIcon: IconButton(
@@ -213,60 +216,38 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Champ requis';
+                            return loc.registerFieldRequired;
                           }
                           if (value != _passwordController.text) {
-                            return 'Les mots de passe ne correspondent pas';
+                            return loc.registerPasswordMismatch;
                           }
                           return null;
                         },
                       ),
                       const SizedBox(height: AppSpacing.md),
+                      // Case à cocher de 48 dp ; le texte n'imite plus des
+                      // liens qui n'ouvraient aucune page (tâche P1.10).
                       Row(
                         children: [
-                          SizedBox(
-                            width: 24,
-                            height: 24,
-                            child: Checkbox(
-                              value: _acceptTerms,
-                              onChanged: (v) =>
-                                  setState(() => _acceptTerms = v ?? false),
-                              activeColor: AppColors.primary,
-                              shape: RoundedRectangleBorder(
-                                borderRadius: BorderRadius.circular(3),
-                              ),
+                          Checkbox(
+                            value: _acceptTerms,
+                            onChanged: (v) =>
+                                setState(() => _acceptTerms = v ?? false),
+                            activeColor: AppColors.primary,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(3),
                             ),
                           ),
-                          const SizedBox(width: AppSpacing.sm),
                           Expanded(
-                            child: RichText(
-                              text: TextSpan(
+                            child: GestureDetector(
+                              onTap: () =>
+                                  setState(() => _acceptTerms = !_acceptTerms),
+                              child: Text(
+                                loc.registerAcceptTerms,
                                 style: AppTypography.bodySmall.copyWith(
                                   color: AppColors.textPrimary,
                                   fontSize: 12,
                                 ),
-                                children: [
-                                  const TextSpan(
-                                    text: 'J\'accepte les ',
-                                  ),
-                                  TextSpan(
-                                    text: 'Conditions d\'utilisation',
-                                    style: AppTypography.bodySmall.copyWith(
-                                      color: AppColors.primary,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                  const TextSpan(text: ' et la '),
-                                  TextSpan(
-                                    text: 'Politique de confidentialité',
-                                    style: AppTypography.bodySmall.copyWith(
-                                      color: AppColors.primary,
-                                      fontWeight: FontWeight.w600,
-                                      fontSize: 12,
-                                    ),
-                                  ),
-                                ],
                               ),
                             ),
                           ),
@@ -274,31 +255,35 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       ),
                       const SizedBox(height: AppSpacing.lg),
                       AppButton(
-                        label: 'S\'inscrire',
+                        label: loc.registerSubmit,
                         onPressed: isLoading ? null : _register,
                         isLoading: isLoading,
                       ),
                       const SizedBox(height: AppSpacing.xl),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            'Déjà un compte?',
-                            style: AppTypography.bodySmall.copyWith(
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: () => context.go(AppRoutes.login),
-                            child: Text(
-                              ' Se connecter',
+                      SizedBox(
+                        width: double.infinity,
+                        child: Wrap(
+                          alignment: WrapAlignment.center,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            Text(
+                              loc.registerHasAccount,
                               style: AppTypography.bodySmall.copyWith(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
                               ),
                             ),
-                          ),
-                        ],
+                            TextButton(
+                              onPressed: () => context.go(AppRoutes.login),
+                              child: Text(
+                                loc.registerLoginLink,
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -317,6 +302,7 @@ class _RegisterHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     final topPadding = MediaQuery.of(context).padding.top;
     return SizedBox(
       height: topPadding + 160,
@@ -332,14 +318,10 @@ class _RegisterHeader extends StatelessWidget {
                 color: AppColors.primary.withAlpha(80),
                 borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
               ),
-              child: Image.asset(
-                'assets/images/login_deco.png',
-                fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => const Icon(
-                  Icons.grass,
-                  color: AppColors.textOnPrimary,
-                  size: 48,
-                ),
+              child: const Icon(
+                Icons.grass,
+                color: AppColors.textOnPrimary,
+                size: 48,
               ),
             ),
           ),
@@ -350,14 +332,14 @@ class _RegisterHeader extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Bonjour!',
+                  loc.registerHello,
                   style: AppTypography.displayLarge.copyWith(
                     color: AppColors.textOnPrimary,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
                 Text(
-                  'Bienvenue sur AgriMada',
+                  loc.registerWelcome,
                   style: AppTypography.bodyMedium.copyWith(
                     color: AppColors.textOnPrimary,
                   ),

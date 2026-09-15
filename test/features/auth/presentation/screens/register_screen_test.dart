@@ -1,12 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:mocktail/mocktail.dart';
 
-import 'package:agri_mada/features/auth/domain/usecases/register_usecase.dart';
 import 'package:agri_mada/features/auth/presentation/screens/register_screen.dart';
-
-class MockRegisterUseCase extends Mock implements RegisterUseCase {}
+import 'package:agri_mada/l10n/app_localizations.dart';
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -16,9 +14,20 @@ void main() {
       // Arrange
       await tester.pumpWidget(
         const ProviderScope(
-          child: MaterialApp(home: RegisterScreen()),
+          child: MaterialApp(
+            locale: Locale('fr'),
+            supportedLocales: [Locale('fr'), Locale('mg')],
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            home: RegisterScreen(),
+          ),
         ),
       );
+      await tester.pumpAndSettle();
 
       // Assert
       expect(find.text('Nom'), findsOneWidget);

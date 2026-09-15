@@ -48,6 +48,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get loginPasswordRequired => 'Veuillez entrer votre mot de passe';
 
   @override
+  String get loginPhoneLabel => 'Téléphone';
+
+  @override
+  String get loginPhoneRequired => 'Veuillez entrer votre numéro';
+
+  @override
   String get loginForgotPassword => 'Mot de passe oublié ?';
 
   @override
@@ -76,6 +82,11 @@ class AppLocalizationsFr extends AppLocalizations {
   String get welcomeStart => 'Commencer';
 
   @override
+  String welcomeModelVersion(String version) {
+    return 'Modèle v$version';
+  }
+
+  @override
   String get homeSoonMessage => 'Bientôt disponible';
 
   @override
@@ -99,13 +110,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get homeOfflineMode => 'Mode hors ligne';
 
   @override
-  String get homeSearchPlaceholder => 'recherche...';
+  String get homeHelpSemantics => 'Aide';
 
   @override
   String get homeSummaryTitle => 'Résumé de votre exploitation';
 
   @override
-  String get homeSystemReady => 'Système prêt';
+  String get homeSystemReady => 'Analyse photo prête';
+
+  @override
+  String get homeSystemAiUnavailable => 'Analyse photo indisponible';
 
   @override
   String homeRegisteredPlots(int count) {
@@ -127,11 +141,11 @@ class AppLocalizationsFr extends AppLocalizations {
       'Consultez l\'état global de vos cultures et les niveaux de risque actuels';
 
   @override
-  String get homeServiceSolutionsTitle => 'Solutions agricoles';
+  String get homeServiceSolutionsTitle => 'Maladies du riz';
 
   @override
   String get homeServiceSolutionsDescription =>
-      'Découvrez les traitements biologiques et solutions locales recommandées';
+      'Reconnaître chaque maladie : symptômes, causes et gestes de prévention';
 
   @override
   String get homeServicePreventionTitle => 'Prévenir les maladies';
@@ -200,21 +214,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get scanResultSubtitle => 'Analyse hors ligne terminée';
 
   @override
-  String get diseaseBacterialLeafBlight => 'Brûlure bactérienne';
+  String get diseaseBacterialLeafBlight => 'Flétrissement bactérien (BLB)';
 
   @override
-  String get diseaseBrownSpot => 'Tache brune';
+  String get diseaseBrownSpot => 'Helminthosporiose (tache brune)';
 
   @override
   String get diseaseLeafSmut => 'Charbon foliaire';
 
   @override
   String get diseaseHealthy => 'Plante saine';
-
-  @override
-  String scanResultConfidence(String value) {
-    return '$value% de confiance';
-  }
 
   @override
   String get scanShareTitle => 'Diagnostic AgriMada';
@@ -228,8 +237,8 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String scanShareConfidence(String value) {
-    return 'Confiance: $value%';
+  String scanShareCertainty(String value) {
+    return 'Certitude : $value';
   }
 
   @override
@@ -238,40 +247,97 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String get scanSeverityTitle => 'Niveau de gravité';
+  String get scanCertaintyProbable => 'Diagnostic probable';
 
   @override
-  String get scanSeverityLow => 'Faible';
+  String get scanCertaintyPossible => 'Diagnostic possible, à confirmer';
 
   @override
-  String get scanSeverityMedium => 'Moyen';
+  String get scanCertaintyUncertain => 'Résultat incertain';
 
   @override
-  String get scanSeverityHigh => 'Élevé';
+  String get scanCertaintyExplainProbable =>
+      'Les symptômes reconnus sont nets. Vérifiez sur la plante avant d\'agir.';
 
   @override
-  String get scanSeverityNoneStatus => 'Aucune - Plante saine';
+  String get scanCertaintyExplainPossible =>
+      'Plusieurs maladies se ressemblent sur cette photo. Faites confirmer par un technicien agricole.';
 
   @override
-  String get scanSeverityLowStatus => 'Faible - Surveiller';
+  String get scanUncertainTitle =>
+      'L\'application ne reconnaît pas cette photo';
 
   @override
-  String get scanSeverityMediumStatus => 'Modéré - Intervention conseillée';
+  String get scanUncertainBody =>
+      'Ce n\'est peut-être pas du riz, ou la photo est floue ou mal éclairée. Aucune maladie n\'est retenue et rien n\'est enregistré.';
 
   @override
-  String get scanSeverityHighStatus => 'Élevé - Intervention urgente';
+  String get scanRetakeTips =>
+      'Pour une nouvelle photo : une seule feuille bien nette, à 20-30 cm, en lumière naturelle, sans contre-jour.';
+
+  @override
+  String get scanRetakePhoto => 'Reprendre la photo';
+
+  @override
+  String scanOtherCandidates(String names) {
+    return 'Autres possibilités : $names';
+  }
+
+  @override
+  String get scanNoResult => 'Aucun résultat à afficher';
+
+  @override
+  String get scanSeverityQuestion => 'Quelle part de la parcelle est touchée ?';
+
+  @override
+  String get scanSeverityFewPlants => 'Quelques plants';
+
+  @override
+  String get scanSeverityUnderThird => 'Moins d\'un tiers';
+
+  @override
+  String get scanSeverityOverThird => 'Plus d\'un tiers';
+
+  @override
+  String get scanSeverityUnknown => 'Part touchée non renseignée';
+
+  @override
+  String get scanAdviceTitle => 'Que faire ?';
+
+  @override
+  String get scanAdviceNoChemical =>
+      'AgriMada ne recommande aucun produit ni dosage. Avant tout traitement, demandez conseil à un technicien agricole.';
+
+  @override
+  String get scanAdviceHealthySeeds => 'Utiliser des semences saines';
+
+  @override
+  String get scanAdviceRemoveResidues =>
+      'Enlever et détruire les résidus des parcelles atteintes';
+
+  @override
+  String get scanAdviceRemoveHostWeeds =>
+      'Enlever et détruire les mauvaises herbes qui hébergent la bactérie';
+
+  @override
+  String get scanAdviceCleanTools =>
+      'Nettoyer les outils au savon après chaque utilisation';
+
+  @override
+  String get scanAdviceAlertTechnician =>
+      'Prévenir le technicien agricole le plus proche';
+
+  @override
+  String get scanDiscard => 'Ce résultat me semble faux';
+
+  @override
+  String get scanDiscarded => 'Résultat écarté, rien n\'a été enregistré';
 
   @override
   String get scanRecommendationsTitle => 'Recommandations adaptées';
 
   @override
   String get scanRecommendationItemTitle => 'Recommandation';
-
-  @override
-  String get scanRecBlbEvacuateWater => 'Évacuer l\'eau des rizières infectées';
-
-  @override
-  String get scanRecBlbApplyCopper => 'Appliquer du cuivre hydroxyde (2-3 g/L)';
 
   @override
   String get scanRecBlbAvoidNitrogen => 'Éviter l\'excès d\'azote';
@@ -285,29 +351,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Améliorer la fertilisation (potassium)';
 
   @override
-  String get scanRecBrownSpotApplyFungicide =>
-      'Appliquer un fongicide à base de mancozèbe';
-
-  @override
-  String get scanRecBrownSpotDrainage => 'Assurer un drainage correct';
-
-  @override
-  String get scanRecBrownSpotAvoidStress => 'Éviter le stress hydrique';
-
-  @override
-  String get scanRecLeafSmutTreatSeeds =>
-      'Traiter les semences avant plantation';
-
-  @override
-  String get scanRecLeafSmutApplyFungicide =>
-      'Appliquer des fongicides systémiques';
-
-  @override
-  String get scanRecLeafSmutRemovePlants =>
-      'Retirer et brûler les plants infectés';
-
-  @override
-  String get scanRecLeafSmutRotation => 'Rotation des cultures recommandée';
+  String get scanRecBrownSpotAvoidStress => 'Éviter que le riz manque d\'eau';
 
   @override
   String get scanRecHealthy =>
@@ -326,9 +370,6 @@ class AppLocalizationsFr extends AppLocalizations {
   String get scanRecHealthyRotation => 'Rotation des cultures';
 
   @override
-  String get scanTip => 'Astuce : évitez l\'arrosage excessif pendant 3 jours';
-
-  @override
   String get scanRescanSemantics => 'Refaire un scan';
 
   @override
@@ -345,6 +386,14 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get scanShare => 'Partager le résultat';
+
+  @override
+  String get modelVersionTitle => 'Version du modèle IA';
+
+  @override
+  String modelSupportedDiseases(String diseases) {
+    return 'Maladies reconnues : $diseases';
+  }
 
   @override
   String journalError(String error) {
@@ -423,6 +472,57 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get journalNameRequired => 'Nom requis';
+
+  @override
+  String get plotPhotoTake => 'Prendre une photo';
+
+  @override
+  String get plotPhotoGallery => 'Choisir dans la galerie';
+
+  @override
+  String get plotPhotoLabel => 'Photo de la parcelle';
+
+  @override
+  String get plotPhotoAdd => 'Ajouter une photo';
+
+  @override
+  String get plotPhotoHint => 'Facultative';
+
+  @override
+  String get plotPhotoRemove => 'Retirer la photo';
+
+  @override
+  String get plotNameLabel => 'Nom de la parcelle';
+
+  @override
+  String get plotNameHint => 'Ex. : rizière du bas-fond';
+
+  @override
+  String get plotCropLabel => 'Culture';
+
+  @override
+  String get plotCropHint => 'Riz';
+
+  @override
+  String get plotSurfaceLabel => 'Surface cultivée';
+
+  @override
+  String get plotSurfaceHint => 'En hectares, ex. : 0,55';
+
+  @override
+  String get plotSurfaceSuffix => 'ha';
+
+  @override
+  String get plotSurfaceInvalid => 'Surface invalide. Exemple : 0,55';
+
+  @override
+  String get plotLocationLabel => 'Emplacement';
+
+  @override
+  String get plotLocationHint => 'Village, fokontany, repère';
+
+  @override
+  String get plotSaveFailed => 'Impossible d\'enregistrer la parcelle';
 
   @override
   String get registerTitle => 'Inscription';
@@ -606,7 +706,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get resetPasswordPhoneRequired => 'Champ requis';
 
   @override
-  String get resetPasswordPhoneInvalid => 'Numero invalide';
+  String get resetPasswordPhoneInvalid => 'Numéro invalide';
 
   @override
   String get resetPasswordBackToLogin => 'Retour à la connexion';
@@ -616,6 +716,26 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get onboardingStart => 'Commencer';
+
+  @override
+  String get onboardingSkip => 'Passer';
+
+  @override
+  String get onboardingWelcome => 'Bienvenue';
+
+  @override
+  String get onboardingHelpTitle => 'Aide AgriMada';
+
+  @override
+  String get onboardingAiAvailable =>
+      'Analyse photo disponible sur ce téléphone';
+
+  @override
+  String get onboardingAiUnavailable =>
+      'Analyse photo indisponible sur ce téléphone';
+
+  @override
+  String get commonClose => 'Fermer';
 
   @override
   String get onboardingSlide1Title => 'Photographiez la feuille malade';
@@ -636,7 +756,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get onboardingSlide3Desc =>
-      'Visualisez la gravité détectée, la confiance de l\'analyse et les recommandations adaptées.';
+      'Voyez la maladie probable, le niveau de certitude et les gestes de prévention.';
 
   @override
   String get onboardingSlide4Title => 'Suivez vos parcelles';
@@ -669,7 +789,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get splashStatusInitializing => 'Initialisation en cours...';
 
   @override
-  String get splashStatusDegraded => 'Initialisation partielle, mode degradé.';
+  String get splashStatusDegraded => 'Initialisation partielle, mode dégradé.';
 
   @override
   String get splashStatusAiReady => 'IA prête';
@@ -759,7 +879,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get guideDisease3Desc =>
-      'Maladie fongique qui se manifeste par des tiges noires sur les feuilles de riz. Le champignon se développe dans les tissus foliaires et forme des sores noirs remplis de spores.';
+      'Maladie fongique qui se manifeste par de petites taches noires sur les feuilles de riz. Le champignon se développe dans les tissus foliaires et forme des sores noirs remplis de spores.';
 
   @override
   String get guideDisease3Symptoms =>
@@ -782,4 +902,92 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get guideDisease4Causes => 'Bonnes pratiques agricoles :';
+
+  @override
+  String get guidesDisclaimer =>
+      'Ces fiches aident à reconnaître une maladie. Avant tout traitement, demandez conseil à un technicien agricole.';
+
+  @override
+  String get guidesAdvice => 'Gestes recommandés';
+
+  @override
+  String get guidesHealthySigns => 'Signes d\'une plante saine';
+
+  @override
+  String get journalHistorySubtitle => 'Historique des analyses';
+
+  @override
+  String get journalHistoryEmptyTitle => 'Aucune analyse';
+
+  @override
+  String get journalHistoryEmptyDescription =>
+      'Vos diagnostics récents apparaîtront ici';
+
+  @override
+  String get journalStartDiagnosis => 'Faire un diagnostic';
+
+  @override
+  String get exportNothing => 'Aucun diagnostic à exporter';
+
+  @override
+  String get exportAction => 'Exporter';
+
+  @override
+  String get exportAsCsv => 'Exporter en CSV';
+
+  @override
+  String get exportAsPdf => 'Exporter en PDF';
+
+  @override
+  String get exportShareText => 'Journal agricole AgriMada';
+
+  @override
+  String get exportDone => 'Export prêt à être partagé';
+
+  @override
+  String get parcelDetailTitle => 'Détail de la parcelle';
+
+  @override
+  String get parcelDetailNewAnalysis => 'Faire une nouvelle analyse';
+
+  @override
+  String get parcelDetailNotFound => 'Parcelle introuvable';
+
+  @override
+  String get parcelDetailNoAnalysis => 'Aucune analyse pour cette parcelle';
+
+  @override
+  String get parcelDetailNotAnalyzedYet =>
+      'Cette parcelle n\'a pas encore été analysée';
+
+  @override
+  String get parcelDetailHealthStatus => 'État de santé';
+
+  @override
+  String get registerLastNameLabel => 'Nom';
+
+  @override
+  String get registerFirstNameLabel => 'Prénom';
+
+  @override
+  String get registerRegionLabel => 'Région';
+
+  @override
+  String get registerFieldRequired => 'Champ requis';
+
+  @override
+  String get registerPhoneInvalid => 'Numéro invalide';
+
+  @override
+  String get registerPasswordTooShort => 'Minimum 8 caractères';
+
+  @override
+  String get registerPasswordMismatch =>
+      'Les mots de passe ne correspondent pas';
+
+  @override
+  String get splashLogoSemantics => 'Logo AgriMada';
+
+  @override
+  String get syncInProgress => 'Synchronisation…';
 }
