@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:agri_mada/l10n/app_localizations.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../core/utils/number_parsing.dart';
 import '../providers/journal_provider.dart';
 
 class AddParcelleSheet extends ConsumerStatefulWidget {
@@ -37,23 +39,26 @@ class _AddParcelleSheetState extends ConsumerState<AddParcelleSheet> {
   Future<void> _pickPhoto() async {
     final source = await showModalBottomSheet<ImageSource>(
       context: context,
-      builder: (context) => SafeArea(
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            ListTile(
-              leading: const Icon(Icons.camera_alt_outlined),
-              title: const Text('Prendre une photo'),
-              onTap: () => Navigator.of(context).pop(ImageSource.camera),
-            ),
-            ListTile(
-              leading: const Icon(Icons.photo_library_outlined),
-              title: const Text('Choisir depuis la galerie'),
-              onTap: () => Navigator.of(context).pop(ImageSource.gallery),
-            ),
-          ],
-        ),
-      ),
+      builder: (context) {
+        final loc = AppLocalizations.of(context);
+        return SafeArea(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ListTile(
+                leading: const Icon(Icons.camera_alt_outlined),
+                title: Text(loc.plotPhotoTake),
+                onTap: () => Navigator.of(context).pop(ImageSource.camera),
+              ),
+              ListTile(
+                leading: const Icon(Icons.photo_library_outlined),
+                title: Text(loc.plotPhotoGallery),
+                onTap: () => Navigator.of(context).pop(ImageSource.gallery),
+              ),
+            ],
+          ),
+        );
+      },
     );
 
     if (source == null || !mounted) return;
@@ -82,23 +87,35 @@ class _AddParcelleSheetState extends ConsumerState<AddParcelleSheet> {
 
   Future<void> _save() async {
     if (!(_formKey.currentState?.validate() ?? false)) return;
+    final loc = AppLocalizations.of(context);
 
     final photoPath = await _savePhotoLocally();
+    final location = _emplacementController.text.trim();
+    final culture = _cultureController.text.trim();
 
-    await ref.read(parcelleNotifierProvider.notifier).createParcelle(
+    // La surface accepte « 0,55 » comme « 0.55 » (tâche P1.6).
+    final parcelle = await ref.read(parcelleNotifierProvider.notifier).createParcelle(
           nom: _nomController.text.trim(),
-          description: _emplacementController.text.trim().isEmpty
-              ? null
-              : _emplacementController.text.trim(),
-          surface: double.tryParse(_surfaceController.text.trim()),
+          description: location.isEmpty ? null : location,
+          culture: culture.isEmpty ? null : culture,
+          surface: parseLocalizedDecimal(_surfaceController.text),
           photoPath: photoPath,
         );
+
+    if (!mounted) return;
+    if (parcelle == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(loc.plotSaveFailed)),
+      );
+      return;
+    }
     widget.onSaved();
-    if (mounted) Navigator.of(context).pop();
+    Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     final state = ref.watch(parcelleNotifierProvider);
     final isLoading = state is AsyncLoading;
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
@@ -122,11 +139,11 @@ class _AddParcelleSheetState extends ConsumerState<AddParcelleSheet> {
                           borderRadius: BorderRadius.circular(2)))),
               const SizedBox(height: AppSpacing.md),
 
-              Text('Ajouter une parcelle', style: AppTypography.headlineMedium.copyWith(color: AppColors.textPrimary)),
-              Text('Nouvelle parcelle', style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
+              Text(loc.journalAddPlot, style: AppTypography.headlineMedium.copyWith(color: AppColors.textPrimary)),
+              Text(loc.journalNewPlot, style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
               const SizedBox(height: AppSpacing.lg),
 
-              Text('Photo de la parcelle', style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+              Text(loc.plotPhotoLabel, style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
               const SizedBox(height: AppSpacing.xs),
               GestureDetector(
                 onTap: _pickPhoto,
@@ -160,9 +177,9 @@ class _AddParcelleSheetState extends ConsumerState<AddParcelleSheet> {
                                 child: const Icon(Icons.add_a_photo_outlined, color: AppColors.primary),
                               ),
                               const SizedBox(height: AppSpacing.sm),
-                              Text('Ajouter une photo', style: AppTypography.bodyMedium.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600)),
+                              Text(loc.plotPhotoAdd, style: AppTypography.bodyMedium.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600)),
                               const SizedBox(height: 4),
-                              Text('Uploadez une photo de votre parcelle', style: AppTypography.caption.copyWith(color: AppColors.textSecondary)),
+                              Text(loc.plotPhotoHint, style: AppTypography.caption.copyWith(color: AppColors.textSecondary)),
                             ],
                           ),
                   ),
@@ -174,97 +191,48 @@ class _AddParcelleSheetState extends ConsumerState<AddParcelleSheet> {
                   child: TextButton.icon(
                     onPressed: () => setState(() => _selectedPhoto = null),
                     icon: const Icon(Icons.delete_outline, size: 16),
-                    label: const Text('Retirer la photo'),
+                    label: Text(loc.plotPhotoRemove),
                   ),
                 ),
               ],
               const SizedBox(height: AppSpacing.lg),
 
-              _buildLabel('Nom de la parcelle'),
+              _buildLabel(loc.plotNameLabel),
               TextFormField(
                 controller: _nomController,
-                decoration: InputDecoration(
-                  hintText: 'Nom de la parcelle (ex: Parcelle Sud)',
-                  hintStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary.withAlpha(150)),
-                  filled: true,
-                  fillColor: AppColors.background,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 14),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppSpacing.sm),
-                    borderSide: BorderSide(color: AppColors.textSecondary.withAlpha(50)),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppSpacing.sm),
-                    borderSide: BorderSide(color: AppColors.textSecondary.withAlpha(50)),
-                  ),
-                ),
-                validator: (v) => (v == null || v.isEmpty) ? 'Requis' : null,
+                decoration: _inputDecoration(loc.plotNameHint),
+                validator: (value) =>
+                    (value == null || value.trim().isEmpty) ? loc.journalNameRequired : null,
               ),
               const SizedBox(height: AppSpacing.md),
 
-              _buildLabel('Culture'),
+              _buildLabel(loc.plotCropLabel),
               TextFormField(
                 controller: _cultureController,
-                decoration: InputDecoration(
-                  hintText: 'Riz',
-                  hintStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary.withAlpha(150)),
-                  filled: true,
-                  fillColor: AppColors.background,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 14),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppSpacing.sm),
-                    borderSide: BorderSide(color: AppColors.textSecondary.withAlpha(50)),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppSpacing.sm),
-                    borderSide: BorderSide(color: AppColors.textSecondary.withAlpha(50)),
-                  ),
-                ),
+                decoration: _inputDecoration(loc.plotCropHint),
               ),
               const SizedBox(height: AppSpacing.md),
 
-              _buildLabel('Surface cultivée'),
+              _buildLabel(loc.plotSurfaceLabel),
               TextFormField(
                 controller: _surfaceController,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: InputDecoration(
-                  hintText: 'Hectares (0,55)',
-                  hintStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary.withAlpha(150)),
-                  suffixText: 'Hectares',
+                decoration: _inputDecoration(loc.plotSurfaceHint).copyWith(
+                  suffixText: loc.plotSurfaceSuffix,
                   suffixStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
-                  filled: true,
-                  fillColor: AppColors.background,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 14),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppSpacing.sm),
-                    borderSide: BorderSide(color: AppColors.textSecondary.withAlpha(50)),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppSpacing.sm),
-                    borderSide: BorderSide(color: AppColors.textSecondary.withAlpha(50)),
-                  ),
                 ),
+                validator: (value) {
+                  final text = value?.trim() ?? '';
+                  if (text.isEmpty) return null;
+                  return parseLocalizedDecimal(text) == null ? loc.plotSurfaceInvalid : null;
+                },
               ),
               const SizedBox(height: AppSpacing.md),
 
-              _buildLabel('Emplacement'),
+              _buildLabel(loc.plotLocationLabel),
               TextFormField(
                 controller: _emplacementController,
-                decoration: InputDecoration(
-                  hintText: 'Zone, détails, etc.',
-                  hintStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary.withAlpha(150)),
-                  filled: true,
-                  fillColor: AppColors.background,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 14),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppSpacing.sm),
-                    borderSide: BorderSide(color: AppColors.textSecondary.withAlpha(50)),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(AppSpacing.sm),
-                    borderSide: BorderSide(color: AppColors.textSecondary.withAlpha(50)),
-                  ),
-                ),
+                decoration: _inputDecoration(loc.plotLocationHint),
               ),
               const SizedBox(height: AppSpacing.xl),
 
@@ -278,7 +246,7 @@ class _AddParcelleSheetState extends ConsumerState<AddParcelleSheet> {
                         side: const BorderSide(color: AppColors.primary),
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
                       ),
-                      child: Text('Annuler', style: AppTypography.bodyMedium.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600)),
+                      child: Text(loc.commonCancel, style: AppTypography.bodyMedium.copyWith(color: AppColors.primary, fontWeight: FontWeight.w600)),
                     ),
                   ),
                   const SizedBox(width: AppSpacing.md),
@@ -296,7 +264,7 @@ class _AddParcelleSheetState extends ConsumerState<AddParcelleSheet> {
                               width: 20,
                               height: 20,
                               child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white))
-                          : Text('Enregistrer', style: AppTypography.bodyMedium.copyWith(color: AppColors.textOnPrimary, fontWeight: FontWeight.w600)),
+                          : Text(loc.commonSave, style: AppTypography.bodyMedium.copyWith(color: AppColors.textOnPrimary, fontWeight: FontWeight.w600)),
                     ),
                   ),
                 ],
@@ -304,6 +272,24 @@ class _AddParcelleSheetState extends ConsumerState<AddParcelleSheet> {
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  InputDecoration _inputDecoration(String hint) {
+    return InputDecoration(
+      hintText: hint,
+      hintStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary.withAlpha(150)),
+      filled: true,
+      fillColor: AppColors.background,
+      contentPadding: const EdgeInsets.symmetric(horizontal: AppSpacing.md, vertical: 14),
+      border: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.sm),
+        borderSide: BorderSide(color: AppColors.textSecondary.withAlpha(50)),
+      ),
+      enabledBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.sm),
+        borderSide: BorderSide(color: AppColors.textSecondary.withAlpha(50)),
       ),
     );
   }

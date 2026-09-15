@@ -8,8 +8,18 @@ part 'parcelle_local.g.dart';
 class ParcelleLocal {
   Id id = Isar.autoIncrement;
 
+  // Identifiant généré sur le téléphone ; le serveur ignore les renvois (P1.9).
+  // Null pour les parcelles créées avant son ajout : attribué à la synchro.
+  String? clientUuid;
+
   late String nomParcelle;
+
+  // Emplacement saisi par l'agriculteur (village, fokontany, repère).
   String? description;
+
+  // Culture déclarée ; null pour les parcelles créées avant son ajout (riz).
+  String? culture;
+
   double? surface;
   double? latitude;
   double? longitude;

@@ -18,6 +18,9 @@ final _privateConstructorUsedError = UnsupportedError(
 mixin _$ParcelleEntity {
   String get id => throw _privateConstructorUsedError;
   String get nom => throw _privateConstructorUsedError;
+
+  /// Emplacement saisi par l'agriculteur (village, fokontany, repère).
+  String? get description => throw _privateConstructorUsedError;
   double? get surface => throw _privateConstructorUsedError;
   String get culture => throw _privateConstructorUsedError;
   DateTime? get lastDiagnosticDate => throw _privateConstructorUsedError;
@@ -38,6 +41,7 @@ abstract class $ParcelleEntityCopyWith<$Res> {
   $Res call(
       {String id,
       String nom,
+      String? description,
       double? surface,
       String culture,
       DateTime? lastDiagnosticDate,
@@ -60,6 +64,7 @@ class _$ParcelleEntityCopyWithImpl<$Res, $Val extends ParcelleEntity>
   $Res call({
     Object? id = null,
     Object? nom = null,
+    Object? description = freezed,
     Object? surface = freezed,
     Object? culture = null,
     Object? lastDiagnosticDate = freezed,
@@ -75,6 +80,10 @@ class _$ParcelleEntityCopyWithImpl<$Res, $Val extends ParcelleEntity>
           ? _value.nom
           : nom // ignore: cast_nullable_to_non_nullable
               as String,
+      description: freezed == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String?,
       surface: freezed == surface
           ? _value.surface
           : surface // ignore: cast_nullable_to_non_nullable
@@ -110,6 +119,7 @@ abstract class _$$ParcelleEntityImplCopyWith<$Res>
   $Res call(
       {String id,
       String nom,
+      String? description,
       double? surface,
       String culture,
       DateTime? lastDiagnosticDate,
@@ -130,6 +140,7 @@ class __$$ParcelleEntityImplCopyWithImpl<$Res>
   $Res call({
     Object? id = null,
     Object? nom = null,
+    Object? description = freezed,
     Object? surface = freezed,
     Object? culture = null,
     Object? lastDiagnosticDate = freezed,
@@ -145,6 +156,10 @@ class __$$ParcelleEntityImplCopyWithImpl<$Res>
           ? _value.nom
           : nom // ignore: cast_nullable_to_non_nullable
               as String,
+      description: freezed == description
+          ? _value.description
+          : description // ignore: cast_nullable_to_non_nullable
+              as String?,
       surface: freezed == surface
           ? _value.surface
           : surface // ignore: cast_nullable_to_non_nullable
@@ -175,6 +190,7 @@ class _$ParcelleEntityImpl implements _ParcelleEntity {
   const _$ParcelleEntityImpl(
       {required this.id,
       required this.nom,
+      this.description,
       this.surface,
       this.culture = 'Riz',
       this.lastDiagnosticDate,
@@ -185,6 +201,10 @@ class _$ParcelleEntityImpl implements _ParcelleEntity {
   final String id;
   @override
   final String nom;
+
+  /// Emplacement saisi par l'agriculteur (village, fokontany, repère).
+  @override
+  final String? description;
   @override
   final double? surface;
   @override
@@ -200,7 +220,7 @@ class _$ParcelleEntityImpl implements _ParcelleEntity {
 
   @override
   String toString() {
-    return 'ParcelleEntity(id: $id, nom: $nom, surface: $surface, culture: $culture, lastDiagnosticDate: $lastDiagnosticDate, isSynced: $isSynced, photoPath: $photoPath)';
+    return 'ParcelleEntity(id: $id, nom: $nom, description: $description, surface: $surface, culture: $culture, lastDiagnosticDate: $lastDiagnosticDate, isSynced: $isSynced, photoPath: $photoPath)';
   }
 
   @override
@@ -210,6 +230,8 @@ class _$ParcelleEntityImpl implements _ParcelleEntity {
             other is _$ParcelleEntityImpl &&
             (identical(other.id, id) || other.id == id) &&
             (identical(other.nom, nom) || other.nom == nom) &&
+            (identical(other.description, description) ||
+                other.description == description) &&
             (identical(other.surface, surface) || other.surface == surface) &&
             (identical(other.culture, culture) || other.culture == culture) &&
             (identical(other.lastDiagnosticDate, lastDiagnosticDate) ||
@@ -221,8 +243,8 @@ class _$ParcelleEntityImpl implements _ParcelleEntity {
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, id, nom, surface, culture,
-      lastDiagnosticDate, isSynced, photoPath);
+  int get hashCode => Object.hash(runtimeType, id, nom, description, surface,
+      culture, lastDiagnosticDate, isSynced, photoPath);
 
   @JsonKey(ignore: true)
   @override
@@ -236,6 +258,7 @@ abstract class _ParcelleEntity implements ParcelleEntity {
   const factory _ParcelleEntity(
       {required final String id,
       required final String nom,
+      final String? description,
       final double? surface,
       final String culture,
       final DateTime? lastDiagnosticDate,
@@ -246,6 +269,10 @@ abstract class _ParcelleEntity implements ParcelleEntity {
   String get id;
   @override
   String get nom;
+  @override
+
+  /// Emplacement saisi par l'agriculteur (village, fokontany, repère).
+  String? get description;
   @override
   double? get surface;
   @override

@@ -1,12 +1,17 @@
 // Repository local - Gestion des parcelles dans Isar (hors-ligne)
 
+import 'dart:io';
+
 import 'package:fpdart/fpdart.dart';
 import 'package:isar/isar.dart';
 
+import '../../../../core/ai/disease_catalog.dart';
 import '../../../../core/errors/failure.dart';
 import '../../../../core/local_db/isar_service.dart';
 import '../../../../core/local_db/models/parcelle_local.dart';
 import '../../../../core/local_db/models/diagnostic_local.dart';
+import '../../../../core/utils/client_uuid.dart';
+import '../../../../core/utils/logger.dart';
 import '../../domain/entities/parcelle_entity.dart';
 import '../../domain/entities/journal_entry.dart';
 import '../../domain/repositories/journal_repository.dart';
@@ -28,7 +33,7 @@ class ParcelleLocalRepository implements JournalRepository {
           .where()
           .sortByDateDiagnosticDesc()
           .findAll();
-          
+
       final latestDiagsMap = <int, DiagnosticLocal>{};
       for (final diag in allDiagnostics) {
         latestDiagsMap.putIfAbsent(diag.parcelleLocalId, () => diag);
@@ -43,10 +48,12 @@ class ParcelleLocalRepository implements JournalRepository {
           ParcelleEntity(
             id: parcelle.id.toString(),
             nom: parcelle.nomParcelle,
+            description: parcelle.description,
             surface: parcelle.surface,
-            culture: 'Riz',
+            culture: parcelle.culture ?? 'Riz',
             lastDiagnosticDate: latestDiagnostic?.dateDiagnostic,
             isSynced: parcelle.isSynced,
+            photoPath: parcelle.photoPath,
           ),
         );
       }
@@ -68,17 +75,22 @@ class ParcelleLocalRepository implements JournalRepository {
 
   // --- Écriture ---
 
+  /// Crée une parcelle et la renvoie avec l'identifiant attribué par Isar
+  /// lors du `put` (tâche P1.9 : plus de relecture de « la dernière parcelle »).
   Future<ParcelleLocal> createParcelle({
     required String nomParcelle,
     String? description,
+    String? culture,
     double? surface,
     double? latitude,
     double? longitude,
     String? photoPath,
   }) async {
     final parcelle = ParcelleLocal()
+      ..clientUuid = generateClientUuid()
       ..nomParcelle = nomParcelle
       ..description = description
+      ..culture = culture
       ..surface = surface
       ..latitude = latitude
       ..longitude = longitude
@@ -94,21 +106,17 @@ class ParcelleLocalRepository implements JournalRepository {
   Future<Either<Failure, Unit>> saveParcelle(ParcelleEntity parcelle) async {
     try {
       final parsedId = int.tryParse(parcelle.id);
-      DateTime createdAt = DateTime.now();
+      final existing =
+          parsedId == null ? null : await _db.parcelleLocals.get(parsedId);
 
-      if (parsedId != null) {
-        final existing = await _db.parcelleLocals.get(parsedId);
-        if (existing != null) {
-          createdAt = existing.createdAt;
-        }
-      }
-
-      final localParcelle = ParcelleLocal()
-        ..id = parsedId ?? Isar.autoIncrement
+      // Une mise à jour part de l'enregistrement existant : la position GPS,
+      // l'identifiant serveur et la date de création ne sont pas écrasés.
+      final localParcelle = (existing ?? (ParcelleLocal()..createdAt = DateTime.now()))
         ..nomParcelle = parcelle.nom
+        ..description = parcelle.description
+        ..culture = parcelle.culture
         ..surface = parcelle.surface
         ..photoPath = parcelle.photoPath
-        ..createdAt = createdAt
         ..isSynced = parcelle.isSynced;
 
       await _db.writeTxn(() => _db.parcelleLocals.put(localParcelle));
@@ -116,6 +124,17 @@ class ParcelleLocalRepository implements JournalRepository {
     } catch (e) {
       return Left(CacheFailure(e.toString()));
     }
+  }
+
+  /// Renvoie l'identifiant client de la parcelle, en l'attribuant d'abord
+  /// aux parcelles créées avant son introduction.
+  Future<String> ensureClientUuid(ParcelleLocal parcelle) async {
+    final existing = parcelle.clientUuid;
+    if (existing != null) return existing;
+    final generated = generateClientUuid();
+    parcelle.clientUuid = generated;
+    await _db.writeTxn(() => _db.parcelleLocals.put(parcelle));
+    return generated;
   }
 
   Future<void> markAsSynced(int localId, int serverId) async {
@@ -136,15 +155,44 @@ class ParcelleLocalRepository implements JournalRepository {
     }
 
     try {
-      await _db.writeTxn(() => _db.parcelleLocals.delete(parsedId));
+      await deleteParcelleById(parsedId);
       return const Right(unit);
     } catch (e) {
       return Left(CacheFailure(e.toString()));
     }
   }
 
+  /// Supprime une parcelle avec ses diagnostics et les photos associées
+  /// (tâche P1.9 : plus de diagnostics orphelins).
   Future<void> deleteParcelleById(int id) async {
-    await _db.writeTxn(() => _db.parcelleLocals.delete(id));
+    final parcelle = await _db.parcelleLocals.get(id);
+    final diagnostics = await _db.diagnosticLocals
+        .filter()
+        .parcelleLocalIdEqualTo(id)
+        .findAll();
+
+    await _db.writeTxn(() async {
+      await _db.diagnosticLocals
+          .deleteAll(diagnostics.map((diagnostic) => diagnostic.id).toList());
+      await _db.parcelleLocals.delete(id);
+    });
+
+    final photoPaths = <String?>[
+      parcelle?.photoPath,
+      for (final diagnostic in diagnostics) diagnostic.imagePath,
+    ];
+    for (final path in photoPaths.whereType<String>()) {
+      await _deleteFileQuietly(path);
+    }
+  }
+
+  Future<void> _deleteFileQuietly(String path) async {
+    try {
+      final file = File(path);
+      if (await file.exists()) await file.delete();
+    } catch (e, st) {
+      AppLogger.error('Suppression de photo impossible', error: e, stackTrace: st);
+    }
   }
 
   /// Construit le journal agricole : chaque parcelle avec son statut de santé
@@ -169,9 +217,11 @@ class ParcelleLocalRepository implements JournalRepository {
       final nb = diagnostics.length;
       final dernierDiag = nb > 0 ? diagnostics.first : null;
       final derniereMaladie = dernierDiag?.maladieDetectee;
-      final statut = nb == 0
-          ? 'aucun_diagnostic'
-          : (derniereMaladie?.toLowerCase() == 'healthy' ? 'sain' : 'malade');
+      final statut = switch (derniereMaladie) {
+        null => 'aucun_diagnostic',
+        final label when DiseaseCatalog.isHealthy(label) => 'sain',
+        _ => 'malade',
+      };
 
       journal.add(JournalEntry(
         parcelle: parcelle,

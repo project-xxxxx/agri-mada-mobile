@@ -6,7 +6,6 @@ import '../../../../core/local_db/models/parcelle_local.dart';
 import '../../data/repositories/parcelle_local_repository.dart';
 import '../../data/services/export_service.dart';
 import '../../domain/entities/journal_entry.dart';
-import '../../domain/entities/parcelle_entity.dart';
 import '../../domain/repositories/journal_repository.dart';
 import '../../domain/usecases/export_journal_usecase.dart';
 import '../../domain/usecases/get_parcelles_usecase.dart';
@@ -42,28 +41,15 @@ final exportJournalUseCaseProvider = Provider<ExportJournalUseCase>(
 );
 
 /// Journal agricole complet avec statut de santé de chaque parcelle
-/// Journal agricole complet avec statut de santé de chaque parcelle
 final journalAgricoleProvider =
     FutureProvider<List<JournalEntry>>((ref) async {
   return ref.read(parcelleRepositoryProvider).getJournalAgricole();
 });
 
-/// Liste simple de toutes les parcelles
-final parcellesProvider = FutureProvider<List<ParcelleLocal>>((ref) async {
-  final result = await ref.read(getParcellesUseCaseProvider).call();
-  return result.fold(
-    (_) => <ParcelleLocal>[],
-    (parcelles) => parcelles
-        .map(
-          (parcelle) => ParcelleLocal()
-            ..id = int.tryParse(parcelle.id) ?? 0
-            ..nomParcelle = parcelle.nom
-            ..surface = parcelle.surface
-            ..createdAt = parcelle.lastDiagnosticDate ?? DateTime.now()
-            ..isSynced = parcelle.isSynced,
-        )
-        .toList(),
-  );
+/// Liste de toutes les parcelles, lues directement dans Isar : photo,
+/// emplacement et date de création ne sont plus perdus (tâche P1.6).
+final parcellesProvider = FutureProvider<List<ParcelleLocal>>((ref) {
+  return ref.read(parcelleRepositoryProvider).getAllParcelles();
 });
 
 /// Liste complète de l'historique des diagnostics
@@ -77,9 +63,12 @@ class ParcelleNotifier extends StateNotifier<AsyncValue<void>> {
 
   final ParcelleLocalRepository _repo;
 
+  /// Crée une parcelle et renvoie celle qui vient d'être enregistrée,
+  /// ou null en cas d'échec.
   Future<ParcelleLocal?> createParcelle({
     required String nom,
     String? description,
+    String? culture,
     double? surface,
     double? latitude,
     double? longitude,
@@ -87,30 +76,17 @@ class ParcelleNotifier extends StateNotifier<AsyncValue<void>> {
   }) async {
     state = const AsyncValue.loading();
     try {
-      final result = await _repo.saveParcelle(
-        ParcelleEntity(
-          id: '0',
-          nom: nom,
-          surface: surface,
-          culture: 'Riz',
-          isSynced: false,
-          photoPath: photoPath,
-        ),
+      final parcelle = await _repo.createParcelle(
+        nomParcelle: nom,
+        description: description,
+        culture: culture ?? 'Riz',
+        surface: surface,
+        latitude: latitude,
+        longitude: longitude,
+        photoPath: photoPath,
       );
-
-      return result.fold(
-        (failure) {
-          state = AsyncValue.error(failure, StackTrace.current);
-          return null;
-        },
-        (_) async {
-          final parcelles = await _repo.getAllParcelles();
-          parcelles.sort((a, b) => a.id.compareTo(b.id));
-          final parcelle = parcelles.isEmpty ? null : parcelles.last;
-          state = const AsyncValue.data(null);
-          return parcelle;
-        },
-      );
+      state = const AsyncValue.data(null);
+      return parcelle;
     } catch (e, st) {
       state = AsyncValue.error(e, st);
       return null;
