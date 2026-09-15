@@ -52,19 +52,6 @@ async def test_me_avec_token_valide_retourne_200(async_client, auth_headers, tes
 
 
 @pytest.mark.asyncio
-async def test_login_admin_retourne_token(async_client, admin_user):
-    response = await async_client.post(
-        '/api/auth/login',
-        data={'username': admin_user.tel, 'password': 'admin'},
-    )
-
-    assert response.status_code == 200
-    payload = response.json()
-    assert 'access_token' in payload
-    assert payload['token_type'] == 'bearer'
-
-
-@pytest.mark.asyncio
 async def test_forgot_password_retourne_200_message_generique(async_client, test_user):
     response = await async_client.post(
         '/api/auth/forgot-password',

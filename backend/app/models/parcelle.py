@@ -4,7 +4,15 @@ Chaque parcelle appartient à un agriculteur et regroupe des diagnostics.
 """
 
 from datetime import datetime, timezone
-from sqlalchemy import Column, Integer, String, Float, DateTime, ForeignKey
+from sqlalchemy import (
+    Column,
+    Integer,
+    String,
+    Float,
+    DateTime,
+    ForeignKey,
+    UniqueConstraint,
+)
 from sqlalchemy.orm import relationship
 
 from app.db.session import Base
@@ -12,11 +20,16 @@ from app.db.session import Base
 
 class Parcelle(Base):
     __tablename__ = "parcelles"
+    __table_args__ = (
+        UniqueConstraint("user_id", "client_uuid", name="uq_parcelles_user_client_uuid"),
+    )
 
     id = Column(Integer, primary_key=True, index=True, autoincrement=True)
     user_id = Column(
         Integer, ForeignKey("users.id", ondelete="CASCADE"), nullable=False, index=True
     )
+    # Identifiant généré par le téléphone : rend la synchronisation idempotente (P1.9).
+    client_uuid = Column(String(36), nullable=True)
     nom_parcelle = Column(String(200), nullable=False)
     description = Column(String(500), nullable=True)
     surface = Column(Float, nullable=True, comment="Surface en hectares")

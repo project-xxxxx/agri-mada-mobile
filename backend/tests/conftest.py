@@ -1,5 +1,10 @@
+import os
 from datetime import datetime, timezone
 from uuid import uuid4
+
+# SECRET_KEY est obligatoire (P1.11) : clé propre aux tests, posée avant tout import
+# de l'application. Une variable d'environnement déjà définie (CI) est conservée.
+os.environ.setdefault('SECRET_KEY', 'pytest-only-key-never-used-outside-tests-0001')
 
 import pytest
 from httpx import ASGITransport, AsyncClient
@@ -7,11 +12,19 @@ from sqlalchemy import create_engine, event
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import StaticPool
 
+from app.core.rate_limit import login_rate_limiter
 from app.core.security import create_access_token
 from app.crud import create_user
 from app.db.session import Base, get_db
 from app.main import app
 from app.models.parcelle import Parcelle
+
+
+@pytest.fixture(autouse=True)
+def _reset_login_rate_limiter():
+    login_rate_limiter.reset()
+    yield
+    login_rate_limiter.reset()
 
 
 @pytest.fixture(scope='session')
@@ -79,18 +92,6 @@ def test_user(db_session):
         password='Password123',
     )
     return user
-
-
-@pytest.fixture
-def admin_user(db_session):
-    return create_user(
-        db=db_session,
-        nom='Admin',
-        prenom='Admin',
-        region='System',
-        tel='admin',
-        password='admin',
-    )
 
 
 @pytest.fixture

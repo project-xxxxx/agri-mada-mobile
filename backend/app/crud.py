@@ -1,15 +1,35 @@
 """
 Fonctions CRUD - Opérations de base de données.
-Create, Read, Update, Delete pour User, Parcelle et Diagnostic.
+Create, Read, Update, Delete pour User, Parcelle, Diagnostic et RefreshToken.
 """
 
-from typing import List, Optional
+from datetime import timedelta
+from typing import List, Optional, Tuple
 from sqlalchemy.orm import Session
 
+from app.core.config import settings
+from app.core.security import (
+    generate_refresh_token,
+    get_password_hash,
+    hash_token,
+    verify_password,
+)
 from app.models.user import User
 from app.models.parcelle import Parcelle
 from app.models.diagnostic import Diagnostic
-from app.core.security import get_password_hash, verify_password
+from app.models.refresh_token import RefreshToken, utcnow_naive
+
+# Étiquettes du modèle qui désignent une plante saine.
+_HEALTHY_LABELS = {"healthy", "normal"}
+
+
+def _normalise_uuid(value: Optional[str]) -> Optional[str]:
+    return value.lower() if value else None
+
+
+def _refresh_all(db: Session, objects: list) -> None:
+    for obj in {id(o): o for o in objects}.values():
+        db.refresh(obj)
 
 
 # ============================================================
@@ -58,6 +78,80 @@ def authenticate_user(db: Session, tel: str, password: str) -> Optional[User]:
 
 
 # ============================================================
+# CRUD - Jetons de rafraîchissement (P1.8)
+# ============================================================
+
+def create_refresh_token(db: Session, user_id: int, *, commit: bool = True) -> str:
+    """Émet un jeton de rafraîchissement et retourne sa valeur en clair."""
+    raw_token = generate_refresh_token()
+    now = utcnow_naive()
+    db.add(
+        RefreshToken(
+            user_id=user_id,
+            token_hash=hash_token(raw_token),
+            expires_at=now + timedelta(days=settings.REFRESH_TOKEN_EXPIRE_DAYS),
+            created_at=now,
+        )
+    )
+    if commit:
+        db.commit()
+    return raw_token
+
+
+def revoke_all_refresh_tokens(db: Session, user_id: int) -> None:
+    now = utcnow_naive()
+    db.query(RefreshToken).filter(
+        RefreshToken.user_id == user_id,
+        RefreshToken.revoked_at.is_(None),
+    ).update({RefreshToken.revoked_at: now}, synchronize_session=False)
+    db.commit()
+
+
+def revoke_refresh_token(db: Session, raw_token: str) -> None:
+    """Révoque un jeton s'il existe (déconnexion) ; sans effet sinon."""
+    token = (
+        db.query(RefreshToken)
+        .filter(RefreshToken.token_hash == hash_token(raw_token))
+        .first()
+    )
+    if token is not None and token.revoked_at is None:
+        token.revoked_at = utcnow_naive()
+        db.commit()
+
+
+def rotate_refresh_token(db: Session, raw_token: str) -> Optional[Tuple[User, str]]:
+    """
+    Échange un jeton valide contre un nouveau (rotation).
+
+    Un jeton déjà révoqué qui revient signale un vol probable : tous les jetons
+    actifs de l'utilisateur sont alors révoqués. Retourne None si refusé.
+    """
+    token = (
+        db.query(RefreshToken)
+        .filter(RefreshToken.token_hash == hash_token(raw_token))
+        .first()
+    )
+    if token is None:
+        return None
+    if token.revoked_at is not None:
+        revoke_all_refresh_tokens(db, token.user_id)
+        return None
+
+    now = utcnow_naive()
+    if token.expires_at <= now:
+        return None
+
+    user = get_user_by_id(db, token.user_id)
+    if user is None or not user.is_active:
+        return None
+
+    token.revoked_at = now
+    new_raw_token = create_refresh_token(db, user.id, commit=False)
+    db.commit()
+    return user, new_raw_token
+
+
+# ============================================================
 # CRUD - Parcelles
 # ============================================================
 
@@ -95,29 +189,53 @@ def create_parcelle(
     return db_parcelle
 
 
-def bulk_create_parcelles(
+def bulk_upsert_parcelles(
     db: Session, user_id: int, parcelles_data: list
-) -> List[Parcelle]:
+) -> Tuple[List[Parcelle], List[Parcelle]]:
     """
-    Crée plusieurs parcelles en bloc (synchronisation offline → serveur).
-    Retourne la liste des parcelles créées.
+    Synchronisation offline → serveur, idempotente grâce à client_uuid (P1.9).
+
+    Une parcelle déjà connue sous le même client_uuid est mise à jour au lieu
+    d'être dupliquée. Retourne (parcelles traitées dans l'ordre reçu, parcelles créées).
     """
-    created = []
+    uuids = {u for p in parcelles_data if (u := _normalise_uuid(p.client_uuid))}
+    known = (
+        {
+            p.client_uuid: p
+            for p in db.query(Parcelle).filter(
+                Parcelle.user_id == user_id, Parcelle.client_uuid.in_(uuids)
+            )
+        }
+        if uuids
+        else {}
+    )
+
+    processed: List[Parcelle] = []
+    created: List[Parcelle] = []
     for p_data in parcelles_data:
-        db_parcelle = Parcelle(
-            user_id=user_id,
-            nom_parcelle=p_data.nom_parcelle,
-            description=p_data.description,
-            surface=p_data.surface,
-            latitude=p_data.latitude,
-            longitude=p_data.longitude,
-        )
-        db.add(db_parcelle)
-        created.append(db_parcelle)
+        client_uuid = _normalise_uuid(p_data.client_uuid)
+        fields = {
+            "nom_parcelle": p_data.nom_parcelle,
+            "description": p_data.description,
+            "surface": p_data.surface,
+            "latitude": p_data.latitude,
+            "longitude": p_data.longitude,
+        }
+        parcelle = known.get(client_uuid) if client_uuid else None
+        if parcelle is None:
+            parcelle = Parcelle(user_id=user_id, client_uuid=client_uuid, **fields)
+            db.add(parcelle)
+            created.append(parcelle)
+            if client_uuid:
+                known[client_uuid] = parcelle
+        else:
+            for name, value in fields.items():
+                setattr(parcelle, name, value)
+        processed.append(parcelle)
+
     db.commit()
-    for p in created:
-        db.refresh(p)
-    return created
+    _refresh_all(db, processed)
+    return processed, created
 
 
 # ============================================================
@@ -172,42 +290,71 @@ def create_diagnostic(
     return db_diag
 
 
-def bulk_create_diagnostics(
+def bulk_upsert_diagnostics(
     db: Session, user_id: int, diagnostics_data: list
-) -> List[Diagnostic]:
+) -> Tuple[List[Diagnostic], List[Diagnostic], int]:
     """
-    Crée plusieurs diagnostics en bloc (synchronisation offline → serveur).
-    Vérifie que chaque parcelle_id appartient bien à l'utilisateur.
-    """
-    # Récupère les IDs de parcelles de l'utilisateur pour validation
-    user_parcelle_ids = {
-        p.id for p in db.query(Parcelle).filter(Parcelle.user_id == user_id).all()
-    }
+    Synchronisation offline → serveur, idempotente grâce à client_uuid (P1.9).
 
-    created = []
+    La parcelle est désignée par parcelle_client_uuid (prioritaire) ou parcelle_id,
+    et doit appartenir à l'utilisateur. Un diagnostic déjà reçu n'est pas modifié.
+    Retourne (diagnostics acceptés dans l'ordre reçu, diagnostics créés, nombre ignoré).
+    """
+    user_parcelles = get_parcelles_by_user(db, user_id)
+    parcelles_by_id = {p.id: p for p in user_parcelles}
+    parcelles_by_uuid = {p.client_uuid: p for p in user_parcelles if p.client_uuid}
+
+    uuids = {u for d in diagnostics_data if (u := _normalise_uuid(d.client_uuid))}
+    known = (
+        {
+            d.client_uuid: d
+            for d in db.query(Diagnostic).filter(
+                Diagnostic.user_id == user_id, Diagnostic.client_uuid.in_(uuids)
+            )
+        }
+        if uuids
+        else {}
+    )
+
+    processed: List[Diagnostic] = []
+    created: List[Diagnostic] = []
     skipped = 0
     for d_data in diagnostics_data:
-        # Sécurité : on ne crée le diagnostic que si la parcelle appartient à l'user
-        if d_data.parcelle_id not in user_parcelle_ids:
+        client_uuid = _normalise_uuid(d_data.client_uuid)
+        if client_uuid and client_uuid in known:
+            processed.append(known[client_uuid])
+            continue
+
+        parcelle = None
+        if d_data.parcelle_client_uuid:
+            parcelle = parcelles_by_uuid.get(_normalise_uuid(d_data.parcelle_client_uuid))
+        if parcelle is None and d_data.parcelle_id is not None:
+            parcelle = parcelles_by_id.get(d_data.parcelle_id)
+        if parcelle is None:
+            # Sécurité : parcelle inconnue ou appartenant à un autre utilisateur.
             skipped += 1
             continue
 
-        db_diag = Diagnostic(
+        diagnostic = Diagnostic(
             user_id=user_id,
-            parcelle_id=d_data.parcelle_id,
+            parcelle_id=parcelle.id,
+            client_uuid=client_uuid,
             maladie_detectee=d_data.maladie_detectee,
             confiance=d_data.confiance,
+            certitude=d_data.certitude,
             niveau_gravite=d_data.niveau_gravite,
             recommandations=d_data.recommandations,
             date_diagnostic=d_data.date_diagnostic,
         )
-        db.add(db_diag)
-        created.append(db_diag)
+        db.add(diagnostic)
+        created.append(diagnostic)
+        processed.append(diagnostic)
+        if client_uuid:
+            known[client_uuid] = diagnostic
 
     db.commit()
-    for d in created:
-        db.refresh(d)
-    return created
+    _refresh_all(db, processed)
+    return processed, created, skipped
 
 
 def get_journal_agricole(db: Session, user_id: int) -> list:
@@ -233,8 +380,9 @@ def get_journal_agricole(db: Session, user_id: int) -> list:
             # Le diagnostic le plus récent détermine l'état actuel
             dernier = diagnostics[0]  # Déjà trié par date desc
             derniere_maladie = dernier.maladie_detectee
-            # On considère la parcelle saine si aucune maladie n'a été trouvée récemment
-            statut = "sain" if derniere_maladie.lower() == "healthy" else "malade"
+            statut = (
+                "sain" if derniere_maladie.lower() in _HEALTHY_LABELS else "malade"
+            )
 
         journal.append(
             {

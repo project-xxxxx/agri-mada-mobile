@@ -3,11 +3,14 @@ Endpoints de synchronisation.
 Reçoit les données créées hors-ligne par l'application Flutter
 et les sauvegarde dans la base PostgreSQL du serveur.
 
+Les renvois sont sans danger : un élément portant un client_uuid déjà reçu
+n'est pas dupliqué (tâche P1.9).
+
 - POST /parcelles : Synchroniser les parcelles créées hors-ligne
 - POST /diagnostics : Synchroniser les diagnostics créés hors-ligne
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 
 from app.db.session import get_db
@@ -15,7 +18,7 @@ from app.deps import get_current_user
 from app.models.user import User
 from app.schemas.parcelle import ParcelleSync, ParcelleSyncResponse
 from app.schemas.diagnostic import DiagnosticSync, DiagnosticSyncResponse
-from app.crud import bulk_create_parcelles, bulk_create_diagnostics
+from app.crud import bulk_upsert_parcelles, bulk_upsert_diagnostics
 
 router = APIRouter(prefix="/sync", tags=["Synchronisation"])
 
@@ -26,7 +29,8 @@ router = APIRouter(prefix="/sync", tags=["Synchronisation"])
     summary="Synchroniser les parcelles",
     description=(
         "Reçoit un ensemble de parcelles créées hors-ligne sur le téléphone "
-        "et les sauvegarde sur le serveur. Nécessite une connexion internet."
+        "et les sauvegarde sur le serveur. Une parcelle déjà reçue avec le même "
+        "client_uuid est mise à jour, pas dupliquée."
     ),
 )
 def sync_parcelles(
@@ -35,15 +39,20 @@ def sync_parcelles(
     current_user: User = Depends(get_current_user),
 ):
     """Synchronisation en bloc des parcelles créées hors-ligne."""
-    created = bulk_create_parcelles(
+    processed, created = bulk_upsert_parcelles(
         db=db,
         user_id=current_user.id,
         parcelles_data=data.parcelles,
     )
+    updated = len({id(p) for p in processed}) - len(created)
+    message = f"{len(created)} parcelle(s) créée(s)."
+    if updated > 0:
+        message += f" {updated} déjà connue(s), mise(s) à jour."
     return ParcelleSyncResponse(
         total_received=len(data.parcelles),
         total_created=len(created),
-        message=f"{len(created)} parcelle(s) synchronisée(s) avec succès.",
+        message=message,
+        parcelles=processed,
         parcelles_creees=created,
     )
 
@@ -64,13 +73,12 @@ def sync_diagnostics(
     current_user: User = Depends(get_current_user),
 ):
     """Synchronisation en bloc des diagnostics créés hors-ligne."""
-    created = bulk_create_diagnostics(
+    processed, created, skipped = bulk_upsert_diagnostics(
         db=db,
         user_id=current_user.id,
         diagnostics_data=data.diagnostics,
     )
 
-    skipped = len(data.diagnostics) - len(created)
     message = f"{len(created)} diagnostic(s) synchronisé(s) avec succès."
     if skipped > 0:
         message += f" {skipped} ignoré(s) (parcelle introuvable ou non autorisée)."
@@ -78,6 +86,8 @@ def sync_diagnostics(
     return DiagnosticSyncResponse(
         total_received=len(data.diagnostics),
         total_created=len(created),
+        total_skipped=skipped,
         message=message,
+        diagnostics=processed,
         diagnostics_crees=created,
     )

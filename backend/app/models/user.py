@@ -30,6 +30,9 @@ class User(Base):
     diagnostics = relationship(
         "Diagnostic", back_populates="user", cascade="all, delete-orphan"
     )
+    refresh_tokens = relationship(
+        "RefreshToken", back_populates="user", cascade="all, delete-orphan"
+    )
 
     def __repr__(self):
         return f"<User {self.prenom} {self.nom} ({self.tel})>"

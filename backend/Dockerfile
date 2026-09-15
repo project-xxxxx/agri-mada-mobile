@@ -18,7 +18,12 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy the rest of the application
 COPY . .
 
+# Le serveur ne tourne pas en root.
+RUN useradd --create-home --uid 10001 agrimada && chown -R agrimada /app
+USER agrimada
+
 EXPOSE 8000
 
-# Run the FastAPI server
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--reload"]
+# Migrations puis serveur, sans --reload (réservé au développement local).
+# SECRET_KEY doit être fourni par l'environnement : le serveur refuse de démarrer sans.
+CMD ["sh", "-c", "alembic upgrade head && exec uvicorn app.main:app --host 0.0.0.0 --port 8000"]

@@ -7,6 +7,8 @@ from datetime import datetime
 from typing import Optional
 from pydantic import BaseModel, Field
 
+MIN_PASSWORD_LENGTH = 8
+
 
 # --- Schémas d'entrée ---
 
@@ -22,7 +24,7 @@ class UserCreate(BaseModel):
         examples=["0341234567"],
         description="Numéro de téléphone unique, utilisé comme identifiant de connexion",
     )
-    password: str = Field(..., min_length=4, max_length=100)
+    password: str = Field(..., min_length=MIN_PASSWORD_LENGTH, max_length=100)
 
 
 class UserLogin(BaseModel):
@@ -42,6 +44,11 @@ class ForgotPasswordRequest(BaseModel):
     )
 
 
+class RefreshTokenRequest(BaseModel):
+    """Jeton de rafraîchissement présenté pour obtenir une nouvelle paire de jetons."""
+    refresh_token: str = Field(..., min_length=20, max_length=200)
+
+
 # --- Schémas de sortie ---
 
 class UserResponse(BaseModel):
@@ -59,9 +66,13 @@ class UserResponse(BaseModel):
 
 
 class Token(BaseModel):
-    """Token JWT retourné après authentification."""
+    """Jetons retournés après authentification ou rafraîchissement."""
     access_token: str
     token_type: str = "bearer"
+    refresh_token: Optional[str] = None
+    expires_in: Optional[int] = Field(
+        None, description="Durée de validité du jeton d'accès, en secondes"
+    )
 
 
 class TokenData(BaseModel):

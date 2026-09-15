@@ -29,3 +29,6 @@ test_jwt.py
 # OS generated files
 .DS_Store
 Thumbs.db
+
+# Sauvegardes manuelles de la base de développement
+*.db.bak*

@@ -2,6 +2,8 @@
 Module de sécurité - Gestion JWT et hachage de mots de passe.
 """
 
+import hashlib
+import secrets
 from datetime import datetime, timedelta, timezone
 from typing import Optional
 
@@ -56,3 +58,14 @@ def decode_access_token(token: str) -> Optional[dict]:
         return payload
     except JWTError:
         return None
+
+
+# --- Jetons de rafraîchissement ---
+def generate_refresh_token() -> str:
+    """Jeton opaque à forte entropie, remis une seule fois au client."""
+    return secrets.token_urlsafe(48)
+
+
+def hash_token(raw_token: str) -> str:
+    """Empreinte stockée en base : le jeton en clair n'est jamais conservé."""
+    return hashlib.sha256(raw_token.encode("utf-8")).hexdigest()
