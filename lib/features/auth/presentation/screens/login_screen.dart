@@ -151,12 +151,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                       // Identifiant (tel/username)
                       _LoginTextField(
                         controller: _usernameController,
-                        hintText: 'Téléphone',
+                        hintText: loc.loginPhoneLabel,
                         prefixIcon: Icons.phone_outlined,
                         keyboardType: TextInputType.phone,
                         validator: (value) {
                           if (value == null || value.isEmpty) {
-                            return 'Veuillez entrer votre numéro';
+                            return loc.loginPhoneRequired;
                           }
                           return null;
                         },
@@ -208,27 +208,32 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
                         isLoading: isLoading,
                       ),
                       const SizedBox(height: AppSpacing.xl),
-                      // Lien inscription
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            loc.loginNoAccount,
-                            style: AppTypography.bodySmall.copyWith(
-                              color: AppColors.textPrimary,
-                            ),
-                          ),
-                          GestureDetector(
-                            onTap: _onRegisterTap,
-                            child: Text(
-                              loc.loginRegister,
+                      // Lien inscription : Wrap passe à la ligne sur 360 dp
+                      // au lieu de déborder (tâche P1.10).
+                      SizedBox(
+                        width: double.infinity,
+                        child: Wrap(
+                          alignment: WrapAlignment.center,
+                          crossAxisAlignment: WrapCrossAlignment.center,
+                          children: [
+                            Text(
+                              loc.loginNoAccount,
                               style: AppTypography.bodySmall.copyWith(
-                                color: AppColors.primary,
-                                fontWeight: FontWeight.w700,
+                                color: AppColors.textPrimary,
                               ),
                             ),
-                          ),
-                        ],
+                            TextButton(
+                              onPressed: _onRegisterTap,
+                              child: Text(
+                                loc.loginRegister,
+                                style: AppTypography.bodySmall.copyWith(
+                                  color: AppColors.primary,
+                                  fontWeight: FontWeight.w700,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                     ],
                   ),
@@ -264,14 +269,10 @@ class _LoginHeader extends StatelessWidget {
                 color: AppColors.primary.withAlpha(80),
                 borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
               ),
-              child: Image.asset(
-                'assets/images/login_deco.png',
-                fit: BoxFit.contain,
-                errorBuilder: (_, __, ___) => const Icon(
-                  Icons.grass,
-                  color: AppColors.textOnPrimary,
-                  size: 48,
-                ),
+              child: const Icon(
+                Icons.grass,
+                color: AppColors.textOnPrimary,
+                size: 48,
               ),
             ),
           ),

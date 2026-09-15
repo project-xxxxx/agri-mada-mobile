@@ -1,12 +1,13 @@
-# Assets images — à remplacer par les vrais assets Figma
-# - splash_rice.png : Image rice plant (splash screen)
-# - welcome_hero.png : Photo agricultrice (welcome screen)
-# - deco_rice_1.png : Petite image décorative cercle 1
-# - deco_rice_2.png : Petite image décorative cercle 2
-# - deco_rice_3.png : Petite image décorative cercle 3
-# - login_deco.png : Illustration login header
-# - rice_summary.png : Image riz carte résumé accueil
-# - service_parcelles.png : Icône service mes parcelles
-# - service_cultures.png : Icône service état des cultures
-# - service_solutions.png : Icône service solutions agricoles
-# - service_prevention.png : Icône service prévenir maladies
+# Images de l'application
+
+Aucune illustration PNG n'est encore livrée : les écrans (démarrage, accueil,
+connexion, inscription, bienvenue) affichent des icônes Material à la place.
+
+Pour ajouter une illustration validée :
+
+1. déposer le fichier dans ce dossier ;
+2. remplacer l'icône correspondante par `Image.asset(...)` dans l'écran ;
+3. vérifier que le test `test/app/small_screen_layout_test.dart` passe toujours.
+
+Seules les photos libres de droits ou produites par l'équipe sont acceptées
+(voir `docs/donnees/consentement-photos.md`).

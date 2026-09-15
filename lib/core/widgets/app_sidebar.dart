@@ -1,132 +1,96 @@
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../app/router.dart';
-import '../../../../app/theme/app_colors.dart';
-import '../../../../app/theme/app_spacing.dart';
-import '../../../../l10n/app_localizations.dart';
-import '../../../../core/ai/model_version_service.dart';
-import '../../../features/auth/presentation/providers/auth_provider.dart';
+import '../../app/router.dart';
+import '../../app/theme/app_colors.dart';
+import '../../app/theme/app_spacing.dart';
+import '../../l10n/app_localizations.dart';
+import '../ai/model_version_service.dart';
+import '../../features/auth/presentation/providers/auth_provider.dart';
 
-final sidebarControllerProvider = StateProvider<bool>((ref) => false);
-
-class AppSidebarOverlay extends ConsumerWidget {
-  const AppSidebarOverlay({super.key, required this.child});
-  final Widget child;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final isOpen = ref.watch(sidebarControllerProvider);
-
-    return Stack(
-      children: [
-        AnimatedContainer(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-          child: isOpen
-              ? BackdropFilter(
-                  filter: ImageFilter.blur(sigmaX: 5, sigmaY: 5),
-                  child: AbsorbPointer(absorbing: true, child: child),
-                )
-              : child,
-        ),
-        if (isOpen)
-          Positioned.fill(
-            child: GestureDetector(
-              onTap: () => ref.read(sidebarControllerProvider.notifier).state = false,
-              child: Container(color: Colors.black.withAlpha(100)),
-            ),
-          ),
-        AnimatedPositioned(
-          duration: const Duration(milliseconds: 300),
-          curve: Curves.easeOut,
-          left: isOpen ? 0 : -300,
-          top: 0,
-          bottom: 0,
-          width: 300,
-          child: const _SidebarContent(),
-        ),
-      ],
-    );
-  }
+/// Ouvre le menu de l'application.
+///
+/// Les écrans du shell (accueil, journal) ont leur propre Scaffold imbriqué
+/// dans celui de MainLayout : on ouvre le tiroir du Scaffold le plus externe
+/// qui en déclare un, pour qu'il recouvre aussi la barre de navigation.
+void openAppMenu(BuildContext context) {
+  ScaffoldState? target;
+  context.visitAncestorElements((element) {
+    if (element is StatefulElement) {
+      final state = element.state;
+      if (state is ScaffoldState && state.hasDrawer) target = state;
+    }
+    return true;
+  });
+  target?.openDrawer();
 }
 
-class _SidebarContent extends ConsumerWidget {
-  const _SidebarContent();
+/// Menu latéral unique de l'application (remplace HomeDrawer et
+/// AppSidebarOverlay, tâche P1.10). C'est un [Drawer] Material : les
+/// ListTile disposent de l'ancêtre Material qui leur manquait.
+class AppMenuDrawer extends ConsumerWidget {
+  const AppMenuDrawer({super.key});
 
-  void _navigate(BuildContext context, String route, WidgetRef ref) {
-    ref.read(sidebarControllerProvider.notifier).state = false;
+  void _navigate(BuildContext context, String route) {
+    Scaffold.of(context).closeDrawer();
     context.go(route);
   }
 
   Future<void> _logout(BuildContext context, WidgetRef ref) async {
-    ref.read(sidebarControllerProvider.notifier).state = false;
+    // Le tiroir est démonté une fois refermé : on garde le routeur avant l'attente.
+    final router = GoRouter.of(context);
+    Scaffold.of(context).closeDrawer();
     await ref.read(authNotifierProvider.notifier).logout();
-    if (context.mounted) context.go(AppRoutes.splash);
+    router.go(AppRoutes.splash);
   }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return SafeArea(
-      child: Container(
-        color: AppColors.background,
+    final loc = AppLocalizations.of(context);
+    return Drawer(
+      backgroundColor: AppColors.background,
+      child: SafeArea(
         child: Column(
           children: [
-            _SidebarHeader(),
+            const _MenuHeader(),
             const SizedBox(height: AppSpacing.sm),
             Expanded(
               child: ListView(
                 padding: EdgeInsets.zero,
                 children: [
-                  _SidebarMenuItem(
+                  _MenuItem(
                     icon: Icons.home_outlined,
-                    title: AppLocalizations.of(context).drawerHomeTitle,
-                    subtitle: AppLocalizations.of(context).drawerHomeSubtitle,
-                    onTap: () => _navigate(context, AppRoutes.home, ref),
+                    title: loc.drawerHomeTitle,
+                    subtitle: loc.drawerHomeSubtitle,
+                    onTap: () => _navigate(context, AppRoutes.home),
                   ),
-                  const _SidebarMenuDivider(),
-                  _SidebarMenuItem(
+                  const _MenuDivider(),
+                  _MenuItem(
                     icon: Icons.map_outlined,
-                    title: AppLocalizations.of(context).drawerPlotsTitle,
-                    subtitle: AppLocalizations.of(context).drawerPlotsSubtitle,
-                    onTap: () => _navigate(context, AppRoutes.myParcelles, ref),
+                    title: loc.drawerPlotsTitle,
+                    subtitle: loc.drawerPlotsSubtitle,
+                    onTap: () => _navigate(context, AppRoutes.myParcelles),
                   ),
-                  const _SidebarMenuDivider(),
-                  _SidebarMenuItem(
-                    icon: Icons.search_outlined,
-                    title: AppLocalizations.of(context).drawerHistoryTitle,
-                    subtitle: AppLocalizations.of(context).drawerHistorySubtitle,
-                    onTap: () => _navigate(context, AppRoutes.journal, ref),
+                  const _MenuDivider(),
+                  _MenuItem(
+                    icon: Icons.history,
+                    title: loc.drawerHistoryTitle,
+                    subtitle: loc.drawerHistorySubtitle,
+                    onTap: () => _navigate(context, AppRoutes.journal),
                   ),
-                  const _SidebarMenuDivider(),
-                  _SidebarMenuItem(
+                  const _MenuDivider(),
+                  _MenuItem(
                     icon: Icons.menu_book_outlined,
-                    title: 'Guides des maladies',
-                    subtitle: 'Fiches d\'identification hors ligne',
-                    onTap: () => _navigate(context, AppRoutes.guides, ref),
+                    title: loc.drawerGuidesTitle,
+                    subtitle: loc.drawerGuidesSubtitle,
+                    onTap: () => _navigate(context, AppRoutes.guides),
                   ),
-                  const _SidebarMenuDivider(),
-                  _SidebarMenuItem(
+                  const _MenuDivider(),
+                  _MenuItem(
                     icon: Icons.settings_outlined,
-                    title: 'Paramètres',
-                    subtitle: 'Langue et préférences',
-                    onTap: () => _navigate(context, AppRoutes.settings, ref),
-                  ),
-                  const _SidebarMenuDivider(),
-                  const SizedBox(height: AppSpacing.sm),
-                  Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 24),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(AppLocalizations.of(context).drawerStorage,
-                            style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-                        const SizedBox(height: 4),
-                        Text(AppLocalizations.of(context).drawerMemoryUsed,
-                            style: const TextStyle(fontSize: 13, color: AppColors.textSecondary)),
-                      ],
-                    ),
+                    title: loc.drawerSettingsTitle,
+                    subtitle: loc.drawerSettingsSubtitle,
+                    onTap: () => _navigate(context, AppRoutes.settings),
                   ),
                   const SizedBox(height: AppSpacing.lg),
                 ],
@@ -137,12 +101,22 @@ class _SidebarContent extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               child: ListTile(
                 leading: Container(
-                  width: 36, height: 36,
-                  decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(8)),
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryLight,
+                    borderRadius: BorderRadius.circular(8),
+                  ),
                   child: const Icon(Icons.logout, color: AppColors.error, size: 20),
                 ),
-                title: Text(AppLocalizations.of(context).drawerLogout,
-                    style: const TextStyle(fontSize: 16, color: AppColors.error, fontWeight: FontWeight.w500)),
+                title: Text(
+                  loc.drawerLogout,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    color: AppColors.error,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
                 onTap: () => _logout(context, ref),
               ),
             ),
@@ -153,9 +127,12 @@ class _SidebarContent extends ConsumerWidget {
   }
 }
 
-class _SidebarHeader extends StatelessWidget {
+class _MenuHeader extends StatelessWidget {
+  const _MenuHeader();
+
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.fromLTRB(24, 24, 24, 16),
@@ -165,9 +142,23 @@ class _SidebarHeader extends StatelessWidget {
         children: [
           Row(
             children: [
-              const Text('AgriMada', style: TextStyle(fontSize: 28, fontWeight: FontWeight.w900, color: AppColors.textOnPrimary)),
+              const Text(
+                'AgriMada',
+                style: TextStyle(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w900,
+                  color: AppColors.textOnPrimary,
+                ),
+              ),
               const SizedBox(width: 6),
-              Container(width: 8, height: 8, decoration: const BoxDecoration(color: AppColors.textOnPrimary, shape: BoxShape.circle)),
+              Container(
+                width: 8,
+                height: 8,
+                decoration: const BoxDecoration(
+                  color: AppColors.textOnPrimary,
+                  shape: BoxShape.circle,
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 16),
@@ -181,19 +172,27 @@ class _SidebarHeader extends StatelessWidget {
                     return Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text(AppLocalizations.of(context).drawerLastUpdate(date),
-                            style: const TextStyle(fontSize: 13, color: AppColors.textOnPrimary)),
+                        Text(
+                          loc.drawerLastUpdate(date),
+                          style: const TextStyle(fontSize: 13, color: AppColors.textOnPrimary),
+                        ),
                         const SizedBox(height: 2),
-                        Text(AppLocalizations.of(context).drawerEmbeddedModel,
-                            style: const TextStyle(fontSize: 13, color: AppColors.textOnPrimary)),
+                        Text(
+                          loc.drawerEmbeddedModel,
+                          style: const TextStyle(fontSize: 13, color: AppColors.textOnPrimary),
+                        ),
                       ],
                     );
                   },
                 ),
               ),
               Container(
-                width: 36, height: 36,
-                decoration: BoxDecoration(color: AppColors.textOnPrimary.withAlpha(30), borderRadius: BorderRadius.circular(8)),
+                width: 36,
+                height: 36,
+                decoration: BoxDecoration(
+                  color: AppColors.textOnPrimary.withAlpha(30),
+                  borderRadius: BorderRadius.circular(8),
+                ),
                 child: const Icon(Icons.memory_outlined, color: AppColors.textOnPrimary, size: 20),
               ),
             ],
@@ -204,8 +203,14 @@ class _SidebarHeader extends StatelessWidget {
   }
 }
 
-class _SidebarMenuItem extends StatelessWidget {
-  const _SidebarMenuItem({required this.icon, required this.title, required this.subtitle, required this.onTap});
+class _MenuItem extends StatelessWidget {
+  const _MenuItem({
+    required this.icon,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
   final IconData icon;
   final String title;
   final String subtitle;
@@ -217,12 +222,26 @@ class _SidebarMenuItem extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
       child: ListTile(
         leading: Container(
-          width: 36, height: 36,
-          decoration: BoxDecoration(color: AppColors.primaryLight, borderRadius: BorderRadius.circular(8)),
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: AppColors.primaryLight,
+            borderRadius: BorderRadius.circular(8),
+          ),
           child: Icon(icon, color: AppColors.primary, size: 20),
         ),
-        title: Text(title, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: AppColors.textPrimary)),
-        subtitle: Text(subtitle, style: const TextStyle(fontSize: 12, color: AppColors.textSecondary)),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+            color: AppColors.textPrimary,
+          ),
+        ),
+        subtitle: Text(
+          subtitle,
+          style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+        ),
         onTap: onTap,
         contentPadding: const EdgeInsets.symmetric(horizontal: 4),
       ),
@@ -230,11 +249,14 @@ class _SidebarMenuItem extends StatelessWidget {
   }
 }
 
-class _SidebarMenuDivider extends StatelessWidget {
-  const _SidebarMenuDivider();
+class _MenuDivider extends StatelessWidget {
+  const _MenuDivider();
 
   @override
   Widget build(BuildContext context) {
-    return const Padding(padding: EdgeInsets.symmetric(horizontal: 16), child: Divider(height: 1, thickness: 1));
+    return const Padding(
+      padding: EdgeInsets.symmetric(horizontal: 16),
+      child: Divider(height: 1, thickness: 1),
+    );
   }
 }

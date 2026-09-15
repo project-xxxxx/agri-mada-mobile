@@ -73,15 +73,9 @@ class _SplashContent extends StatelessWidget {
       mainAxisSize: MainAxisSize.min,
       children: [
         Semantics(
-          label: 'AgriMada logo',
+          label: AppLocalizations.of(context).splashLogoSemantics,
           image: true,
-          child: Image.asset(
-            'assets/images/splash_rice.png',
-            width: 180,
-            height: 237,
-            fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => const _RicePlaceholder(),
-          ),
+          child: const _RicePlaceholder(),
         ),
         const SizedBox(height: AppSpacing.lg),
         const _AgriMadaLogo(),

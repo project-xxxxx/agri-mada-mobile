@@ -15,13 +15,14 @@ class WelcomeScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context);
     final bootstrapAsync = ref.watch(appBootstrapProvider);
     final snapshot = bootstrapAsync.valueOrNull;
     final prenom = snapshot?.profile['prenom'];
     final modelVersion = snapshot?.modelVersion?.version;
     final iaStatus = snapshot?.isAiReady == true
-        ? 'IA hors-ligne prete'
-        : 'Mode degrade sans IA';
+        ? loc.splashStatusAiReady
+        : loc.splashStatusAiUnavailable;
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -47,7 +48,7 @@ class WelcomeScreen extends ConsumerWidget {
                         Padding(
                           padding: const EdgeInsets.only(top: AppSpacing.sm),
                           child: Text(
-                            'Bonjour $prenom',
+                            loc.homeHelloUser(prenom),
                             style: AppTypography.bodyMedium.copyWith(
                               color: AppColors.primary,
                             ),
@@ -59,7 +60,7 @@ class WelcomeScreen extends ConsumerWidget {
                         child: Text(
                           modelVersion == null
                               ? iaStatus
-                              : '$iaStatus • Modele v$modelVersion',
+                              : '$iaStatus • ${loc.welcomeModelVersion(modelVersion)}',
                           style: AppTypography.bodySmall,
                           textAlign: TextAlign.center,
                         ),
@@ -130,52 +131,33 @@ class _WelcomeHero extends StatelessWidget {
               shape: BoxShape.circle,
               color: AppColors.primaryLight,
             ),
-            child: ClipOval(
-              child: Image.asset(
-                'assets/images/welcome_hero.png',
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  color: AppColors.primaryLight,
-                  child: const Icon(
-                    Icons.person,
-                    size: 120,
-                    color: AppColors.primary,
-                  ),
-                ),
-              ),
+            // Pas encore d'illustration validée : icône plutôt qu'un fichier
+            // image absent du dépôt (tâche P1.10).
+            child: const Icon(
+              Icons.grass,
+              size: 120,
+              color: AppColors.primary,
             ),
           ),
           const Positioned(
             top: -10,
             right: -10,
-            child: _DecorativeCircle(
-              size: 38,
-              imagePath: 'assets/images/deco_rice_1.png',
-            ),
+            child: _DecorativeCircle(size: 38),
           ),
           const Positioned(
             bottom: -20,
             left: -20,
-            child: _DecorativeCircle(
-              size: 46,
-              imagePath: 'assets/images/deco_rice_2.png',
-            ),
+            child: _DecorativeCircle(size: 46),
           ),
           const Positioned(
             bottom: 10,
             right: -10,
-            child: _DecorativeCircle(
-              size: 28,
-              imagePath: 'assets/images/deco_rice_3.png',
-            ),
+            child: _DecorativeCircle(size: 28),
           ),
           const Positioned(
             top: 30,
             left: -15,
-            child: _DecorativeCircle(
-              size: 32,
-              imagePath: 'assets/images/deco_rice_4.png',
-            ),
+            child: _DecorativeCircle(size: 32),
           ),
         ],
       ),
@@ -184,13 +166,9 @@ class _WelcomeHero extends StatelessWidget {
 }
 
 class _DecorativeCircle extends StatelessWidget {
-  const _DecorativeCircle({
-    required this.size,
-    required this.imagePath,
-  });
+  const _DecorativeCircle({required this.size});
 
   final double size;
-  final String imagePath;
 
   @override
   Widget build(BuildContext context) {
@@ -199,18 +177,10 @@ class _DecorativeCircle extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
+        color: AppColors.primaryLight,
         border: Border.all(
-          color: AppColors.primaryLight,
+          color: AppColors.background,
           width: 2,
-        ),
-      ),
-      child: ClipOval(
-        child: Image.asset(
-          imagePath,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => Container(
-            color: AppColors.primaryLight,
-          ),
         ),
       ),
     );

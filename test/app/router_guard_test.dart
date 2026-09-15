@@ -27,7 +27,7 @@ void main() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(secureStorageChannel,
             (MethodCall call) async {
-      final args = call.arguments as Map<String, dynamic>;
+      final args = Map<String, dynamic>.from(call.arguments as Map);
       switch (call.method) {
         case 'write':
           storage[args['key'] as String] =
@@ -122,7 +122,7 @@ void main() {
       await tester.pumpAndSettle();
 
       // Assert
-      expect(find.text('Mot de passe oublie ?'), findsOneWidget);
+      expect(find.text('Mot de passe oublié ?'), findsOneWidget);
       container.dispose();
     });
 

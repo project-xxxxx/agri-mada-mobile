@@ -7,13 +7,13 @@ import '../../../../app/router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
-import '../../../../core/sync/presentation/sync_status_indicator.dart';
+import '../../../../core/providers/connectivity_provider.dart';
 import '../../../../core/providers/locale_provider.dart';
+import '../../../../core/providers/tflite_provider.dart';
+import '../../../../core/sync/presentation/sync_status_indicator.dart';
+import '../../../../core/widgets/app_sidebar.dart';
 import '../../../auth/presentation/providers/session_provider.dart';
 import '../../../journal/presentation/providers/journal_provider.dart';
-import '../../../../core/sync/providers/sync_provider.dart';
-import '../../../../core/widgets/app_sidebar.dart';
-import 'home_drawer.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -79,10 +79,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
 
-    return AppSidebarOverlay(
-      child: Scaffold(
-        drawer: const HomeDrawer(),
-        backgroundColor: AppColors.scaffoldBackground,
+    return Scaffold(
+      backgroundColor: AppColors.scaffoldBackground,
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
@@ -95,25 +93,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildAnimatedItem(
-                        _HomeHeader(
-                          onMenuTap: () =>
-                              ref.read(sidebarControllerProvider.notifier).state = true,
-                        ),
-                        0),
-                    const SizedBox(height: AppSpacing.md),
-                    _buildAnimatedItem(const _SearchBar(), 1),
+                    _buildAnimatedItem(const _HomeHeader(), 0),
                     const SizedBox(height: AppSpacing.lg),
-                    _buildAnimatedItem(const _SummaryCard(), 2),
+                    _buildAnimatedItem(const _SummaryCard(), 1),
                     const SizedBox(height: AppSpacing.lg),
                     _buildAnimatedItem(
                         Text(
                           loc.homeServicesTitle,
                           style: AppTypography.headlineMedium,
                         ),
-                        3),
+                        2),
                     const SizedBox(height: AppSpacing.md),
-                    _buildAnimatedItem(const _ServicesGrid(), 4),
+                    _buildAnimatedItem(const _ServicesGrid(), 3),
                     const SizedBox(height: 100),
                   ],
                 ),
@@ -122,30 +113,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
           ],
         ),
       ),
-    ),
     );
   }
 }
 
 class _HomeHeader extends ConsumerWidget {
-  const _HomeHeader({required this.onMenuTap});
-
-  final VoidCallback onMenuTap;
+  const _HomeHeader();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final loc = AppLocalizations.of(context);
-    final syncState = ref.watch(syncNotifierProvider);
-    final locale = ref.watch(localeProvider);
 
     final menuButton = Semantics(
       button: true,
       label: loc.homeMenuSemantics,
       child: GestureDetector(
-        onTap: onMenuTap,
+        onTap: () => openAppMenu(context),
         child: Container(
-          width: 40,
-          height: 40,
+          width: 48,
+          height: 48,
           decoration: BoxDecoration(
             color: AppColors.cardBackground,
             borderRadius: BorderRadius.circular(AppSpacing.sm),
@@ -157,7 +143,7 @@ class _HomeHeader extends ConsumerWidget {
               ),
             ],
           ),
-          child: const Icon(Icons.menu, color: AppColors.textPrimary, size: 20),
+          child: const Icon(Icons.menu, color: AppColors.textPrimary, size: 22),
         ),
       ),
     );
@@ -191,15 +177,7 @@ class _HomeHeader extends ConsumerWidget {
       },
     );
 
-    final actions = _HomeHeaderActions(
-      syncState: syncState,
-      locale: locale,
-      offlineLabel: loc.homeOfflineMode,
-      onLocaleSelected: (value) {
-        ref.read(localeProvider.notifier).setLocale(Locale(value));
-      },
-      onHelpTap: () => context.push('${AppRoutes.onboarding}?mode=help'),
-    );
+    const actions = _HomeHeaderActions();
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -217,7 +195,7 @@ class _HomeHeader extends ConsumerWidget {
                 ],
               ),
               const SizedBox(height: AppSpacing.xs),
-              Align(
+              const Align(
                 alignment: Alignment.centerRight,
                 child: actions,
               ),
@@ -231,7 +209,7 @@ class _HomeHeader extends ConsumerWidget {
             const SizedBox(width: AppSpacing.sm),
             Expanded(child: greeting),
             const SizedBox(width: AppSpacing.sm),
-            Flexible(
+            const Flexible(
               child: Align(
                 alignment: Alignment.centerRight,
                 child: actions,
@@ -244,155 +222,94 @@ class _HomeHeader extends ConsumerWidget {
   }
 }
 
-class _HomeHeaderActions extends StatelessWidget {
-  const _HomeHeaderActions({
-    required this.syncState,
-    required this.locale,
-    required this.offlineLabel,
-    required this.onLocaleSelected,
-    required this.onHelpTap,
-  });
-
-  final SyncState syncState;
-  final Locale locale;
-  final String offlineLabel;
-  final ValueChanged<String> onLocaleSelected;
-  final VoidCallback onHelpTap;
+class _HomeHeaderActions extends ConsumerWidget {
+  const _HomeHeaderActions();
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context);
+    final locale = ref.watch(localeProvider);
+    // null tant que l'état du réseau est inconnu : pas de badge plutôt qu'un faux.
+    final isOnline = ref.watch(isOnlineProvider).valueOrNull;
+
     return Wrap(
-      spacing: AppSpacing.sm,
+      spacing: AppSpacing.xs,
       runSpacing: AppSpacing.xs,
       crossAxisAlignment: WrapCrossAlignment.center,
       alignment: WrapAlignment.end,
       children: [
-        Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const SyncStatusIndicator(),
-            if (syncState is! SyncIdle) const SizedBox(width: AppSpacing.sm),
-            const Icon(Icons.wifi_off, color: AppColors.primary, size: 18),
-            const SizedBox(width: 4),
-            Text(
-              offlineLabel,
-              style: AppTypography.caption.copyWith(
-                color: AppColors.primary,
+        const SyncStatusIndicator(),
+        if (isOnline == false)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.wifi_off, color: AppColors.textSecondary, size: 18),
+              const SizedBox(width: 4),
+              Text(
+                loc.homeOfflineMode,
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.textSecondary,
+                ),
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
         PopupMenuButton<String>(
           initialValue: locale.languageCode,
-          onSelected: onLocaleSelected,
+          onSelected: (value) {
+            ref.read(localeProvider.notifier).setLocale(Locale(value));
+          },
           itemBuilder: (_) => const [
             PopupMenuItem(value: 'fr', child: Text('FR')),
             PopupMenuItem(value: 'mg', child: Text('MG')),
           ],
-          child: Container(
-            padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.xs,
-              vertical: 2,
-            ),
-            decoration: BoxDecoration(
-              border: Border.all(color: AppColors.primary),
-              borderRadius: BorderRadius.circular(AppSpacing.xs),
-            ),
-            child: Text(
-              locale.languageCode.toUpperCase(),
-              style: AppTypography.caption.copyWith(color: AppColors.primary),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: AppSpacing.xs,
+                ),
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.primary),
+                  borderRadius: BorderRadius.circular(AppSpacing.xs),
+                ),
+                child: Text(
+                  locale.languageCode.toUpperCase(),
+                  style: AppTypography.caption.copyWith(color: AppColors.primary),
+                ),
+              ),
             ),
           ),
         ),
         Semantics(
           button: true,
-          label: 'Aide',
+          label: loc.homeHelpSemantics,
           child: GestureDetector(
-            onTap: onHelpTap,
-            child: Container(
-              width: 30,
-              height: 30,
-              decoration: BoxDecoration(
-                color: AppColors.primaryLight,
-                borderRadius: BorderRadius.circular(AppSpacing.xs),
-              ),
-              alignment: Alignment.center,
-              child: Text(
-                '?',
-                style: AppTypography.bodyMedium.copyWith(
-                  color: AppColors.primary,
-                  fontWeight: FontWeight.w700,
-                ),
-              ),
-            ),
-          ),
-        ),
-      ],
-    );
-  }
-}
-
-class _SearchBar extends StatelessWidget {
-  const _SearchBar();
-
-  @override
-  Widget build(BuildContext context) {
-    final loc = AppLocalizations.of(context);
-    return Row(
-      children: [
-        Expanded(
-          child: Container(
-            height: 49,
-            decoration: BoxDecoration(
-              color: AppColors.cardBackground,
-              borderRadius: BorderRadius.circular(AppSpacing.sm),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha(15),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                const SizedBox(width: AppSpacing.md),
-                const Icon(Icons.search,
-                    color: AppColors.textSecondary, size: 18),
-                const SizedBox(width: AppSpacing.sm),
-                Expanded(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => context.push('${AppRoutes.onboarding}?mode=help'),
+            child: SizedBox(
+              width: 48,
+              height: 48,
+              child: Center(
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryLight,
+                    borderRadius: BorderRadius.circular(AppSpacing.xs),
+                  ),
+                  alignment: Alignment.center,
                   child: Text(
-                    loc.homeSearchPlaceholder,
-                    style: AppTypography.caption,
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
+                    '?',
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
                   ),
                 ),
-              ],
-            ),
-          ),
-        ),
-        const SizedBox(width: AppSpacing.sm),
-        Container(
-          height: 49,
-          width: 49,
-          decoration: BoxDecoration(
-            color: AppColors.primary,
-            borderRadius: BorderRadius.circular(AppSpacing.sm),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withAlpha(50),
-                blurRadius: 8,
-                offset: const Offset(0, 2),
               ),
-            ],
-          ),
-          child: IconButton(
-            icon: const Icon(Icons.tune, color: AppColors.textOnPrimary),
-            onPressed: () {
-              // Action pour le filtre (Nom, Culture, Date)
-            },
-            tooltip: 'Filtre',
+            ),
           ),
         ),
       ],
@@ -433,27 +350,42 @@ class _SummaryCard extends StatelessWidget {
                       fontWeight: FontWeight.w600,
                     ),
                     maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const Spacer(),
-                  Row(
-                    children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: AppColors.primary,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                      Text(
-                        loc.homeSystemReady,
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
+                  // Reflète l'état réel du modèle embarqué (tâche P1.10).
+                  Consumer(
+                    builder: (context, ref, _) {
+                      final isAiReady = ref.watch(isTFLiteReadyProvider);
+                      final color =
+                          isAiReady ? AppColors.primary : AppColors.warning;
+                      return Row(
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: color,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.xs),
+                          Expanded(
+                            child: Text(
+                              isAiReady
+                                  ? loc.homeSystemReady
+                                  : loc.homeSystemAiUnavailable,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.bodySmall.copyWith(
+                                color: color,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                   const SizedBox(height: AppSpacing.xs),
                   Consumer(
@@ -463,6 +395,8 @@ class _SummaryCard extends StatelessWidget {
                       return Text(
                         loc.homeRegisteredPlots(nb),
                         style: AppTypography.bodySmall,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       );
                     },
                   ),
@@ -475,18 +409,11 @@ class _SummaryCard extends StatelessWidget {
               topRight: Radius.circular(AppSpacing.cardRadius),
               bottomRight: Radius.circular(AppSpacing.cardRadius),
             ),
-            child: Image.asset(
-              'assets/images/rice_summary.png',
+            child: Container(
               width: 128,
-              height: 140,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                width: 128,
-                height: 140,
-                color: AppColors.primaryLight,
-                child:
-                    const Icon(Icons.grass, color: AppColors.primary, size: 48),
-              ),
+              height: double.infinity,
+              color: AppColors.primaryLight,
+              child: const Icon(Icons.grass, color: AppColors.primary, size: 48),
             ),
           ),
         ],
@@ -513,29 +440,25 @@ class _ServicesGrid extends StatelessWidget {
         _ServiceCard(
           title: loc.homeServicePlotsTitle,
           description: loc.homeServicePlotsDescription,
-          iconPath: 'assets/images/service_parcelles.png',
-          iconFallback: Icons.map_outlined,
+          icon: Icons.map_outlined,
           onTap: () => context.go(AppRoutes.myParcelles),
         ),
         _ServiceCard(
           title: loc.homeServiceCropsTitle,
           description: loc.homeServiceCropsDescription,
-          iconPath: 'assets/images/service_cultures.png',
-          iconFallback: Icons.bar_chart_outlined,
+          icon: Icons.bar_chart_outlined,
           onTap: () => context.go(AppRoutes.journal),
         ),
         _ServiceCard(
           title: loc.homeServiceSolutionsTitle,
           description: loc.homeServiceSolutionsDescription,
-          iconPath: 'assets/images/service_solutions.png',
-          iconFallback: Icons.science_outlined,
+          icon: Icons.science_outlined,
           onTap: () => context.go(AppRoutes.guides),
         ),
         _ServiceCard(
           title: loc.homeServicePreventionTitle,
           description: loc.homeServicePreventionDescription,
-          iconPath: 'assets/images/service_prevention.png',
-          iconFallback: Icons.health_and_safety_outlined,
+          icon: Icons.health_and_safety_outlined,
           onTap: () => context.go(AppRoutes.prevention),
         ),
       ],
@@ -547,15 +470,13 @@ class _ServiceCard extends StatelessWidget {
   const _ServiceCard({
     required this.title,
     required this.description,
-    required this.iconPath,
-    required this.iconFallback,
+    required this.icon,
     this.onTap,
   });
 
   final String title;
   final String description;
-  final String iconPath;
-  final IconData iconFallback;
+  final IconData icon;
   final VoidCallback? onTap;
 
   @override
@@ -578,17 +499,7 @@ class _ServiceCard extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Image.asset(
-              iconPath,
-              width: 64,
-              height: 50,
-              fit: BoxFit.contain,
-              errorBuilder: (_, __, ___) => Icon(
-                iconFallback,
-                color: AppColors.primary,
-                size: 40,
-              ),
-            ),
+            Icon(icon, color: AppColors.primary, size: 40),
             const SizedBox(height: AppSpacing.sm),
             Text(
               title,
@@ -596,6 +507,7 @@ class _ServiceCard extends StatelessWidget {
                 fontWeight: FontWeight.w600,
               ),
               maxLines: 2,
+              overflow: TextOverflow.ellipsis,
             ),
             const SizedBox(height: AppSpacing.xs),
             Expanded(

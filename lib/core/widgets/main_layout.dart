@@ -13,13 +13,12 @@ class MainLayout extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    return AppSidebarOverlay(
-      child: Scaffold(
-        body: child,
-        floatingActionButton: _PulsatingScanFab(onTap: () => context.go(AppRoutes.scanning)),
-        floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-        bottomNavigationBar: const _AppBottomNav(),
-      ),
+    return Scaffold(
+      drawer: const AppMenuDrawer(),
+      body: child,
+      floatingActionButton: _PulsatingScanFab(onTap: () => context.go(AppRoutes.scanning)),
+      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
+      bottomNavigationBar: const _AppBottomNav(),
     );
   }
 }
@@ -39,10 +38,12 @@ class _PulsatingScanFabState extends State<_PulsatingScanFab> with SingleTickerP
   @override
   void initState() {
     super.initState();
+    // Quelques pulsations pour attirer l'œil, puis arrêt : une animation
+    // infinie use la batterie des téléphones d'entrée de gamme.
     _controller = AnimationController(
       vsync: this,
       duration: const Duration(milliseconds: 1500),
-    )..repeat(reverse: true);
+    )..repeat(reverse: true, count: 3);
     _scaleAnimation = Tween<double>(begin: 1.0, end: 1.05).animate(
       CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
     );
@@ -149,14 +150,16 @@ class _NavItem extends StatelessWidget {
     final color = isSelected ? AppColors.primary : AppColors.textSecondary;
     return Semantics(
       button: true,
+      selected: isSelected,
       label: label,
       child: GestureDetector(
         onTap: onTap,
         behavior: HitTestBehavior.opaque,
-        child: AnimatedContainer(
-          duration: const Duration(milliseconds: 250),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(minWidth: 64, minHeight: 48),
           child: Column(
             mainAxisSize: MainAxisSize.min,
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(isSelected ? activeIcon : icon, color: color, size: 24),
               const SizedBox(height: 2),
