@@ -10,6 +10,7 @@ import 'package:pdf/widgets.dart' as pw;
 
 import '../../../../core/local_db/models/diagnostic_local.dart';
 import '../../../../core/local_db/models/parcelle_local.dart';
+import '../../../scan/domain/entities/declared_severity.dart';
 
 class ExportStrings {
   const ExportStrings({
@@ -25,6 +26,8 @@ class ExportStrings {
     required this.pdfAllPlots,
     required this.pdfPlotLabel,
     required this.pdfDateLabel,
+    required this.diseaseName,
+    required this.severityLabel,
   });
 
   final String csvDate;
@@ -39,6 +42,12 @@ class ExportStrings {
   final String pdfAllPlots;
   final String Function(String) pdfPlotLabel;
   final String Function(String) pdfDateLabel;
+
+  /// Nom traduit d'une étiquette du modèle.
+  final String Function(String label) diseaseName;
+
+  /// Libellé traduit d'une gravité déclarée (code de [DeclaredSeverity]).
+  final String Function(String? code) severityLabel;
 }
 
 class ExportService {
@@ -70,11 +79,11 @@ class ExportService {
         (diagnostic) => [
           _dateFormat.format(diagnostic.dateDiagnostic),
           _parcelleLabel(diagnostic.parcelleLocalId, parcellesById),
-          diagnostic.maladieDetectee,
-          _formatGravite(diagnostic.niveauGravite),
+          strings.diseaseName(diagnostic.maladieDetectee),
+          strings.severityLabel(diagnostic.niveauGravite),
           _confidencePercent(diagnostic.confiance),
           _normalizeText(diagnostic.recommandations),
-          '\u2014', // Pas de champ 'traitement appliqu\u00e9' dans le mod\u00e8le
+          '—', // Pas de champ 'traitement appliqué' dans le modèle
         ],
       ),
     ];
@@ -192,10 +201,10 @@ class ExportService {
                     _PdfBodyCell(
                       _parcelleLabel(diagnostic.parcelleLocalId, parcellesById),
                     ),
-                    _PdfBodyCell(diagnostic.maladieDetectee),
+                    _PdfBodyCell(strings.diseaseName(diagnostic.maladieDetectee)),
                     _PdfBodyCell(
-                      _formatGravite(diagnostic.niveauGravite),
-                      backgroundColor: _graviteColor(diagnostic.niveauGravite),
+                      strings.severityLabel(diagnostic.niveauGravite),
+                      backgroundColor: _severityColor(diagnostic.niveauGravite),
                       textColor: PdfColors.white,
                     ),
                     _PdfBodyCell(
@@ -203,7 +212,7 @@ class ExportService {
                       alignment: pw.Alignment.centerRight,
                     ),
                     _PdfBodyCell(_normalizeText(diagnostic.recommandations)),
-                    _PdfBodyCell('\u2014'), // Pas de champ 'traitement appliqu\u00e9'
+                    _PdfBodyCell('—'), // Pas de champ 'traitement appliqué'
                   ],
                 ),
               ),
@@ -238,13 +247,6 @@ class ExportService {
     return parcelle?.nomParcelle ?? 'Parcelle $parcelleId';
   }
 
-  String _formatGravite(String? gravite) => switch (gravite?.toLowerCase()) {
-        'sévère' || 'severe' => 'Sévère',
-        'modéré' || 'modere' => 'Modéré',
-        'faible' => 'Faible',
-        _ => 'Non précisée',
-      };
-
   String _confidencePercent(double? confidence) {
     final value = confidence == null ? 0 : (confidence * 100).round();
     return '$value';
@@ -255,11 +257,12 @@ class ExportService {
     return (text == null || text.isEmpty) ? '—' : text;
   }
 
-  PdfColor _graviteColor(String? value) => switch (value?.toLowerCase()) {
-        'faible' => PdfColors.green,
-        'modéré' || 'modere' => PdfColors.orange,
-        'sévère' || 'severe' => PdfColors.red,
-        _ => PdfColors.grey700,
+  PdfColor _severityColor(String? code) =>
+      switch (DeclaredSeverity.fromCode(code)) {
+        DeclaredSeverity.quelquesPlants => PdfColors.green,
+        DeclaredSeverity.moinsDunTiers => PdfColors.orange,
+        DeclaredSeverity.plusDunTiers => PdfColors.red,
+        null => PdfColors.grey700,
       };
 
   Future<pw.ImageProvider?> _loadLogo() async {

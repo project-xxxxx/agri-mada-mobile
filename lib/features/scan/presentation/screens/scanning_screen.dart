@@ -27,7 +27,6 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
   final _picker = ImagePicker();
   ParcelleLocal? _selectedParcelle;
   bool _isPickerActive = false;
-  bool _showParcelleSelector = true;
 
   @override
   void initState() {
@@ -42,7 +41,6 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
       if (preselected != null && mounted) {
         setState(() {
           _selectedParcelle = preselected;
-          _showParcelleSelector = false;
         });
         _pickAndAnalyze(ImageSource.camera);
         return;
@@ -65,7 +63,6 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
       }
       setState(() {
         _selectedParcelle = selected;
-        _showParcelleSelector = false;
       });
       _pickAndAnalyze(ImageSource.camera);
     }
@@ -97,7 +94,8 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
       return;
     }
 
-    if (_selectedParcelle == null) return;
+    final parcelle = _selectedParcelle;
+    if (parcelle == null) return;
 
     setState(() => _isPickerActive = true);
 
@@ -108,28 +106,18 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
         maxWidth: 1024,
       );
 
-      if (xFile == null) {
-        setState(() => _isPickerActive = false);
-        return;
-      }
+      if (xFile == null || !mounted) return;
 
-      final imageFile = File(xFile.path);
+      // Le résultat est affiché sans être enregistré : l'agriculteur décide (P1.7).
+      final result = await ref
+          .read(scanNotifierProvider.notifier)
+          .analyzeImage(File(xFile.path), parcelleLocalId: parcelle.id);
 
       if (!mounted) return;
-      final result = await ref.read(scanNotifierProvider.notifier).analyzeImage(imageFile);
-
       if (result == null) {
-        setState(() => _isPickerActive = false);
+        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(loc.scanIaUnavailable)));
         return;
       }
-
-      await ref.read(scanNotifierProvider.notifier).saveDiagnostic(
-            parcelleLocalId: _selectedParcelle!.id,
-            result: result,
-            imagePath: xFile.path,
-          );
-
-      if (!mounted) return;
       context.go(AppRoutes.scanResult);
     } finally {
       if (mounted) setState(() => _isPickerActive = false);
@@ -138,6 +126,7 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     final scanState = ref.watch(scanNotifierProvider);
     final isLoading = scanState is ScanLoading;
 
@@ -172,7 +161,7 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
                       borderRadius: BorderRadius.circular(30),
                     ),
                     child: Text(
-                      'ANNULER',
+                      loc.scanCancel,
                       style: AppTypography.bodyMedium.copyWith(
                         color: Colors.black87,
                         fontWeight: FontWeight.w600,
@@ -209,7 +198,7 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
               Navigator.of(context).pop();
               context.go(AppRoutes.myParcelles);
             },
-            child: const Text('Créer une parcelle'),
+            child: Text(loc.journalAddPlot),
           ),
         ],
       ),
@@ -217,6 +206,7 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
   }
 
   Future<ParcelleLocal?> _showParcelleSelectorDialog(List<ParcelleLocal> parcelles) {
+    final loc = AppLocalizations.of(context);
     return showModalBottomSheet<ParcelleLocal>(
       context: context,
       isDismissible: false,
@@ -231,7 +221,7 @@ class _ScanningScreenState extends ConsumerState<ScanningScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               const SizedBox(height: AppSpacing.md),
-              const Text('Sélectionnez la parcelle', style: AppTypography.headlineMedium),
+              Text(loc.scanSelectPlot, style: AppTypography.headlineMedium),
               const SizedBox(height: AppSpacing.md),
               Expanded(
                 child: ListView.builder(
@@ -270,13 +260,16 @@ class _CameraViewfinder extends StatelessWidget {
         border: Border.all(color: Colors.white.withAlpha(200), width: 3),
       ),
       child: isLoading
-          ? const Center(
+          ? Center(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  CircularProgressIndicator(color: Colors.white),
-                  SizedBox(height: 16),
-                  Text('Analyse en cours...', style: TextStyle(color: Colors.white)),
+                  const CircularProgressIndicator(color: Colors.white),
+                  const SizedBox(height: 16),
+                  Text(
+                    AppLocalizations.of(context).scanLoading,
+                    style: const TextStyle(color: Colors.white),
+                  ),
                 ],
               ),
             )

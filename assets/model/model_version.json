@@ -1,10 +1,9 @@
 {
   "version": "1.0.0",
-  "date": "2025-01-01",
+  "date": "2026-05-07",
   "maladies_supportees": [
-    "blast",
-    "helminthosporiose",
-    "bacteriose",
-    "tungro"
+    "Bacterial leaf blight",
+    "Brown spot",
+    "Leaf smut"
   ]
 }

@@ -4,10 +4,12 @@ import 'dart:io';
 
 import 'package:fpdart/fpdart.dart' as fpdart;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../../core/ai/diagnosis_certainty.dart';
 import '../../../../core/ai/tflite_service.dart';
 import '../../../../core/errors/failure.dart';
 import '../../../../core/local_db/models/diagnostic_local.dart';
 import '../../data/repositories/diagnostic_local_repository.dart';
+import '../../domain/entities/declared_severity.dart';
 import '../../domain/entities/diagnostic_result.dart' as domain;
 import '../../domain/repositories/scan_repository.dart';
 import '../../../../core/providers/tflite_provider.dart';
@@ -21,7 +23,6 @@ final lastDiagnosticResultProvider =
 final diagnosticRepositoryProvider = Provider<DiagnosticLocalRepository>(
   (_) => DiagnosticLocalRepository(),
 );
-
 
 /// Contrat domain du scan
 final scanRepositoryProvider = Provider<ScanRepository>(
@@ -81,25 +82,23 @@ class ScanError extends ScanState {
   final String message;
 }
 
+/// Issue d'une demande d'enregistrement du diagnostic affiché.
+enum SaveOutcome { saved, notAllowed, failed }
+
 /// Notifier principal du flux de scan
 class ScanNotifier extends StateNotifier<ScanState> {
-  ScanNotifier(this._analyzeImage, this._scanRepository, this._diagRepo)
+  ScanNotifier(this._analyzeImage, this._scanRepository)
       : super(const ScanState.initial());
 
   final AnalyzeImageUseCase _analyzeImage;
   final ScanRepository _scanRepository;
-  final DiagnosticLocalRepository _diagRepo;
-  
-  int? _lastParcelleLocalId;
-  domain.DiagnosticResult? _lastDiagnosticResult;
-  DiagnosticLocal? _lastSavedDiagnostic;
 
-  int? get lastParcelleLocalId => _lastParcelleLocalId;
-  domain.DiagnosticResult? get lastDiagnosticResult => _lastDiagnosticResult;
-  DiagnosticLocal? get lastSavedDiagnostic => _lastSavedDiagnostic;
-
-  /// Analyse une image et retourne le résultat
-  Future<domain.DiagnosticResult?> analyzeImage(File imageFile) async {
+  /// Analyse une image. Le résultat est affiché mais pas enregistré :
+  /// l'enregistrement se fait uniquement à la demande de l'agriculteur (P1.7).
+  Future<domain.DiagnosticResult?> analyzeImage(
+    File imageFile, {
+    int? parcelleLocalId,
+  }) async {
     state = const ScanState.loading();
     final result = await _analyzeImage(imageFile.path);
 
@@ -112,77 +111,33 @@ class ScanNotifier extends StateNotifier<ScanState> {
       };
       return null;
     }, (diagnostic) {
-      _lastDiagnosticResult = diagnostic;
-      state = ScanState.success(diagnostic);
-      return diagnostic;
+      final withPlot =
+          diagnostic.copyWith(parcelleId: parcelleLocalId?.toString());
+      state = ScanState.success(withPlot);
+      return withPlot;
     });
   }
 
-  /// Sauvegarde le diagnostic dans Isar (hors-ligne)
-  Future<DiagnosticLocal?> saveDiagnostic({
-    int? parcelleLocalId,
-    required domain.DiagnosticResult result,
-    String? imagePath,
-  }) async {
-    try {
-      final resolvedParcelleLocalId = parcelleLocalId ?? _lastParcelleLocalId;
-      if (resolvedParcelleLocalId == null) {
-        return null;
-      }
+  /// Enregistre le diagnostic affiché, avec la part de parcelle touchée
+  /// déclarée par l'agriculteur. Un résultat incertain n'est jamais enregistré.
+  Future<SaveOutcome> saveCurrent({DeclaredSeverity? severity}) async {
+    final current = state;
+    if (current is! ScanSuccess) return SaveOutcome.notAllowed;
 
-      final saveResult = await _scanRepository.save(
-        result.copyWith(
-          parcelleId: resolvedParcelleLocalId.toString(),
-          imagePath: imagePath ?? result.imagePath,
-        ),
-      );
-
-      return await saveResult.fold(
-        (_) async => null,
-        (_) async => _diagRepo.getLatestDiagnostic().then((diagnostic) {
-          if (diagnostic == null) {
-            return null;
-          }
-          _lastParcelleLocalId = resolvedParcelleLocalId;
-          _lastDiagnosticResult = result.copyWith(
-            parcelleId: resolvedParcelleLocalId.toString(),
-            imagePath: imagePath ?? result.imagePath,
-          );
-          _lastSavedDiagnostic = diagnostic;
-          return diagnostic;
-        }),
-      );
-    } catch (_) {
-      return null;
-    }
-  }
-
-  Future<DiagnosticLocal?> persistLastDiagnostic({String? imagePath}) async {
-    final existingSavedDiagnostic = _lastSavedDiagnostic;
-    if (existingSavedDiagnostic != null) {
-      return existingSavedDiagnostic;
+    final result = current.result;
+    if (result.certitude == DiagnosisCertainty.incertain ||
+        result.parcelleId == null) {
+      return SaveOutcome.notAllowed;
     }
 
-    final result = switch (state) {
-      ScanSuccess(:final result) => result,
-      _ => _lastDiagnosticResult,
-    };
-
-    if (result == null) {
-      return null;
-    }
-
-    return saveDiagnostic(
-      parcelleLocalId: _lastParcelleLocalId,
-      result: result,
-      imagePath: imagePath,
+    final saved = await _scanRepository.save(
+      result.copyWith(niveauGravite: severity?.code),
     );
+    return saved.isRight() ? SaveOutcome.saved : SaveOutcome.failed;
   }
 
+  /// Écarte le résultat affiché sans rien enregistrer.
   void reset() {
-    _lastParcelleLocalId = null;
-    _lastDiagnosticResult = null;
-    _lastSavedDiagnostic = null;
     state = const ScanState.initial();
   }
 }
@@ -203,17 +158,7 @@ class _ScanRepositoryAdapter implements ScanRepository {
 
     try {
       final result = await _tfliteService.analyzeImage(File(imagePath));
-      return fpdart.Right(
-        domain.DiagnosticResult(
-          culture: 'Riz',
-          maladieDetectee: result.maladieDetectee,
-          confiance: result.confiance,
-          imagePath: imagePath,
-          createdAt: DateTime.now(),
-          niveauGravite: result.niveauGravite,
-          recommandations: result.recommandations,
-        ),
-      );
+      return fpdart.Right(diagnosticFromInference(result, imagePath));
     } catch (e) {
       return fpdart.Left(ServerFailure(e.toString()));
     }
@@ -236,6 +181,5 @@ final scanNotifierProvider = StateNotifierProvider<ScanNotifier, ScanState>(
   (ref) => ScanNotifier(
     ref.watch(analyzeImageUseCaseProvider),
     ref.watch(scanRepositoryProvider),
-    ref.watch(diagnosticRepositoryProvider),
   ),
 );

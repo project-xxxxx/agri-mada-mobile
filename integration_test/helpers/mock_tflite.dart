@@ -21,8 +21,8 @@ MockTFLiteService buildMockTfliteService({
       return TFLiteInferenceResult(
         maladieDetectee: r.maladieDetectee,
         confiance: r.confiance,
-        niveauGravite: r.niveauGravite ?? 'modéré',
-        recommandations: r.recommandations,
+        classement: r.classement,
+        certitude: r.certitude,
       );
     });
   }

@@ -9,13 +9,13 @@
 
 import 'dart:io';
 
-
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
 import 'package:image/image.dart' as img;
 import 'package:tflite_flutter/tflite_flutter.dart';
 
 import '../utils/logger.dart';
+import 'diagnosis_certainty.dart';
 
 @visibleForTesting
 bool hasValidTfliteModelHeader(Uint8List buffer) {
@@ -36,17 +36,20 @@ class TFLiteNotInitializedException implements Exception {
 
 // ─── Résultat interne TFLite (type privé au service) ────────────────────────
 // Renommé depuis DiagnosticResult pour éviter la collision avec l'entité domain.
+// Le service ne décide ni de la gravité ni des conseils (tâches P1.1 et P1.3).
 class TFLiteInferenceResult {
   final String maladieDetectee;
   final double confiance;
-  final String niveauGravite;
-  final List<String> recommandations;
+
+  /// Les classes les plus probables, de la plus à la moins probable.
+  final List<ScoredLabel> classement;
+  final DiagnosisCertainty certitude;
 
   const TFLiteInferenceResult({
     required this.maladieDetectee,
     required this.confiance,
-    required this.niveauGravite,
-    required this.recommandations,
+    this.classement = const [],
+    this.certitude = DiagnosisCertainty.incertain,
   });
 }
 
@@ -213,62 +216,20 @@ class TFLiteService {
       outputList,
     );
 
-    // 5. Trouver le label avec le score le plus élevé
-    final scores = outputList[0];
-    double maxScore = 0;
-    int maxIndex = 0;
-    for (var i = 0; i < scores.length; i++) {
-      if (scores[i] > maxScore) {
-        maxScore = scores[i];
-        maxIndex = i;
-      }
-    }
-
-    final maladie = maxIndex < _labels.length ? _labels[maxIndex] : 'Inconnu';
-    final gravite = _determineGravite(maladie, maxScore);
-    final recommandations = _getRecommandations(maladie);
+    // 5. Classer les scores et en déduire la certitude (tâche P1.2).
+    //    La gravité n'est plus calculée ici : elle est déclarée par l'agriculteur.
+    final ranked = rankScores(outputList[0], _labels);
+    final best = ranked.isNotEmpty ? ranked.first : const ScoredLabel('Inconnu', 0);
 
     stopwatch.stop();
     lastInferenceTimeMs = stopwatch.elapsedMilliseconds;
 
     return TFLiteInferenceResult(
-      maladieDetectee: maladie,
-      confiance: maxScore,
-      niveauGravite: gravite,
-      recommandations: recommandations,
+      maladieDetectee: best.label,
+      confiance: best.score,
+      classement: ranked,
+      certitude: certaintyOf(ranked),
     );
-  }
-
-  String _determineGravite(String maladie, double confiance) {
-    if (maladie.toLowerCase() == 'healthy') return 'aucune';
-    if (confiance >= 0.85) return 'sévère';
-    if (confiance >= 0.60) return 'modéré';
-    return 'faible';
-  }
-
-  /// Retourne les identifiants de clés ARB des recommandations.
-  List<String> _getRecommandations(String maladie) {
-    return switch (maladie) {
-      'Bacterial leaf blight' => [
-          'scanRecBlbEvacuateWater',
-          'scanRecBlbApplyCopper',
-          'scanRecBlbAvoidNitrogen',
-          'scanRecBlbUseResistantVarieties',
-        ],
-      'Brown spot' => [
-          'scanRecBrownSpotFertilize',
-          'scanRecBrownSpotApplyFungicide',
-          'scanRecBrownSpotDrainage',
-          'scanRecBrownSpotAvoidStress',
-        ],
-      'Leaf smut' => [
-          'scanRecLeafSmutTreatSeeds',
-          'scanRecLeafSmutApplyFungicide',
-          'scanRecLeafSmutRemovePlants',
-          'scanRecLeafSmutRotation',
-        ],
-      _ => ['scanRecHealthy'],
-    };
   }
 
   void dispose() {

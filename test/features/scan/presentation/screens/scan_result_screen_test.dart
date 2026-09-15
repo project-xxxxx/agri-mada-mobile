@@ -1,15 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart' as fpdart;
 import 'package:go_router/go_router.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 
+import 'package:agri_mada/core/ai/diagnosis_certainty.dart';
 import 'package:agri_mada/core/errors/failure.dart';
-import 'package:agri_mada/core/local_db/models/diagnostic_local.dart';
-import 'package:agri_mada/features/scan/data/repositories/diagnostic_local_repository.dart';
 import 'package:agri_mada/features/scan/domain/entities/diagnostic_result.dart'
     as domain;
 import 'package:agri_mada/features/scan/domain/repositories/scan_repository.dart';
@@ -18,7 +16,12 @@ import 'package:agri_mada/features/scan/presentation/providers/scan_provider.dar
 import 'package:agri_mada/features/scan/presentation/screens/scan_result_screen.dart';
 import 'package:agri_mada/l10n/app_localizations.dart';
 
-class _StubScanRepository implements ScanRepository {
+class _RecordingScanRepository implements ScanRepository {
+  _RecordingScanRepository({this.failSave = false});
+
+  final bool failSave;
+  final saved = <domain.DiagnosticResult>[];
+
   @override
   Future<fpdart.Either<Failure, domain.DiagnosticResult>> analyze(
     String imagePath,
@@ -35,39 +38,20 @@ class _StubScanRepository implements ScanRepository {
   Future<fpdart.Either<Failure, fpdart.Unit>> save(
     domain.DiagnosticResult result,
   ) async {
-    return const fpdart.Right(fpdart.unit);
+    saved.add(result);
+    return failSave
+        ? const fpdart.Left(CacheFailure('echec'))
+        : const fpdart.Right(fpdart.unit);
   }
 }
 
-class _MockDiagnosticLocalRepository extends Mock
-    implements DiagnosticLocalRepository {}
-
-class _TestScanNotifier extends ScanNotifier {
-  _TestScanNotifier({
-    required domain.DiagnosticResult result,
-    required DiagnosticLocal? persistReturn,
-    DiagnosticLocal? lastSavedDiagnostic,
-  })  : _persistReturn = persistReturn,
-        _lastSavedDiagnostic = lastSavedDiagnostic,
-        super(
-          AnalyzeImageUseCase(_StubScanRepository()),
-          _StubScanRepository(),
-          _MockDiagnosticLocalRepository(),
-        ) {
+/// Notifier dont l'analyse est déjà terminée, sans moteur TFLite.
+class _SeededScanNotifier extends ScanNotifier {
+  _SeededScanNotifier(
+    _RecordingScanRepository repository,
+    domain.DiagnosticResult result,
+  ) : super(AnalyzeImageUseCase(repository), repository) {
     state = ScanState.success(result);
-  }
-
-  final DiagnosticLocal? _persistReturn;
-  final DiagnosticLocal? _lastSavedDiagnostic;
-  bool persistCalled = false;
-
-  @override
-  DiagnosticLocal? get lastSavedDiagnostic => _lastSavedDiagnostic;
-
-  @override
-  Future<DiagnosticLocal?> persistLastDiagnostic({String? imagePath}) async {
-    persistCalled = true;
-    return _persistReturn;
   }
 }
 
@@ -76,27 +60,27 @@ void main() {
 
   const shareChannel = MethodChannel('dev.fluttercommunity.plus/share');
 
-  DiagnosticLocal buildDiagnosticLocal(DateTime date) {
-    return DiagnosticLocal()
-      ..parcelleLocalId = 1
-      ..maladieDetectee = 'Leaf smut'
-      ..confiance = 0.88
-      ..niveauGravite = 'severe'
-      ..recommandations = 'Traiter les semences'
-      ..dateDiagnostic = date;
-  }
-
-  final tResult = domain.DiagnosticResult(
-    maladieDetectee: 'Leaf smut',
+  final probable = domain.DiagnosticResult(
+    maladieDetectee: 'Brown spot',
     confiance: 0.88,
-    niveauGravite: 'severe',
-    recommandations: ['Traiter les semences'],
     createdAt: DateTime(2026, 5, 13),
+    parcelleId: '1',
+    certitude: DiagnosisCertainty.probable,
+    classement: const [
+      ScoredLabel('Brown spot', 0.88),
+      ScoredLabel('Leaf smut', 0.08),
+    ],
+  );
+
+  final uncertain = probable.copyWith(
+    confiance: 0.41,
+    certitude: DiagnosisCertainty.incertain,
   );
 
   Future<void> pumpScreen(
     WidgetTester tester,
-    _TestScanNotifier notifier,
+    _RecordingScanRepository repository,
+    domain.DiagnosticResult result,
   ) async {
     final router = GoRouter(
       initialLocation: '/scan-result',
@@ -105,31 +89,24 @@ void main() {
           path: '/scan-result',
           builder: (context, state) => const ScanResultScreen(),
         ),
-        GoRoute(
-          path: '/journal',
-          builder: (context, state) => const Scaffold(
-            body: Center(child: Text('Journal Screen')),
+        for (final (path, label) in const [
+          ('/journal', 'Journal Screen'),
+          ('/scanning', 'Scanning Screen'),
+          ('/home', 'Home Screen'),
+        ])
+          GoRoute(
+            path: path,
+            builder: (context, state) => Scaffold(body: Center(child: Text(label))),
           ),
-        ),
-        GoRoute(
-          path: '/scanning',
-          builder: (context, state) => const Scaffold(
-            body: Center(child: Text('Scanning Screen')),
-          ),
-        ),
-        GoRoute(
-          path: '/home',
-          builder: (context, state) => const Scaffold(
-            body: Center(child: Text('Home Screen')),
-          ),
-        ),
       ],
     );
 
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
-          scanNotifierProvider.overrideWith((ref) => notifier),
+          scanNotifierProvider.overrideWith(
+            (ref) => _SeededScanNotifier(repository, result),
+          ),
         ],
         child: MaterialApp.router(
           routerConfig: router,
@@ -147,98 +124,90 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  Future<void> tapText(WidgetTester tester, String text) async {
+    await tester.ensureVisible(find.text(text));
+    await tester.tap(find.text(text));
+    await tester.pumpAndSettle();
+  }
+
   group('ScanResultScreen', () {
     tearDown(() {
       TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
           .setMockMethodCallHandler(shareChannel, null);
     });
 
-    testWidgets(
-      'bouton Partager appelle Share.share avec le texte attendu',
-      (tester) async {
-        // Arrange
-        MethodCall? shareCall;
-        TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
-            .setMockMethodCallHandler(shareChannel, (call) async {
-          shareCall = call;
-          return null;
-        });
+    testWidgets('affiche la maladie traduite et la certitude, sans produit ni badge « fiable »',
+        (tester) async {
+      await pumpScreen(tester, _RecordingScanRepository(), probable);
 
-        final notifier = _TestScanNotifier(
-          result: tResult,
-          persistReturn: buildDiagnosticLocal(DateTime(2026, 5, 13)),
-          lastSavedDiagnostic: buildDiagnosticLocal(DateTime(2026, 5, 13)),
-        );
+      expect(find.text('Helminthosporiose (tache brune)'), findsOneWidget);
+      expect(find.text('Diagnostic probable'), findsOneWidget);
+      expect(find.textContaining('fiable'), findsNothing);
+      expect(find.textContaining('L/ha'), findsNothing);
+      expect(find.textContaining('fongicide'), findsNothing);
+    });
 
-        await pumpScreen(tester, notifier);
+    testWidgets('un résultat incertain ne propose pas l\'enregistrement',
+        (tester) async {
+      await pumpScreen(tester, _RecordingScanRepository(), uncertain);
 
-        // Act
-        await tester.ensureVisible(find.text('Partager le resultat'));
-        await tester.tap(find.text('Partager le resultat'));
-        await tester.pumpAndSettle();
+      expect(find.text('L\'application ne reconnaît pas cette photo'), findsOneWidget);
+      expect(find.text('Enregistrer'), findsNothing);
+      expect(find.text('Helminthosporiose (tache brune)'), findsNothing);
+    });
 
-        // Assert
-        expect(shareCall, isNotNull);
-        expect(shareCall!.method, 'share');
+    testWidgets('Enregistrer sauvegarde la part de parcelle choisie puis ouvre le journal',
+        (tester) async {
+      final repository = _RecordingScanRepository();
+      await pumpScreen(tester, repository, probable);
 
-        final arguments = shareCall!.arguments;
-        final sharedText = arguments is Map<String, dynamic>
-            ? (arguments['text'] as String? ?? '')
-            : arguments.toString();
+      await tapText(tester, 'Moins d\'un tiers');
+      await tapText(tester, 'Enregistrer');
 
-        expect(sharedText, contains('Diagnostic AgriMada'));
-        expect(sharedText, contains('Culture'));
-        expect(sharedText, contains('Maladie'));
-        expect(sharedText, contains('88'));
-        expect(sharedText, contains('13/05/2026'));
-      },
-    );
+      expect(repository.saved, hasLength(1));
+      expect(repository.saved.single.niveauGravite, 'moins_tiers');
+      expect(find.text('Journal Screen'), findsOneWidget);
+    });
 
-    testWidgets(
-      'bouton Enregistrer appelle la sauvegarde puis navigue vers le journal',
-      (tester) async {
-        // Arrange
-        final notifier = _TestScanNotifier(
-          result: tResult,
-          persistReturn: buildDiagnosticLocal(DateTime(2026, 5, 13)),
-        );
+    testWidgets('un échec de sauvegarde affiche un message', (tester) async {
+      await pumpScreen(tester, _RecordingScanRepository(failSave: true), probable);
 
-        await pumpScreen(tester, notifier);
+      await tapText(tester, 'Enregistrer');
 
-        // Act
-        await tester.ensureVisible(find.text('Enregistrer'));
-        await tester.tap(find.text('Enregistrer'));
-        await tester.pumpAndSettle();
+      expect(find.text('Impossible d\'enregistrer le diagnostic'), findsOneWidget);
+    });
 
-        // Assert
-        expect(notifier.persistCalled, isTrue);
-        expect(find.text('Journal Screen'), findsOneWidget);
-      },
-    );
+    testWidgets('« Ce résultat me semble faux » écarte le résultat sans enregistrer',
+        (tester) async {
+      final repository = _RecordingScanRepository();
+      await pumpScreen(tester, repository, probable);
 
-    testWidgets(
-      'echec de sauvegarde affiche une snackbar erreur',
-      (tester) async {
-        // Arrange
-        final notifier = _TestScanNotifier(
-          result: tResult,
-          persistReturn: null,
-        );
+      await tapText(tester, 'Ce résultat me semble faux');
 
-        await pumpScreen(tester, notifier);
+      expect(repository.saved, isEmpty);
+      expect(find.text('Scanning Screen'), findsOneWidget);
+    });
 
-        // Act
-        await tester.ensureVisible(find.text('Enregistrer'));
-        await tester.tap(find.text('Enregistrer'));
-        await tester.pumpAndSettle();
+    testWidgets('Partager envoie la maladie, la certitude et la date',
+        (tester) async {
+      MethodCall? shareCall;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(shareChannel, (call) async {
+        shareCall = call;
+        return null;
+      });
 
-        // Assert
-        expect(notifier.persistCalled, isTrue);
-        expect(
-          find.text('Impossible d\'enregistrer le diagnostic'),
-          findsOneWidget,
-        );
-      },
-    );
+      await pumpScreen(tester, _RecordingScanRepository(), probable);
+      await tapText(tester, 'Partager le résultat');
+
+      expect(shareCall, isNotNull);
+      final arguments = shareCall!.arguments;
+      final sharedText = arguments is Map
+          ? (arguments['text'] as String? ?? '')
+          : arguments.toString();
+      expect(sharedText, contains('Helminthosporiose (tache brune)'));
+      expect(sharedText, contains('Diagnostic probable'));
+      expect(sharedText, contains('13/05/2026'));
+    });
   });
 }

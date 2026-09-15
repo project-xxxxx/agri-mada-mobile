@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:agri_mada/core/ai/diagnosis_certainty.dart';
 import 'package:agri_mada/features/scan/domain/entities/diagnostic_result.dart';
 import 'package:agri_mada/core/local_db/models/diagnostic_local.dart';
 import 'package:agri_mada/core/local_db/models/parcelle_local.dart';
@@ -9,17 +10,18 @@ const mockDiseaseName = 'Brown spot';
 
 const mockRecommendations = <String>[
   'Améliorer la fertilisation (potassium)',
-  'Appliquer un fongicide à base de mancozèbe',
-  'Assurer un drainage correct',
-  'Éviter le stress hydrique',
+  'Éviter que le riz manque d\'eau',
 ];
 
 final mockTfliteResult = DiagnosticResult(
   maladieDetectee: mockDiseaseName,
   confiance: 0.91,
-  niveauGravite: 'modéré',
   createdAt: DateTime(2026, 1, 2),
-  recommandations: mockRecommendations,
+  certitude: DiagnosisCertainty.probable,
+  classement: const [
+    ScoredLabel(mockDiseaseName, 0.91),
+    ScoredLabel('Leaf smut', 0.05),
+  ],
 );
 
 
@@ -43,7 +45,7 @@ DiagnosticLocal buildTestDiagnostic({
   int parcelleLocalId = 1,
   String maladieDetectee = mockDiseaseName,
   double confiance = 0.91,
-  String? niveauGravite = 'modéré',
+  String? niveauGravite = 'moins_tiers',
   String? imagePath,
   int? inferenceTimeMs,
   bool isSynced = false,
@@ -54,6 +56,7 @@ DiagnosticLocal buildTestDiagnostic({
     ..maladieDetectee = maladieDetectee
     ..confiance = confiance
     ..niveauGravite = niveauGravite
+    ..certitude = DiagnosisCertainty.probable.name
     ..recommandations = mockRecommendations.join('\n')
     ..imagePath = imagePath
     ..inferenceTimeMs = inferenceTimeMs

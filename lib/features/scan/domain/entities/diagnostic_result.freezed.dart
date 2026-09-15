@@ -23,8 +23,15 @@ mixin _$DiagnosticResult {
   String? get imagePath => throw _privateConstructorUsedError;
   DateTime get createdAt => throw _privateConstructorUsedError;
   String? get parcelleId => throw _privateConstructorUsedError;
+
+  /// Part de la parcelle touchée déclarée par l'agriculteur
+  /// (code de `DeclaredSeverity`), jamais déduite du modèle.
   String? get niveauGravite => throw _privateConstructorUsedError;
   List<String> get recommandations => throw _privateConstructorUsedError;
+  DiagnosisCertainty get certitude => throw _privateConstructorUsedError;
+
+  /// Les classes les plus probables, de la plus à la moins probable.
+  List<ScoredLabel> get classement => throw _privateConstructorUsedError;
 
   @JsonKey(ignore: true)
   $DiagnosticResultCopyWith<DiagnosticResult> get copyWith =>
@@ -46,7 +53,9 @@ abstract class $DiagnosticResultCopyWith<$Res> {
       DateTime createdAt,
       String? parcelleId,
       String? niveauGravite,
-      List<String> recommandations});
+      List<String> recommandations,
+      DiagnosisCertainty certitude,
+      List<ScoredLabel> classement});
 }
 
 /// @nodoc
@@ -71,6 +80,8 @@ class _$DiagnosticResultCopyWithImpl<$Res, $Val extends DiagnosticResult>
     Object? parcelleId = freezed,
     Object? niveauGravite = freezed,
     Object? recommandations = null,
+    Object? certitude = null,
+    Object? classement = null,
   }) {
     return _then(_value.copyWith(
       id: freezed == id
@@ -109,6 +120,14 @@ class _$DiagnosticResultCopyWithImpl<$Res, $Val extends DiagnosticResult>
           ? _value.recommandations
           : recommandations // ignore: cast_nullable_to_non_nullable
               as List<String>,
+      certitude: null == certitude
+          ? _value.certitude
+          : certitude // ignore: cast_nullable_to_non_nullable
+              as DiagnosisCertainty,
+      classement: null == classement
+          ? _value.classement
+          : classement // ignore: cast_nullable_to_non_nullable
+              as List<ScoredLabel>,
     ) as $Val);
   }
 }
@@ -130,7 +149,9 @@ abstract class _$$DiagnosticResultImplCopyWith<$Res>
       DateTime createdAt,
       String? parcelleId,
       String? niveauGravite,
-      List<String> recommandations});
+      List<String> recommandations,
+      DiagnosisCertainty certitude,
+      List<ScoredLabel> classement});
 }
 
 /// @nodoc
@@ -153,6 +174,8 @@ class __$$DiagnosticResultImplCopyWithImpl<$Res>
     Object? parcelleId = freezed,
     Object? niveauGravite = freezed,
     Object? recommandations = null,
+    Object? certitude = null,
+    Object? classement = null,
   }) {
     return _then(_$DiagnosticResultImpl(
       id: freezed == id
@@ -191,6 +214,14 @@ class __$$DiagnosticResultImplCopyWithImpl<$Res>
           ? _value._recommandations
           : recommandations // ignore: cast_nullable_to_non_nullable
               as List<String>,
+      certitude: null == certitude
+          ? _value.certitude
+          : certitude // ignore: cast_nullable_to_non_nullable
+              as DiagnosisCertainty,
+      classement: null == classement
+          ? _value._classement
+          : classement // ignore: cast_nullable_to_non_nullable
+              as List<ScoredLabel>,
     ));
   }
 }
@@ -207,8 +238,11 @@ class _$DiagnosticResultImpl implements _DiagnosticResult {
       required this.createdAt,
       this.parcelleId,
       this.niveauGravite,
-      final List<String> recommandations = const <String>[]})
-      : _recommandations = recommandations;
+      final List<String> recommandations = const <String>[],
+      this.certitude = DiagnosisCertainty.incertain,
+      final List<ScoredLabel> classement = const <ScoredLabel>[]})
+      : _recommandations = recommandations,
+        _classement = classement;
 
   @override
   final String? id;
@@ -225,6 +259,9 @@ class _$DiagnosticResultImpl implements _DiagnosticResult {
   final DateTime createdAt;
   @override
   final String? parcelleId;
+
+  /// Part de la parcelle touchée déclarée par l'agriculteur
+  /// (code de `DeclaredSeverity`), jamais déduite du modèle.
   @override
   final String? niveauGravite;
   final List<String> _recommandations;
@@ -237,8 +274,24 @@ class _$DiagnosticResultImpl implements _DiagnosticResult {
   }
 
   @override
+  @JsonKey()
+  final DiagnosisCertainty certitude;
+
+  /// Les classes les plus probables, de la plus à la moins probable.
+  final List<ScoredLabel> _classement;
+
+  /// Les classes les plus probables, de la plus à la moins probable.
+  @override
+  @JsonKey()
+  List<ScoredLabel> get classement {
+    if (_classement is EqualUnmodifiableListView) return _classement;
+    // ignore: implicit_dynamic_type
+    return EqualUnmodifiableListView(_classement);
+  }
+
+  @override
   String toString() {
-    return 'DiagnosticResult(id: $id, culture: $culture, maladieDetectee: $maladieDetectee, confiance: $confiance, imagePath: $imagePath, createdAt: $createdAt, parcelleId: $parcelleId, niveauGravite: $niveauGravite, recommandations: $recommandations)';
+    return 'DiagnosticResult(id: $id, culture: $culture, maladieDetectee: $maladieDetectee, confiance: $confiance, imagePath: $imagePath, createdAt: $createdAt, parcelleId: $parcelleId, niveauGravite: $niveauGravite, recommandations: $recommandations, certitude: $certitude, classement: $classement)';
   }
 
   @override
@@ -261,7 +314,11 @@ class _$DiagnosticResultImpl implements _DiagnosticResult {
             (identical(other.niveauGravite, niveauGravite) ||
                 other.niveauGravite == niveauGravite) &&
             const DeepCollectionEquality()
-                .equals(other._recommandations, _recommandations));
+                .equals(other._recommandations, _recommandations) &&
+            (identical(other.certitude, certitude) ||
+                other.certitude == certitude) &&
+            const DeepCollectionEquality()
+                .equals(other._classement, _classement));
   }
 
   @override
@@ -275,7 +332,9 @@ class _$DiagnosticResultImpl implements _DiagnosticResult {
       createdAt,
       parcelleId,
       niveauGravite,
-      const DeepCollectionEquality().hash(_recommandations));
+      const DeepCollectionEquality().hash(_recommandations),
+      certitude,
+      const DeepCollectionEquality().hash(_classement));
 
   @JsonKey(ignore: true)
   @override
@@ -295,7 +354,9 @@ abstract class _DiagnosticResult implements DiagnosticResult {
       required final DateTime createdAt,
       final String? parcelleId,
       final String? niveauGravite,
-      final List<String> recommandations}) = _$DiagnosticResultImpl;
+      final List<String> recommandations,
+      final DiagnosisCertainty certitude,
+      final List<ScoredLabel> classement}) = _$DiagnosticResultImpl;
 
   @override
   String? get id;
@@ -312,9 +373,18 @@ abstract class _DiagnosticResult implements DiagnosticResult {
   @override
   String? get parcelleId;
   @override
+
+  /// Part de la parcelle touchée déclarée par l'agriculteur
+  /// (code de `DeclaredSeverity`), jamais déduite du modèle.
   String? get niveauGravite;
   @override
   List<String> get recommandations;
+  @override
+  DiagnosisCertainty get certitude;
+  @override
+
+  /// Les classes les plus probables, de la plus à la moins probable.
+  List<ScoredLabel> get classement;
   @override
   @JsonKey(ignore: true)
   _$$DiagnosticResultImplCopyWith<_$DiagnosticResultImpl> get copyWith =>

@@ -17,53 +17,63 @@ const DiagnosticLocalSchema = CollectionSchema(
   name: r'DiagnosticLocal',
   id: 383149067658847577,
   properties: {
-    r'confiance': PropertySchema(
+    r'certitude': PropertySchema(
       id: 0,
+      name: r'certitude',
+      type: IsarType.string,
+    ),
+    r'clientUuid': PropertySchema(
+      id: 1,
+      name: r'clientUuid',
+      type: IsarType.string,
+    ),
+    r'confiance': PropertySchema(
+      id: 2,
       name: r'confiance',
       type: IsarType.double,
     ),
     r'dateDiagnostic': PropertySchema(
-      id: 1,
+      id: 3,
       name: r'dateDiagnostic',
       type: IsarType.dateTime,
     ),
     r'imagePath': PropertySchema(
-      id: 2,
+      id: 4,
       name: r'imagePath',
       type: IsarType.string,
     ),
     r'inferenceTimeMs': PropertySchema(
-      id: 3,
+      id: 5,
       name: r'inferenceTimeMs',
       type: IsarType.long,
     ),
     r'isSynced': PropertySchema(
-      id: 4,
+      id: 6,
       name: r'isSynced',
       type: IsarType.bool,
     ),
     r'maladieDetectee': PropertySchema(
-      id: 5,
+      id: 7,
       name: r'maladieDetectee',
       type: IsarType.string,
     ),
     r'niveauGravite': PropertySchema(
-      id: 6,
+      id: 8,
       name: r'niveauGravite',
       type: IsarType.string,
     ),
     r'parcelleLocalId': PropertySchema(
-      id: 7,
+      id: 9,
       name: r'parcelleLocalId',
       type: IsarType.long,
     ),
     r'recommandations': PropertySchema(
-      id: 8,
+      id: 10,
       name: r'recommandations',
       type: IsarType.string,
     ),
     r'serverId': PropertySchema(
-      id: 9,
+      id: 11,
       name: r'serverId',
       type: IsarType.long,
     )
@@ -88,6 +98,18 @@ int _diagnosticLocalEstimateSize(
   Map<Type, List<int>> allOffsets,
 ) {
   var bytesCount = offsets.last;
+  {
+    final value = object.certitude;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
+  {
+    final value = object.clientUuid;
+    if (value != null) {
+      bytesCount += 3 + value.length * 3;
+    }
+  }
   {
     final value = object.imagePath;
     if (value != null) {
@@ -116,16 +138,18 @@ void _diagnosticLocalSerialize(
   List<int> offsets,
   Map<Type, List<int>> allOffsets,
 ) {
-  writer.writeDouble(offsets[0], object.confiance);
-  writer.writeDateTime(offsets[1], object.dateDiagnostic);
-  writer.writeString(offsets[2], object.imagePath);
-  writer.writeLong(offsets[3], object.inferenceTimeMs);
-  writer.writeBool(offsets[4], object.isSynced);
-  writer.writeString(offsets[5], object.maladieDetectee);
-  writer.writeString(offsets[6], object.niveauGravite);
-  writer.writeLong(offsets[7], object.parcelleLocalId);
-  writer.writeString(offsets[8], object.recommandations);
-  writer.writeLong(offsets[9], object.serverId);
+  writer.writeString(offsets[0], object.certitude);
+  writer.writeString(offsets[1], object.clientUuid);
+  writer.writeDouble(offsets[2], object.confiance);
+  writer.writeDateTime(offsets[3], object.dateDiagnostic);
+  writer.writeString(offsets[4], object.imagePath);
+  writer.writeLong(offsets[5], object.inferenceTimeMs);
+  writer.writeBool(offsets[6], object.isSynced);
+  writer.writeString(offsets[7], object.maladieDetectee);
+  writer.writeString(offsets[8], object.niveauGravite);
+  writer.writeLong(offsets[9], object.parcelleLocalId);
+  writer.writeString(offsets[10], object.recommandations);
+  writer.writeLong(offsets[11], object.serverId);
 }
 
 DiagnosticLocal _diagnosticLocalDeserialize(
@@ -135,17 +159,19 @@ DiagnosticLocal _diagnosticLocalDeserialize(
   Map<Type, List<int>> allOffsets,
 ) {
   final object = DiagnosticLocal();
-  object.confiance = reader.readDoubleOrNull(offsets[0]);
-  object.dateDiagnostic = reader.readDateTime(offsets[1]);
+  object.certitude = reader.readStringOrNull(offsets[0]);
+  object.clientUuid = reader.readStringOrNull(offsets[1]);
+  object.confiance = reader.readDoubleOrNull(offsets[2]);
+  object.dateDiagnostic = reader.readDateTime(offsets[3]);
   object.id = id;
-  object.imagePath = reader.readStringOrNull(offsets[2]);
-  object.inferenceTimeMs = reader.readLongOrNull(offsets[3]);
-  object.isSynced = reader.readBool(offsets[4]);
-  object.maladieDetectee = reader.readString(offsets[5]);
-  object.niveauGravite = reader.readStringOrNull(offsets[6]);
-  object.parcelleLocalId = reader.readLong(offsets[7]);
-  object.recommandations = reader.readStringOrNull(offsets[8]);
-  object.serverId = reader.readLongOrNull(offsets[9]);
+  object.imagePath = reader.readStringOrNull(offsets[4]);
+  object.inferenceTimeMs = reader.readLongOrNull(offsets[5]);
+  object.isSynced = reader.readBool(offsets[6]);
+  object.maladieDetectee = reader.readString(offsets[7]);
+  object.niveauGravite = reader.readStringOrNull(offsets[8]);
+  object.parcelleLocalId = reader.readLong(offsets[9]);
+  object.recommandations = reader.readStringOrNull(offsets[10]);
+  object.serverId = reader.readLongOrNull(offsets[11]);
   return object;
 }
 
@@ -157,24 +183,28 @@ P _diagnosticLocalDeserializeProp<P>(
 ) {
   switch (propertyId) {
     case 0:
-      return (reader.readDoubleOrNull(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 1:
-      return (reader.readDateTime(offset)) as P;
+      return (reader.readStringOrNull(offset)) as P;
     case 2:
-      return (reader.readStringOrNull(offset)) as P;
+      return (reader.readDoubleOrNull(offset)) as P;
     case 3:
-      return (reader.readLongOrNull(offset)) as P;
+      return (reader.readDateTime(offset)) as P;
     case 4:
-      return (reader.readBool(offset)) as P;
-    case 5:
-      return (reader.readString(offset)) as P;
-    case 6:
       return (reader.readStringOrNull(offset)) as P;
+    case 5:
+      return (reader.readLongOrNull(offset)) as P;
+    case 6:
+      return (reader.readBool(offset)) as P;
     case 7:
-      return (reader.readLong(offset)) as P;
+      return (reader.readString(offset)) as P;
     case 8:
       return (reader.readStringOrNull(offset)) as P;
     case 9:
+      return (reader.readLong(offset)) as P;
+    case 10:
+      return (reader.readStringOrNull(offset)) as P;
+    case 11:
       return (reader.readLongOrNull(offset)) as P;
     default:
       throw IsarError('Unknown property with id $propertyId');
@@ -276,6 +306,314 @@ extension DiagnosticLocalQueryWhere
 
 extension DiagnosticLocalQueryFilter
     on QueryBuilder<DiagnosticLocal, DiagnosticLocal, QFilterCondition> {
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterFilterCondition>
+      certitudeIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'certitude',
+      ));
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterFilterCondition>
+      certitudeIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'certitude',
+      ));
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterFilterCondition>
+      certitudeEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'certitude',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterFilterCondition>
+      certitudeGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'certitude',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterFilterCondition>
+      certitudeLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'certitude',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterFilterCondition>
+      certitudeBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'certitude',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterFilterCondition>
+      certitudeStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'certitude',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterFilterCondition>
+      certitudeEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'certitude',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterFilterCondition>
+      certitudeContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'certitude',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterFilterCondition>
+      certitudeMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'certitude',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterFilterCondition>
+      certitudeIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'certitude',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterFilterCondition>
+      certitudeIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'certitude',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterFilterCondition>
+      clientUuidIsNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNull(
+        property: r'clientUuid',
+      ));
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterFilterCondition>
+      clientUuidIsNotNull() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(const FilterCondition.isNotNull(
+        property: r'clientUuid',
+      ));
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterFilterCondition>
+      clientUuidEqualTo(
+    String? value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'clientUuid',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterFilterCondition>
+      clientUuidGreaterThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        include: include,
+        property: r'clientUuid',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterFilterCondition>
+      clientUuidLessThan(
+    String? value, {
+    bool include = false,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.lessThan(
+        include: include,
+        property: r'clientUuid',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterFilterCondition>
+      clientUuidBetween(
+    String? lower,
+    String? upper, {
+    bool includeLower = true,
+    bool includeUpper = true,
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.between(
+        property: r'clientUuid',
+        lower: lower,
+        includeLower: includeLower,
+        upper: upper,
+        includeUpper: includeUpper,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterFilterCondition>
+      clientUuidStartsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.startsWith(
+        property: r'clientUuid',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterFilterCondition>
+      clientUuidEndsWith(
+    String value, {
+    bool caseSensitive = true,
+  }) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.endsWith(
+        property: r'clientUuid',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterFilterCondition>
+      clientUuidContains(String value, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.contains(
+        property: r'clientUuid',
+        value: value,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterFilterCondition>
+      clientUuidMatches(String pattern, {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.matches(
+        property: r'clientUuid',
+        wildcard: pattern,
+        caseSensitive: caseSensitive,
+      ));
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterFilterCondition>
+      clientUuidIsEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.equalTo(
+        property: r'clientUuid',
+        value: '',
+      ));
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterFilterCondition>
+      clientUuidIsNotEmpty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addFilterCondition(FilterCondition.greaterThan(
+        property: r'clientUuid',
+        value: '',
+      ));
+    });
+  }
+
   QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterFilterCondition>
       confianceIsNull() {
     return QueryBuilder.apply(this, (query) {
@@ -1294,6 +1632,34 @@ extension DiagnosticLocalQueryLinks
 extension DiagnosticLocalQuerySortBy
     on QueryBuilder<DiagnosticLocal, DiagnosticLocal, QSortBy> {
   QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterSortBy>
+      sortByCertitude() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'certitude', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterSortBy>
+      sortByCertitudeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'certitude', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterSortBy>
+      sortByClientUuid() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'clientUuid', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterSortBy>
+      sortByClientUuidDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'clientUuid', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterSortBy>
       sortByConfiance() {
     return QueryBuilder.apply(this, (query) {
       return query.addSortBy(r'confiance', Sort.asc);
@@ -1436,6 +1802,34 @@ extension DiagnosticLocalQuerySortBy
 
 extension DiagnosticLocalQuerySortThenBy
     on QueryBuilder<DiagnosticLocal, DiagnosticLocal, QSortThenBy> {
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterSortBy>
+      thenByCertitude() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'certitude', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterSortBy>
+      thenByCertitudeDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'certitude', Sort.desc);
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterSortBy>
+      thenByClientUuid() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'clientUuid', Sort.asc);
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterSortBy>
+      thenByClientUuidDesc() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addSortBy(r'clientUuid', Sort.desc);
+    });
+  }
+
   QueryBuilder<DiagnosticLocal, DiagnosticLocal, QAfterSortBy>
       thenByConfiance() {
     return QueryBuilder.apply(this, (query) {
@@ -1591,6 +1985,20 @@ extension DiagnosticLocalQuerySortThenBy
 
 extension DiagnosticLocalQueryWhereDistinct
     on QueryBuilder<DiagnosticLocal, DiagnosticLocal, QDistinct> {
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QDistinct> distinctByCertitude(
+      {bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'certitude', caseSensitive: caseSensitive);
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, DiagnosticLocal, QDistinct>
+      distinctByClientUuid({bool caseSensitive = true}) {
+    return QueryBuilder.apply(this, (query) {
+      return query.addDistinctBy(r'clientUuid', caseSensitive: caseSensitive);
+    });
+  }
+
   QueryBuilder<DiagnosticLocal, DiagnosticLocal, QDistinct>
       distinctByConfiance() {
     return QueryBuilder.apply(this, (query) {
@@ -1670,6 +2078,19 @@ extension DiagnosticLocalQueryProperty
   QueryBuilder<DiagnosticLocal, int, QQueryOperations> idProperty() {
     return QueryBuilder.apply(this, (query) {
       return query.addPropertyName(r'id');
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, String?, QQueryOperations> certitudeProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'certitude');
+    });
+  }
+
+  QueryBuilder<DiagnosticLocal, String?, QQueryOperations>
+      clientUuidProperty() {
+    return QueryBuilder.apply(this, (query) {
+      return query.addPropertyName(r'clientUuid');
     });
   }
 
