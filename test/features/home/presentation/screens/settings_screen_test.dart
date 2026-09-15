@@ -31,7 +31,16 @@ void main() {
               };
             }),
           ],
-          child: const MaterialApp(home: SettingsScreen()),
+          child: const MaterialApp(
+            home: SettingsScreen(),
+            localizationsDelegates: [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+            supportedLocales: [Locale('fr')],
+          ),
         ),
       );
       await tester.pumpAndSettle();

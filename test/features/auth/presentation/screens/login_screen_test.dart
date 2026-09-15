@@ -121,7 +121,7 @@ void main() {
       await pumpLoginScreen(tester);
 
       // Act
-      await tester.tap(find.text('Mot de passe oublie ?'));
+      await tester.tap(find.text('Mot de passe oublié ?'));
       await tester.pumpAndSettle();
 
       // Assert
