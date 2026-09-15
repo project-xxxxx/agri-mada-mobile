@@ -1,0 +1,7 @@
+# Dépendances Python des scripts ml/ (hors backend)
+pyyaml>=6.0
+huggingface_hub>=0.24
+# Optionnel : jeux hébergés sur Kaggle (jeton API dans ~/.kaggle/kaggle.json)
+kaggle>=1.6
+# Extraction de l'archive .7z de sethy_5932
+py7zr>=0.21

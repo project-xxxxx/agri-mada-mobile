@@ -1,0 +1,428 @@
+# Taxonomie v1 AgriMada — organe × problème (tâche P0.2)
+#
+# STATUT : BROUILLON. À relire et valider par l'agronome référent (FOFIFA / DRAE)
+# avant tout entraînement. Une classe « a_confirmer » n'entre dans un modèle
+# qu'après confirmation de sa présence à Madagascar.
+#
+# Les correspondances exactes avec les étiquettes des jeux publics seront
+# définies en P3.2 dans ml/label_map.yaml. Ici, `jeux_publics` liste seulement
+# les jeux (voir ml/DATASETS.md) qui contiennent la classe.
+
+version: 1
+statut: brouillon
+valide_par: null
+date_validation: null
+
+legende:
+  priorite: [haute, moyenne, basse]
+  presence_madagascar:
+    confirmee: citée dans une source malgache consultée (voir `sources`)
+    a_confirmer: connue ailleurs, non retrouvée dans les sources malgaches consultées
+    sans_objet: classe technique ou état sain
+  nature: [technique, sain, maladie, ravageur, abiotique, symptome_a_preciser]
+  nom_mg: >-
+    Terme relevé dans une fiche FOFIFA quand il existe ; null = à proposer et
+    valider par l'agronome malgachophone.
+
+exclusions:
+  - id: tungro
+    raison: maladie asiatique, absente de Madagascar ; les images des jeux publics sont écartées ou versées dans « autre ».
+
+# ---------------------------------------------------------------------------
+# Étage A — porte d'entrée et organe (un seul modèle)
+# ---------------------------------------------------------------------------
+porte:
+  - id: riz_exploitable
+    nature: technique
+    nom_fr: Photo de riz exploitable
+  - id: pas_riz
+    nature: technique
+    nom_fr: Ce n'est pas du riz
+    notes: adventices, maïs, canne, herbes, sol, eau, mains, outils, animaux, écrans
+  - id: photo_inexploitable
+    nature: technique
+    nom_fr: Photo inexploitable
+    notes: floue, trop sombre, contre-jour, sujet trop petit
+
+organes:
+  - { id: feuille,         nom_fr: Feuilles,              nom_mg: Ravina }
+  - { id: tige_gaine,      nom_fr: Tige et gaine,         nom_mg: "Taho · fonon-dravina" }
+  - { id: collet,          nom_fr: Collet et base des tiges, nom_mg: Foto-bary }
+  - { id: racines,         nom_fr: Racines,               nom_mg: Faka }
+  - { id: panicule_grains, nom_fr: Panicule et grains,    nom_mg: "Salohy · voam-bary" }
+  - { id: plante_entiere,  nom_fr: Plante entière ou parcelle, nom_mg: null }
+
+# ---------------------------------------------------------------------------
+# Étage B — problèmes par organe (un modèle multi-étiquette par organe)
+# ---------------------------------------------------------------------------
+problemes:
+
+  feuille:
+    - id: feuille_saine
+      nature: sain
+      nom_fr: Feuille saine
+      presence_madagascar: sans_objet
+      priorite: haute
+      jeux_publics: [paddy_doctor, banglariceleaf, mendeley_hx6f852hw4]
+    - id: pyriculariose_feuille
+      nature: maladie
+      nom_fr: Pyriculariose (feuille)
+      nom_mg: Menalavitra
+      agent: Magnaporthe oryzae
+      presence_madagascar: confirmee
+      priorite: haute
+      sources: [fofifa_aretina_alaotra, cirad_pyriculariose]
+      jeux_publics: [paddy_doctor, banglariceleaf, mendeley_hx6f852hw4, sethy_5932, dhan_shomadhan, hf_rice_disease]
+    - id: blb
+      nature: maladie
+      nom_fr: Flétrissement bactérien (BLB)
+      nom_mg: Malazo ravina vokatry ny bakteria
+      agent: Xanthomonas oryzae pv. oryzae
+      presence_madagascar: confirmee
+      priorite: haute
+      sources: [fofifa_blb_bls]
+      jeux_publics: [paddy_doctor, banglariceleaf, mendeley_hx6f852hw4, sethy_5932]
+    - id: bls
+      nature: maladie
+      nom_fr: Strie bactérienne (BLS)
+      nom_mg: Tsipika amin'ny ravina afitsoky ny bakteria
+      agent: Xanthomonas oryzae pv. oryzicola
+      presence_madagascar: confirmee
+      priorite: haute
+      sources: [fofifa_blb_bls]
+      jeux_publics: [paddy_doctor, banglariceleaf]
+    - id: helminthosporiose
+      nature: maladie
+      nom_fr: Helminthosporiose (tache brune)
+      nom_mg: Helminthosporiose
+      agent: Bipolaris oryzae
+      presence_madagascar: confirmee
+      priorite: haute
+      sources: [fofifa_aretina_alaotra]
+      jeux_publics: [paddy_doctor, mendeley_hx6f852hw4, sethy_5932, dhan_shomadhan, hf_rice_disease]
+    - id: cercosporiose
+      nature: maladie
+      nom_fr: Cercosporiose
+      nom_mg: Cercosporiose
+      agent: Cercospora janseana
+      presence_madagascar: confirmee
+      priorite: basse
+      sources: [fofifa_aretina_alaotra]
+      notes: jugée peu grave par la fiche FOFIFA (« tsy atahorana »)
+      jeux_publics: [mendeley_hx6f852hw4]
+    - id: echaudure
+      nature: maladie
+      nom_fr: Échaudure des feuilles (leaf scald)
+      nom_mg: null
+      agent: Microdochium oryzae
+      presence_madagascar: a_confirmer
+      priorite: basse
+      jeux_publics: [mendeley_hx6f852hw4, dhan_shomadhan]
+    - id: degats_hispa
+      nature: ravageur
+      nom_fr: Dégâts d'hispa (« pou du riz »)
+      nom_mg: Haom-bary
+      agent: Hispa gestroi, Trichispa sericea
+      presence_madagascar: confirmee
+      priorite: moyenne
+      sources: [fofifa_bibikely_alaotra, fofifa_aretina_alaotra]
+      notes: la fiche FOFIFA indique qu'il transmet le RYMV
+      jeux_publics: [paddy_doctor, mendeley_hx6f852hw4]
+    - id: degats_chenilles
+      nature: ravageur
+      nom_fr: Feuilles enroulées ou mangées par des chenilles
+      nom_mg: null
+      agent: Nymphula sp., Parnara sp.
+      presence_madagascar: confirmee
+      priorite: basse
+      sources: [fofifa_bibikely_alaotra]
+      notes: noms locaux relevés pour l'insecte (« tsingalabilona » pour Parnara), pas pour le symptôme
+      jeux_publics: [paddy_doctor]
+    - id: toxicite_fer_feuille
+      nature: abiotique
+      nom_fr: Toxicité ferreuse (bronzage des feuilles)
+      nom_mg: null
+      presence_madagascar: confirmee
+      priorite: haute
+      sources: [ird_toxicite_ferreuse, cirad_toxicite_ferreuse]
+      jeux_publics: []
+    - id: carence_azote
+      nature: abiotique
+      nom_fr: Carence en azote
+      nom_mg: null
+      presence_madagascar: sans_objet
+      priorite: moyenne
+      jeux_publics: [nutrient_deficiency_rice]
+    - id: carence_potassium
+      nature: abiotique
+      nom_fr: Carence en potassium
+      nom_mg: null
+      presence_madagascar: sans_objet
+      priorite: basse
+      jeux_publics: [nutrient_deficiency_rice]
+    - id: carence_phosphore
+      nature: abiotique
+      nom_fr: Carence en phosphore
+      nom_mg: null
+      presence_madagascar: sans_objet
+      priorite: moyenne
+      sources: [fofifa_p_dipping]
+      notes: sols pauvres en phosphore des rizières malgaches, ciblés par la technique FOFIFA du P-dipping
+      jeux_publics: [nutrient_deficiency_rice]
+    - id: mildiou
+      nature: maladie
+      nom_fr: Mildiou (downy mildew)
+      nom_mg: null
+      agent: Sclerophthora macrospora
+      presence_madagascar: a_confirmer
+      priorite: basse
+      jeux_publics: [paddy_doctor]
+
+  tige_gaine:
+    - id: tige_gaine_saine
+      nature: sain
+      nom_fr: Tige et gaine saines
+      presence_madagascar: sans_objet
+      priorite: haute
+      jeux_publics: []
+    - id: coeur_mort_foreurs
+      nature: ravageur
+      nom_fr: Cœur mort (foreurs de tige)
+      nom_mg: "Fositra fotsy · fositra mavokely"
+      agent: Maliarpha separatella, Sesamia calamistis
+      presence_madagascar: confirmee
+      priorite: haute
+      sources: [fofifa_bibikely_alaotra, cirad_maliarpha]
+      notes: les foreurs des jeux publics sont d'autres espèces ; utilisables pour le symptôme, pas pour l'espèce
+      jeux_publics: [paddy_doctor]
+    - id: pourriture_gaine
+      nature: maladie
+      nom_fr: Pourriture de la gaine
+      nom_mg: Fahalovan'ny tahom-bary
+      agent: Sarocladium oryzae (probable, à confirmer par le laboratoire)
+      presence_madagascar: confirmee
+      priorite: moyenne
+      sources: [fofifa_aretina_alaotra, fofifa_catalogue_rpa]
+      jeux_publics: []
+    - id: rhizoctone
+      nature: maladie
+      nom_fr: Rhizoctone (sheath blight)
+      nom_mg: null
+      agent: Rhizoctonia solani
+      presence_madagascar: a_confirmer
+      priorite: basse
+      jeux_publics: [banglariceleaf, mendeley_hx6f852hw4, dhan_shomadhan, frontiers_33026]
+
+  collet:
+    - id: collet_sain
+      nature: sain
+      nom_fr: Collet sain
+      presence_madagascar: sans_objet
+      priorite: haute
+      jeux_publics: []
+    - id: degats_voana
+      nature: ravageur
+      nom_fr: Base de tige rongée (scarabée noir)
+      nom_mg: "Voana · fano"
+      agent: Heteronychus spp.
+      presence_madagascar: confirmee
+      priorite: haute
+      sources: [fofifa_voana_metarhizium]
+      notes: selon la fiche FOFIFA, ce sont les adultes qui rongent la base des jeunes plants, pas les larves (sakivy)
+      jeux_publics: []
+    - id: pyriculariose_noeud_collet
+      nature: maladie
+      nom_fr: Pyriculariose du nœud ou du collet
+      nom_mg: Menalavitra
+      agent: Magnaporthe oryzae
+      presence_madagascar: confirmee
+      priorite: moyenne
+      sources: [cirad_pyriculariose]
+      jeux_publics: []
+
+  panicule_grains:
+    - id: panicule_saine
+      nature: sain
+      nom_fr: Panicule saine
+      presence_madagascar: sans_objet
+      priorite: haute
+      jeux_publics: [rice_grain_disease]
+    - id: pyriculariose_cou
+      nature: maladie
+      nom_fr: Pyriculariose du cou
+      nom_mg: Menalavitra
+      agent: Magnaporthe oryzae
+      presence_madagascar: confirmee
+      priorite: haute
+      sources: [fofifa_aretina_alaotra, cirad_pyriculariose]
+      jeux_publics: [hf_rice_disease, rice_grain_disease, frontiers_33026]
+    - id: panicule_blanche_foreurs
+      nature: ravageur
+      nom_fr: Panicule blanche (foreurs)
+      nom_mg: "Fositra fotsy · fositra mavokely"
+      agent: Maliarpha separatella, Sesamia calamistis
+      presence_madagascar: confirmee
+      priorite: haute
+      sources: [fofifa_bibikely_alaotra]
+      jeux_publics: []
+    - id: grains_taches
+      nature: maladie
+      nom_fr: Grains tachés
+      nom_mg: Pentipentina amin'ny voam-bary
+      agent: Bipolaris oryzae et autres
+      presence_madagascar: confirmee
+      priorite: moyenne
+      sources: [fofifa_aretina_alaotra]
+      jeux_publics: []
+    - id: degats_punaises
+      nature: ravageur
+      nom_fr: Grains vides ou piqués (punaises)
+      nom_mg: Besoroka
+      presence_madagascar: confirmee
+      priorite: moyenne
+      sources: [fofifa_bibikely_alaotra]
+      jeux_publics: []
+    - id: sterilite_froid
+      nature: abiotique
+      nom_fr: Stérilité due au froid
+      nom_mg: null
+      presence_madagascar: a_confirmer
+      priorite: moyenne
+      notes: connue sur les Hautes Terres ; source malgache à rattacher avant validation
+      jeux_publics: []
+    - id: faux_charbon
+      nature: maladie
+      nom_fr: Faux charbon
+      nom_mg: null
+      agent: Ustilaginoidea virens
+      presence_madagascar: a_confirmer
+      priorite: basse
+      jeux_publics: [rice_grain_disease, frontiers_33026]
+    - id: brunissure_bacterienne_panicule
+      nature: maladie
+      nom_fr: Brunissure bactérienne de la panicule
+      nom_mg: null
+      agent: Burkholderia glumae
+      presence_madagascar: a_confirmer
+      priorite: basse
+      jeux_publics: [paddy_doctor]
+
+  racines:
+    - id: racines_saines
+      nature: sain
+      nom_fr: Racines saines
+      presence_madagascar: sans_objet
+      priorite: moyenne
+      jeux_publics: []
+    - id: galles_nematodes
+      nature: ravageur
+      nom_fr: Galles de nématodes
+      nom_mg: null
+      agent: Meloidogyne graminicola
+      presence_madagascar: confirmee
+      priorite: moyenne
+      sources: [nematodes_madagascar_2016]
+      jeux_publics: []
+    - id: racines_ferreuses
+      nature: abiotique
+      nom_fr: Racines brun-orangé (toxicité ferreuse)
+      nom_mg: null
+      presence_madagascar: confirmee
+      priorite: moyenne
+      sources: [ird_toxicite_ferreuse, cirad_toxicite_ferreuse]
+      jeux_publics: []
+    - id: racines_noires_pourries
+      nature: abiotique
+      nom_fr: Racines noires ou pourries (sol asphyxié)
+      nom_mg: null
+      presence_madagascar: a_confirmer
+      priorite: basse
+      jeux_publics: []
+    - id: racines_rongees
+      nature: symptome_a_preciser
+      nom_fr: Racines rongées
+      nom_mg: null
+      presence_madagascar: a_confirmer
+      priorite: basse
+      notes: ravageur à identifier avec l'agronome
+      jeux_publics: []
+
+  plante_entiere:
+    - id: plante_saine
+      nature: sain
+      nom_fr: Plante et parcelle saines
+      presence_madagascar: sans_objet
+      priorite: haute
+      jeux_publics: []
+    - id: rymv
+      nature: maladie
+      nom_fr: Panachure jaune du riz (RYMV)
+      nom_mg: Mavoratsy
+      agent: Rice yellow mottle virus, souche S4mg
+      presence_madagascar: confirmee
+      priorite: haute
+      sources: [fofifa_aretina_alaotra, rymv_madagascar]
+      notes: la fiche FOFIFA recommande de brûler les plants atteints ; confirmation par ELISA pour l'annotation
+      jeux_publics: []
+    - id: foyers_desseches
+      nature: symptome_a_preciser
+      nom_fr: Foyers de plants desséchés
+      nom_mg: null
+      presence_madagascar: sans_objet
+      priorite: moyenne
+      notes: oriente vers une photo du collet ou de la tige (voana, foreurs, rats)
+      jeux_publics: []
+    - id: carence_generale
+      nature: abiotique
+      nom_fr: Vert pâle uniforme (carence probable)
+      nom_mg: null
+      presence_madagascar: sans_objet
+      priorite: basse
+      jeux_publics: []
+    - id: bakanae
+      nature: maladie
+      nom_fr: Bakanae (plantules allongées et pâles)
+      nom_mg: null
+      agent: Fusarium fujikuroi
+      presence_madagascar: a_confirmer
+      priorite: basse
+      jeux_publics: []
+
+# ---------------------------------------------------------------------------
+sources:
+  fofifa_blb_bls:
+    titre: Les maladies bactériennes du riz (fiche FR et MG), CRR FOFIFA Antsirabe, 2020
+    url: https://www.fofifa.mg/wp-content/uploads/2020/09/FicheBLBBLS-VF-Final.pdf
+  fofifa_aretina_alaotra:
+    titre: Ireo aretim-bary mirongatra noho ny fiovaovan'ny toetr'andro, AF RICE Alaotra, 2017
+    url: https://www.fofifa.mg/wp-content/uploads/2020/07/IREO-ARETIM-2.pdf
+  fofifa_bibikely_alaotra:
+    titre: Ireo bibikely fahavalon'ny vary an-drano sy an-tanety aty Alaotra, 2017
+    url: https://www.fofifa.mg/wp-content/uploads/2020/07/KISARY-BIBIKELY.pdf
+  fofifa_voana_metarhizium:
+    titre: Fantaro ny voana na fano, ny sakivy, ary ny fampiasana holatra Metarhizium, 2010
+    url: https://www.fofifa.mg/wp-content/uploads/2020/06/FICHE-METARHIZIUM_2010.pdf
+  fofifa_catalogue_rpa:
+    titre: Variétés de riz pluvial pour les Hautes Terres de 1300 à 1800 m
+    url: https://www.fofifa.mg/wp-content/uploads/2020/05/catalogue-vari%C3%A9tal-RPA-2009.pdf
+  fofifa_p_dipping:
+    titre: Voka-tsoa azo avimin'ny teknika P-Dipping, FOFIFA (projet FyVary)
+    url: https://www.fofifa.mg/wp-content/uploads/2026/02/Manuel-P-dipping-2kg.pdf
+  cirad_pyriculariose:
+    titre: Lutte intégrée contre la pyriculariose du riz pluvial à Madagascar
+    url: https://agritrop.cirad.fr/569130/
+  cirad_maliarpha:
+    titre: Maliarpha separatella Ragonot, foreur du riz. Fiche technique
+    url: https://agritrop.cirad.fr/407181/
+  ird_toxicite_ferreuse:
+    titre: La toxicité ferreuse dans les sols de rizières (IRD)
+    url: https://horizon.documentation.ird.fr/exl-doc/pleins_textes/pleins_textes_5/b_fdi_23-25/30046.pdf
+  cirad_toxicite_ferreuse:
+    titre: Effet de la toxicité ferreuse sur le rendement et les composantes du rendement du riz
+    url: https://agritrop.cirad.fr/558461/
+  nematodes_madagascar_2016:
+    titre: First report of the root-knot nematode (Meloidogyne graminicola) in Madagascar rice fields
+    url: https://link.springer.com/article/10.1007/s13314-016-0222-5
+  rymv_madagascar:
+    titre: Comparing patterns and scales of plant virus phylogeography - RYMV in Madagascar
+    url: https://pmc.ncbi.nlm.nih.gov/articles/PMC6671560/
