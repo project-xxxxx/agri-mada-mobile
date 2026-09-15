@@ -23,6 +23,11 @@ abstract class AuthRemoteDatasource {
     @Field('password') String password,
   );
 
+  @POST(ApiConstants.logout)
+  Future<void> logout(
+    @Body() Map<String, dynamic> payload,
+  );
+
   @GET(ApiConstants.me)
   Future<dynamic> getMe(
     @Header('Authorization') String authorization,

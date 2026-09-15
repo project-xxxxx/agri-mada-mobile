@@ -6,8 +6,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/errors/failure.dart';
+import '../../../core/local_db/models/diagnostic_local.dart';
+import '../../../core/local_db/models/parcelle_local.dart';
 import '../../../core/utils/logger.dart';
-import '../../../features/auth/presentation/providers/auth_provider.dart';
+import '../../../features/auth/presentation/providers/auth_provider.dart'
+    show dioProvider;
+import '../../../features/auth/presentation/providers/session_provider.dart'
+    show sessionServiceProvider;
 import '../../../features/journal/presentation/providers/journal_provider.dart'
     show parcelleRepositoryProvider;
 import '../../../features/scan/presentation/providers/scan_provider.dart'
@@ -52,10 +57,29 @@ SyncRemoteDatasource syncRemoteDatasource(Ref ref) {
   return SyncRemoteDatasource(ref.watch(dioProvider));
 }
 
+/// Éléments d'une réponse de synchronisation, indexés par client_uuid.
+Map<String, Map<String, dynamic>> _itemsByClientUuid(
+  Map<String, dynamic> response,
+  String key,
+) {
+  final raw = response[key];
+  if (raw is! List) return const {};
+  return {
+    for (final item in raw.whereType<Map<dynamic, dynamic>>())
+      if (item['client_uuid'] case final String clientUuid)
+        clientUuid: Map<String, dynamic>.from(item),
+  };
+}
+
 @Riverpod(keepAlive: true)
 class SyncNotifier extends _$SyncNotifier {
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   static const int _maxAttempts = 2;
+
+  /// La session locale est conservée : seule la synchronisation attend que
+  /// l'agriculteur se reconnecte (tâche P1.8).
+  static const reauthRequiredMessage =
+      'Reconnectez-vous pour synchroniser vos données';
 
   bool _isDnsLookupFailure(DioException exception) {
     final details =
@@ -94,8 +118,20 @@ class SyncNotifier extends _$SyncNotifier {
     });
   }
 
+  Future<bool> _isReauthRequired() async {
+    try {
+      return await ref.read(sessionServiceProvider).isReauthRequired();
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<void> syncData() async {
     if (state is SyncSyncing) return;
+    if (await _isReauthRequired()) {
+      state = const SyncState.error(reauthRequiredMessage);
+      return;
+    }
     state = const SyncState.syncing();
 
     for (var attempt = 1; attempt <= _maxAttempts; attempt++) {
@@ -107,15 +143,13 @@ class SyncNotifier extends _$SyncNotifier {
         final isUnauthorized =
             e.response?.statusCode == 401 || e.error is AuthFailure;
         if (isUnauthorized) {
+          // Plus de déconnexion forcée : l'agriculteur continue hors ligne.
           AppLogger.error(
-            'Synchronisation interrompue: session expirée',
+            'Synchronisation suspendue : reconnexion requise',
             error: e.error ?? e,
             stackTrace: st,
           );
-          await ref.read(authNotifierProvider.notifier).logout();
-          state = const SyncState.error(
-            'Session expirée, veuillez vous reconnecter',
-          );
+          state = const SyncState.error(reauthRequiredMessage);
           return;
         }
 
@@ -151,6 +185,9 @@ class SyncNotifier extends _$SyncNotifier {
     }
   }
 
+  /// Envoie parcelles puis diagnostics. Chaque élément porte un client_uuid :
+  /// un renvoi après une réponse perdue ne crée pas de doublon, et la réponse
+  /// est associée par identifiant, jamais par position (tâche P1.9).
   Future<void> _syncParcellesAndDiagnostics() async {
     final parcelleRepo = ref.read(parcelleLocalRepositoryProvider);
     final diagnosticRepo = ref.read(diagnosticLocalRepositoryProvider);
@@ -158,27 +195,29 @@ class SyncNotifier extends _$SyncNotifier {
 
     final unsyncedParcelles = await parcelleRepo.getUnsyncedParcelles();
     if (unsyncedParcelles.isNotEmpty) {
-      final payload = {
-        'parcelles': unsyncedParcelles
-            .map((p) => {
-                  'nom_parcelle': p.nomParcelle,
-                  'description': p.description,
-                  'surface': p.surface,
-                  'latitude': p.latitude,
-                  'longitude': p.longitude,
-                })
-            .toList(),
-      };
+      final localByUuid = <String, ParcelleLocal>{};
+      final payload = <Map<String, dynamic>>[];
+      for (final parcelle in unsyncedParcelles) {
+        final clientUuid = await parcelleRepo.ensureClientUuid(parcelle);
+        localByUuid[clientUuid] = parcelle;
+        payload.add({
+          'client_uuid': clientUuid,
+          'nom_parcelle': parcelle.nomParcelle,
+          'description': parcelle.description,
+          'surface': parcelle.surface,
+          'latitude': parcelle.latitude,
+          'longitude': parcelle.longitude,
+        });
+      }
 
       final response = Map<String, dynamic>.from(
-        await remoteDataSource.syncParcelles(payload) as Map,
+        await remoteDataSource.syncParcelles({'parcelles': payload}) as Map,
       );
-      final createdList = response['parcelles_creees'] as List<dynamic>;
-
-      for (int index = 0; index < unsyncedParcelles.length; index++) {
-        final createdParcelle = createdList[index] as Map<String, dynamic>;
-        final serverId = createdParcelle['id'] as int;
-        await parcelleRepo.markAsSynced(unsyncedParcelles[index].id, serverId);
+      final synced = _itemsByClientUuid(response, 'parcelles');
+      for (final MapEntry(key: clientUuid, value: local) in localByUuid.entries) {
+        if (synced[clientUuid]?['id'] case final int serverId) {
+          await parcelleRepo.markAsSynced(local.id, serverId);
+        }
       }
     }
 
@@ -187,40 +226,39 @@ class SyncNotifier extends _$SyncNotifier {
       return;
     }
 
-    final payloadDiagnostics = <Map<String, dynamic>>[];
-    final localDiagIds = <int>[];
-
+    final localByUuid = <String, DiagnosticLocal>{};
+    final payload = <Map<String, dynamic>>[];
     for (final diag in unsyncedDiagnostics) {
       final parcelle = await parcelleRepo.getParcelleById(diag.parcelleLocalId);
-      if (parcelle != null && parcelle.serverId != null) {
-        payloadDiagnostics.add({
-          'parcelle_id': parcelle.serverId,
-          'maladie_detectee': diag.maladieDetectee,
-          'confiance': diag.confiance,
-          'niveau_gravite': diag.niveauGravite,
-          'recommandations': diag.recommandations,
-          'date_diagnostic': diag.dateDiagnostic.toIso8601String(),
-        });
-        localDiagIds.add(diag.id);
-      }
+      // Parcelle pas encore connue du serveur : le diagnostic attend la prochaine fois.
+      if (parcelle == null || parcelle.serverId == null) continue;
+
+      final clientUuid = await diagnosticRepo.ensureClientUuid(diag);
+      localByUuid[clientUuid] = diag;
+      payload.add({
+        'client_uuid': clientUuid,
+        'parcelle_client_uuid': await parcelleRepo.ensureClientUuid(parcelle),
+        'parcelle_id': parcelle.serverId,
+        'maladie_detectee': diag.maladieDetectee,
+        'confiance': diag.confiance,
+        'certitude': diag.certitude,
+        'niveau_gravite': diag.niveauGravite,
+        'recommandations': diag.recommandations,
+        'date_diagnostic': diag.dateDiagnostic.toUtc().toIso8601String(),
+      });
     }
 
-    if (payloadDiagnostics.isEmpty) {
+    if (payload.isEmpty) {
       return;
     }
 
     final response = Map<String, dynamic>.from(
-      await remoteDataSource.syncDiagnostics(
-        {'diagnostics': payloadDiagnostics},
-      ) as Map,
+      await remoteDataSource.syncDiagnostics({'diagnostics': payload}) as Map,
     );
-    final createdList = response['diagnostics_crees'] as List<dynamic>;
-
-    for (int index = 0; index < localDiagIds.length; index++) {
-      if (index < createdList.length) {
-        final createdDiagnostic = createdList[index] as Map<String, dynamic>;
-        final serverId = createdDiagnostic['id'] as int;
-        await diagnosticRepo.markAsSynced(localDiagIds[index], serverId);
+    final synced = _itemsByClientUuid(response, 'diagnostics');
+    for (final MapEntry(key: clientUuid, value: local) in localByUuid.entries) {
+      if (synced[clientUuid]?['id'] case final int serverId) {
+        await diagnosticRepo.markAsSynced(local.id, serverId);
       }
     }
   }

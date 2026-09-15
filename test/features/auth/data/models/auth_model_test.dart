@@ -25,6 +25,21 @@ void main() {
       expect(json['token_type'], 'bearer');
     });
 
+    test('fromJson lit le jeton de rafraîchissement et sa durée', () {
+      final model = AuthModel.fromJson(const {
+        ...tJson,
+        'refresh_token': 'refresh-token',
+        'expires_in': 3600,
+      });
+
+      expect(model.refreshToken, 'refresh-token');
+      expect(model.expiresIn, 3600);
+    });
+
+    test('fromJson accepte une réponse sans jeton de rafraîchissement', () {
+      expect(AuthModel.fromJson(tJson).refreshToken, isNull);
+    });
+
     test('toEntity retourne un AuthToken cohérent', () {
       final entity = tModel.toEntity();
       expect(entity.accessToken, tModel.accessToken);

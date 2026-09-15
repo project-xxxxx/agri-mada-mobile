@@ -23,7 +23,12 @@ mixin _$AuthModel {
   @JsonKey(name: 'access_token')
   String get accessToken => throw _privateConstructorUsedError;
   @JsonKey(name: 'token_type')
-  String get tokenType => throw _privateConstructorUsedError;
+  String get tokenType =>
+      throw _privateConstructorUsedError; // Absents des réponses d'un serveur antérieur à la tâche P1.8.
+  @JsonKey(name: 'refresh_token')
+  String? get refreshToken => throw _privateConstructorUsedError;
+  @JsonKey(name: 'expires_in')
+  int? get expiresIn => throw _privateConstructorUsedError;
 
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
   @JsonKey(ignore: true)
@@ -38,7 +43,9 @@ abstract class $AuthModelCopyWith<$Res> {
   @useResult
   $Res call(
       {@JsonKey(name: 'access_token') String accessToken,
-      @JsonKey(name: 'token_type') String tokenType});
+      @JsonKey(name: 'token_type') String tokenType,
+      @JsonKey(name: 'refresh_token') String? refreshToken,
+      @JsonKey(name: 'expires_in') int? expiresIn});
 }
 
 /// @nodoc
@@ -56,6 +63,8 @@ class _$AuthModelCopyWithImpl<$Res, $Val extends AuthModel>
   $Res call({
     Object? accessToken = null,
     Object? tokenType = null,
+    Object? refreshToken = freezed,
+    Object? expiresIn = freezed,
   }) {
     return _then(_value.copyWith(
       accessToken: null == accessToken
@@ -66,6 +75,14 @@ class _$AuthModelCopyWithImpl<$Res, $Val extends AuthModel>
           ? _value.tokenType
           : tokenType // ignore: cast_nullable_to_non_nullable
               as String,
+      refreshToken: freezed == refreshToken
+          ? _value.refreshToken
+          : refreshToken // ignore: cast_nullable_to_non_nullable
+              as String?,
+      expiresIn: freezed == expiresIn
+          ? _value.expiresIn
+          : expiresIn // ignore: cast_nullable_to_non_nullable
+              as int?,
     ) as $Val);
   }
 }
@@ -80,7 +97,9 @@ abstract class _$$AuthModelImplCopyWith<$Res>
   @useResult
   $Res call(
       {@JsonKey(name: 'access_token') String accessToken,
-      @JsonKey(name: 'token_type') String tokenType});
+      @JsonKey(name: 'token_type') String tokenType,
+      @JsonKey(name: 'refresh_token') String? refreshToken,
+      @JsonKey(name: 'expires_in') int? expiresIn});
 }
 
 /// @nodoc
@@ -96,6 +115,8 @@ class __$$AuthModelImplCopyWithImpl<$Res>
   $Res call({
     Object? accessToken = null,
     Object? tokenType = null,
+    Object? refreshToken = freezed,
+    Object? expiresIn = freezed,
   }) {
     return _then(_$AuthModelImpl(
       accessToken: null == accessToken
@@ -106,6 +127,14 @@ class __$$AuthModelImplCopyWithImpl<$Res>
           ? _value.tokenType
           : tokenType // ignore: cast_nullable_to_non_nullable
               as String,
+      refreshToken: freezed == refreshToken
+          ? _value.refreshToken
+          : refreshToken // ignore: cast_nullable_to_non_nullable
+              as String?,
+      expiresIn: freezed == expiresIn
+          ? _value.expiresIn
+          : expiresIn // ignore: cast_nullable_to_non_nullable
+              as int?,
     ));
   }
 }
@@ -115,7 +144,9 @@ class __$$AuthModelImplCopyWithImpl<$Res>
 class _$AuthModelImpl implements _AuthModel {
   const _$AuthModelImpl(
       {@JsonKey(name: 'access_token') required this.accessToken,
-      @JsonKey(name: 'token_type') required this.tokenType});
+      @JsonKey(name: 'token_type') required this.tokenType,
+      @JsonKey(name: 'refresh_token') this.refreshToken,
+      @JsonKey(name: 'expires_in') this.expiresIn});
 
   factory _$AuthModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$AuthModelImplFromJson(json);
@@ -126,10 +157,17 @@ class _$AuthModelImpl implements _AuthModel {
   @override
   @JsonKey(name: 'token_type')
   final String tokenType;
+// Absents des réponses d'un serveur antérieur à la tâche P1.8.
+  @override
+  @JsonKey(name: 'refresh_token')
+  final String? refreshToken;
+  @override
+  @JsonKey(name: 'expires_in')
+  final int? expiresIn;
 
   @override
   String toString() {
-    return 'AuthModel(accessToken: $accessToken, tokenType: $tokenType)';
+    return 'AuthModel(accessToken: $accessToken, tokenType: $tokenType, refreshToken: $refreshToken, expiresIn: $expiresIn)';
   }
 
   @override
@@ -140,12 +178,17 @@ class _$AuthModelImpl implements _AuthModel {
             (identical(other.accessToken, accessToken) ||
                 other.accessToken == accessToken) &&
             (identical(other.tokenType, tokenType) ||
-                other.tokenType == tokenType));
+                other.tokenType == tokenType) &&
+            (identical(other.refreshToken, refreshToken) ||
+                other.refreshToken == refreshToken) &&
+            (identical(other.expiresIn, expiresIn) ||
+                other.expiresIn == expiresIn));
   }
 
   @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, accessToken, tokenType);
+  int get hashCode =>
+      Object.hash(runtimeType, accessToken, tokenType, refreshToken, expiresIn);
 
   @JsonKey(ignore: true)
   @override
@@ -163,9 +206,10 @@ class _$AuthModelImpl implements _AuthModel {
 
 abstract class _AuthModel implements AuthModel {
   const factory _AuthModel(
-          {@JsonKey(name: 'access_token') required final String accessToken,
-          @JsonKey(name: 'token_type') required final String tokenType}) =
-      _$AuthModelImpl;
+      {@JsonKey(name: 'access_token') required final String accessToken,
+      @JsonKey(name: 'token_type') required final String tokenType,
+      @JsonKey(name: 'refresh_token') final String? refreshToken,
+      @JsonKey(name: 'expires_in') final int? expiresIn}) = _$AuthModelImpl;
 
   factory _AuthModel.fromJson(Map<String, dynamic> json) =
       _$AuthModelImpl.fromJson;
@@ -176,6 +220,12 @@ abstract class _AuthModel implements AuthModel {
   @override
   @JsonKey(name: 'token_type')
   String get tokenType;
+  @override // Absents des réponses d'un serveur antérieur à la tâche P1.8.
+  @JsonKey(name: 'refresh_token')
+  String? get refreshToken;
+  @override
+  @JsonKey(name: 'expires_in')
+  int? get expiresIn;
   @override
   @JsonKey(ignore: true)
   _$$AuthModelImplCopyWith<_$AuthModelImpl> get copyWith =>

@@ -1,27 +1,33 @@
 import 'dart:io';
-import 'dart:ffi';
 
 import 'package:dio/dio.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:fpdart/fpdart.dart';
-import 'package:isar/isar.dart';
 import 'package:mocktail/mocktail.dart';
 
+import 'package:agri_mada/core/errors/failure.dart';
 import 'package:agri_mada/core/local_db/models/diagnostic_local.dart';
 import 'package:agri_mada/core/local_db/isar_service.dart';
 import 'package:agri_mada/core/local_db/models/parcelle_local.dart';
 import 'package:agri_mada/core/local_db/models/user_local.dart';
+import 'package:agri_mada/core/local_db/session_service.dart';
 import 'package:agri_mada/core/sync/data/datasources/sync_remote_datasource.dart';
 import 'package:agri_mada/core/sync/providers/sync_provider.dart';
 import 'package:agri_mada/features/auth/data/repositories/auth_repository_impl.dart';
 import 'package:agri_mada/features/auth/presentation/providers/auth_provider.dart';
+import 'package:agri_mada/features/auth/presentation/providers/session_provider.dart';
 import 'package:agri_mada/features/journal/data/repositories/parcelle_local_repository.dart';
+import 'package:agri_mada/features/scan/data/repositories/diagnostic_local_repository.dart';
+
+import '../../helpers/isar_test_core.dart';
 
 class MockSyncRemoteDatasource extends Mock implements SyncRemoteDatasource {}
 
 class MockAuthRepositoryImpl extends Mock implements AuthRepositoryImpl {}
+
+class MockSessionService extends Mock implements SessionService {}
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
@@ -31,14 +37,10 @@ void main() {
   late ProviderContainer container;
   late MockSyncRemoteDatasource mockSyncRemoteDatasource;
   late MockAuthRepositoryImpl mockAuthRepository;
+  late MockSessionService mockSessionService;
 
   setUpAll(() async {
-    await Isar.initializeIsarCore(
-      libraries: {
-        Abi.windowsX64:
-            'C:/Users/dilan/AppData/Local/Pub/Cache/hosted/pub.dev/isar_flutter_libs-3.1.0+1/windows/isar.dll',
-      },
-    );
+    await initIsarCoreForTests();
 
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall methodCall) async {
@@ -56,16 +58,20 @@ void main() {
 
     mockSyncRemoteDatasource = MockSyncRemoteDatasource();
     mockAuthRepository = MockAuthRepositoryImpl();
+    mockSessionService = MockSessionService();
 
     when(() => mockAuthRepository.logout()).thenAnswer(
       (_) async => const Right(unit),
     );
+    when(() => mockSessionService.isReauthRequired())
+        .thenAnswer((_) async => false);
 
     container = ProviderContainer(
       overrides: [
         syncRemoteDatasourceProvider
             .overrideWithValue(mockSyncRemoteDatasource),
         authRepositoryProvider.overrideWithValue(mockAuthRepository),
+        sessionServiceProvider.overrideWithValue(mockSessionService),
       ],
     );
   });
@@ -86,14 +92,25 @@ void main() {
         .setMockMethodCallHandler(channel, null);
   });
 
+  DioException unauthorized({Object? error}) => DioException(
+        requestOptions: RequestOptions(path: '/sync/parcelles'),
+        error: error,
+        response: error == null
+            ? Response(
+                requestOptions: RequestOptions(path: '/sync/parcelles'),
+                statusCode: 401,
+              )
+            : null,
+      );
+
   group('SyncNotifier', () {
     test('sync reussie -> SyncState.success()', () async {
       // Arrange
       when(() => mockSyncRemoteDatasource.syncParcelles(any())).thenAnswer(
-        (_) async => {'parcelles_creees': <Map<String, dynamic>>[]},
+        (_) async => {'parcelles': <Map<String, dynamic>>[]},
       );
       when(() => mockSyncRemoteDatasource.syncDiagnostics(any())).thenAnswer(
-        (_) async => {'diagnostics_crees': <Map<String, dynamic>>[]},
+        (_) async => {'diagnostics': <Map<String, dynamic>>[]},
       );
 
       // Act
@@ -103,22 +120,13 @@ void main() {
       expect(container.read(syncNotifierProvider), const SyncState.success());
     });
 
-    test(
-        '401 -> declenche logout + SyncState.error("Session expiree, veuillez vous reconnecter")',
+    test('401 -> session conservée, reconnexion demandée pour synchroniser',
         () async {
       // Arrange
       final parcelleRepo = ParcelleLocalRepository();
       await parcelleRepo.createParcelle(nomParcelle: 'Parcelle 401');
-
-      when(() => mockSyncRemoteDatasource.syncParcelles(any())).thenThrow(
-        DioException(
-          requestOptions: RequestOptions(path: '/sync/parcelles'),
-          response: Response(
-            requestOptions: RequestOptions(path: '/sync/parcelles'),
-            statusCode: 401,
-          ),
-        ),
-      );
+      when(() => mockSyncRemoteDatasource.syncParcelles(any()))
+          .thenThrow(unauthorized());
 
       // Act
       await container.read(syncNotifierProvider.notifier).syncData();
@@ -126,9 +134,9 @@ void main() {
       // Assert
       expect(
         container.read(syncNotifierProvider),
-        const SyncState.error('Session expirée, veuillez vous reconnecter'),
+        const SyncState.error(SyncNotifier.reauthRequiredMessage),
       );
-      verify(() => mockAuthRepository.logout()).called(1);
+      verifyNever(() => mockAuthRepository.logout());
     });
 
     test(
@@ -156,21 +164,13 @@ void main() {
       );
     });
 
-    test(
-        'token absent (401) -> SyncState.error("Session expirée, veuillez vous reconnecter")',
+    test('AuthFailure de l\'intercepteur -> reconnexion demandée, pas de logout',
         () async {
       // Arrange
       final parcelleRepo = ParcelleLocalRepository();
-      await parcelleRepo.createParcelle(nomParcelle: 'Parcelle token absent');
-
+      await parcelleRepo.createParcelle(nomParcelle: 'Parcelle token refusé');
       when(() => mockSyncRemoteDatasource.syncParcelles(any())).thenThrow(
-        DioException(
-          requestOptions: RequestOptions(path: '/sync/parcelles'),
-          response: Response(
-            requestOptions: RequestOptions(path: '/sync/parcelles'),
-            statusCode: 401,
-          ),
-        ),
+        unauthorized(error: const AuthFailure('Session expirée')),
       );
 
       // Act
@@ -179,8 +179,108 @@ void main() {
       // Assert
       expect(
         container.read(syncNotifierProvider),
-        const SyncState.error('Session expirée, veuillez vous reconnecter'),
+        const SyncState.error(SyncNotifier.reauthRequiredMessage),
       );
+      verifyNever(() => mockAuthRepository.logout());
+    });
+
+    test('reconnexion requise -> aucun appel réseau', () async {
+      // Arrange
+      await ParcelleLocalRepository().createParcelle(nomParcelle: 'En attente');
+      when(() => mockSessionService.isReauthRequired())
+          .thenAnswer((_) async => true);
+
+      // Act
+      await container.read(syncNotifierProvider.notifier).syncData();
+
+      // Assert
+      verifyNever(() => mockSyncRemoteDatasource.syncParcelles(any()));
+      expect(
+        container.read(syncNotifierProvider),
+        const SyncState.error(SyncNotifier.reauthRequiredMessage),
+      );
+    });
+
+    test('parcelles associées par client_uuid, pas par position (P1.9)',
+        () async {
+      // Arrange
+      final parcelleRepo = ParcelleLocalRepository();
+      final nouvelle = await parcelleRepo.createParcelle(nomParcelle: 'Nouvelle');
+      // Parcelle créée avant l'introduction de client_uuid.
+      final ancienne = ParcelleLocal()
+        ..nomParcelle = 'Ancienne'
+        ..createdAt = DateTime(2025, 11, 2);
+      final db = IsarService.instance.db;
+      await db.writeTxn(() => db.parcelleLocals.put(ancienne));
+
+      late List<Map<String, dynamic>> sent;
+      when(() => mockSyncRemoteDatasource.syncParcelles(any()))
+          .thenAnswer((invocation) async {
+        final body = invocation.positionalArguments.first as Map<String, dynamic>;
+        sent = (body['parcelles'] as List).cast<Map<String, dynamic>>();
+        // Le serveur répond dans l'ordre inverse.
+        return {
+          'parcelles': [
+            for (final (index, item) in sent.indexed.toList().reversed)
+              {'id': 100 + index, 'client_uuid': item['client_uuid']},
+          ],
+        };
+      });
+
+      // Act
+      await container.read(syncNotifierProvider.notifier).syncData();
+
+      // Assert
+      expect(container.read(syncNotifierProvider), const SyncState.success());
+      for (final local in [nouvelle, ancienne]) {
+        final stored = (await db.parcelleLocals.get(local.id))!;
+        final sentIndex =
+            sent.indexWhere((item) => item['client_uuid'] == stored.clientUuid);
+        expect(stored.clientUuid, isNotNull);
+        expect(sentIndex, isNot(-1));
+        expect(stored.isSynced, isTrue);
+        expect(stored.serverId, 100 + sentIndex);
+      }
+    });
+
+    test('diagnostic envoyé avec son client_uuid, celui de la parcelle et la certitude',
+        () async {
+      // Arrange
+      final parcelleRepo = ParcelleLocalRepository();
+      final parcelle = await parcelleRepo.createParcelle(nomParcelle: 'Sud');
+      await parcelleRepo.markAsSynced(parcelle.id, 7);
+      final diagnostic = await DiagnosticLocalRepository().saveDiagnostic(
+        parcelleLocalId: parcelle.id,
+        maladieDetectee: 'Brown spot',
+        certitude: 'probable',
+        niveauGravite: 'moins_tiers',
+      );
+
+      late Map<String, dynamic> sent;
+      when(() => mockSyncRemoteDatasource.syncDiagnostics(any()))
+          .thenAnswer((invocation) async {
+        final body = invocation.positionalArguments.first as Map<String, dynamic>;
+        sent = (body['diagnostics'] as List).cast<Map<String, dynamic>>().single;
+        return {
+          'diagnostics': [
+            {'id': 55, 'client_uuid': sent['client_uuid']},
+          ],
+        };
+      });
+
+      // Act
+      await container.read(syncNotifierProvider.notifier).syncData();
+
+      // Assert
+      final db = IsarService.instance.db;
+      final stored = (await db.diagnosticLocals.get(diagnostic.id))!;
+      final storedParcelle = (await db.parcelleLocals.get(parcelle.id))!;
+      expect(sent['client_uuid'], stored.clientUuid);
+      expect(sent['parcelle_client_uuid'], storedParcelle.clientUuid);
+      expect(sent['parcelle_id'], 7);
+      expect(sent['certitude'], 'probable');
+      expect(stored.isSynced, isTrue);
+      expect(stored.serverId, 55);
     });
   });
 }

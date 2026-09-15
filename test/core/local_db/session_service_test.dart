@@ -12,7 +12,7 @@ void main() {
   setUpAll(() {
     TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
         .setMockMethodCallHandler(channel, (MethodCall call) async {
-      final args = call.arguments as Map<String, dynamic>;
+      final args = Map<String, dynamic>.from(call.arguments as Map);
       switch (call.method) {
         case 'write':
           storage[args['key'] as String] =
@@ -85,12 +85,40 @@ void main() {
       expect(isLoggedIn, isTrue);
     });
 
-    test('clearSession() supprime toutes les cles', () async {
+    test('saveSession() conserve le jeton de rafraîchissement', () async {
+      await SessionService.instance.saveSession(
+        token: 'jwt-token',
+        tokenType: 'bearer',
+        refreshToken: 'refresh-1',
+      );
+
+      expect(await SessionService.instance.getRefreshToken(), 'refresh-1');
+    });
+
+    test('une nouvelle connexion lève la demande de reconnexion', () async {
+      await SessionService.instance.markReauthRequired();
+      expect(await SessionService.instance.isReauthRequired(), isTrue);
+
+      await SessionService.instance.saveSession(
+        token: 'jwt-token',
+        tokenType: 'bearer',
+        refreshToken: 'refresh-2',
+      );
+
+      expect(await SessionService.instance.isReauthRequired(), isFalse);
+    });
+
+    test('clearSession() supprime jetons et profil, garde langue et onboarding',
+        () async {
       // Arrange
+      await SessionService.instance.saveLocaleCode('mg');
+      await SessionService.instance.setOnboardingDone(true);
       await SessionService.instance.saveSession(
         token: 'jwt-token',
         tokenType: 'Bearer',
+        refreshToken: 'refresh-1',
       );
+      await SessionService.instance.markReauthRequired();
       await SessionService.instance.saveProfile(
         userId: 1,
         nom: 'Rakoto',
@@ -103,7 +131,8 @@ void main() {
       await SessionService.instance.clearSession();
 
       // Assert
-      expect(storage, isEmpty);
+      expect(storage, {'app_locale': 'mg', 'onboarding_done': 'true'});
+      expect(await SessionService.instance.isLoggedIn(), isFalse);
     });
   });
 }

@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dio/dio.dart';
 import 'package:fpdart/fpdart.dart';
 
@@ -90,6 +92,7 @@ class AuthRepositoryImpl implements AuthRepository {
       await _sessionService.saveSession(
         token: token.accessToken,
         tokenType: token.tokenType,
+        refreshToken: token.refreshToken,
       );
 
       final profileJsonRaw = await _remote.getMe(
@@ -150,7 +153,29 @@ class AuthRepositoryImpl implements AuthRepository {
 
   @override
   Future<Either<Failure, Unit>> logout() async {
+    String? refreshToken;
+    try {
+      refreshToken = await _sessionService.getRefreshToken();
+    } catch (e, st) {
+      AppLogger.error('Lecture du jeton de rafraîchissement impossible',
+          error: e, stackTrace: st);
+    }
+
     await _sessionService.clearSession();
+
+    if (refreshToken != null && refreshToken.isNotEmpty) {
+      // Révocation côté serveur au mieux : hors ligne, la déconnexion locale
+      // suffit et ne doit pas attendre le délai réseau.
+      unawaited(
+        _remote.logout({'refresh_token': refreshToken}).catchError(
+          (Object e, StackTrace st) => AppLogger.error(
+            'Révocation serveur de la session impossible',
+            error: e,
+            stackTrace: st,
+          ),
+        ),
+      );
+    }
     return const Right(unit);
   }
 }

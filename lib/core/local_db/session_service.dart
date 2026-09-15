@@ -1,5 +1,5 @@
 // Service de session locale sécurisée
-// Stocke le token JWT et le profil utilisateur dans flutter_secure_storage
+// Stocke les jetons et le profil utilisateur dans flutter_secure_storage
 // (données chiffrées sur l'appareil — non accessible sans déverrouillage)
 // Permet à l'agriculteur de rester connecté sans internet.
 
@@ -20,6 +20,8 @@ class SessionService {
   // Clés de stockage
   static const _keyToken = 'auth_token';
   static const _keyTokenType = 'auth_token_type';
+  static const _keyRefreshToken = 'auth_refresh_token';
+  static const _keyReauthRequired = 'auth_reauth_required';
   static const _keyUserId = 'user_id';
   static const _keyNom = 'user_nom';
   static const _keyPrenom = 'user_prenom';
@@ -30,13 +32,21 @@ class SessionService {
 
   // --- Sauvegarde (après connexion internet réussie) ---
 
+  /// Enregistre les jetons reçus du serveur et lève l'éventuelle demande de
+  /// reconnexion. Sans jeton de rafraîchissement, l'ancien est supprimé.
   Future<void> saveSession({
     required String token,
     required String tokenType,
+    String? refreshToken,
   }) async {
     await Future.wait([
       _storage.write(key: _keyToken, value: token),
       _storage.write(key: _keyTokenType, value: tokenType),
+      if (refreshToken != null)
+        _storage.write(key: _keyRefreshToken, value: refreshToken)
+      else
+        _storage.delete(key: _keyRefreshToken),
+      _storage.delete(key: _keyReauthRequired),
     ]);
   }
 
@@ -60,6 +70,7 @@ class SessionService {
 
   Future<String?> getToken() => _storage.read(key: _keyToken);
   Future<String?> getTokenType() => _storage.read(key: _keyTokenType);
+  Future<String?> getRefreshToken() => _storage.read(key: _keyRefreshToken);
   Future<int?> getUserId() async {
     final v = await _storage.read(key: _keyUserId);
     return v != null ? int.tryParse(v) : null;
@@ -93,6 +104,20 @@ class SessionService {
     return token != null && token.isNotEmpty;
   }
 
+  // --- Reconnexion requise (tâche P1.8) ---
+
+  /// Le serveur a refusé le jeton de rafraîchissement. L'agriculteur garde
+  /// l'accès à ses données locales ; seule la synchronisation attend qu'il se
+  /// reconnecte.
+  Future<void> markReauthRequired() {
+    return _storage.write(key: _keyReauthRequired, value: 'true');
+  }
+
+  Future<bool> isReauthRequired() async {
+    final value = await _storage.read(key: _keyReauthRequired);
+    return value == 'true';
+  }
+
   /// Retourne le profil complet de l'utilisateur en mémoire
   Future<Map<String, String?>> getProfile() async {
     return {
@@ -105,17 +130,19 @@ class SessionService {
 
   // --- Déconnexion ---
 
+  /// Supprime les jetons et le profil. La langue choisie et l'onboarding déjà
+  /// vu sont des préférences de l'appareil : ils sont conservés (tâche P1.8).
   Future<void> clearSession() async {
     await Future.wait([
       _storage.delete(key: _keyToken),
       _storage.delete(key: _keyTokenType),
+      _storage.delete(key: _keyRefreshToken),
+      _storage.delete(key: _keyReauthRequired),
       _storage.delete(key: _keyUserId),
       _storage.delete(key: _keyNom),
       _storage.delete(key: _keyPrenom),
       _storage.delete(key: _keyTel),
       _storage.delete(key: _keyRegion),
-      _storage.delete(key: _keyLocale),
-      _storage.delete(key: _keyOnboardingDone),
     ]);
   }
 }
