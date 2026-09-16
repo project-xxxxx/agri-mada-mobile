@@ -253,7 +253,7 @@ class AppLocalizationsMg extends AppLocalizations {
   String get scanCertaintyProbable => 'Tena mety ho izy';
 
   @override
-  String get scanCertaintyPossible => 'Mety ho izy, mila hamafisina';
+  String get scanCertaintyPossible => 'Soso-kevitra tokony hamafisina';
 
   @override
   String get scanCertaintyUncertain => 'Vokatra tsy azo antoka';
@@ -264,7 +264,7 @@ class AppLocalizationsMg extends AppLocalizations {
 
   @override
   String get scanCertaintyExplainPossible =>
-      'Mifanahaka ny aretina maromaro amin\'ity sary ity. Asao teknisianina momba ny fambolena hanamafy.';
+      'Modely mbola andrana : matetika diso amin\'ny sary nalaina tany an-tsaha. Soso-kevitra fotsiny ity fa tsy fitiliana. Asao teknisianina momba ny fambolena hanamafy alohan\'ny hanaovana zavatra.';
 
   @override
   String get scanUncertainTitle => 'Tsy fantatry ny rindranasa ity sary ity';
@@ -993,4 +993,78 @@ class AppLocalizationsMg extends AppLocalizations {
 
   @override
   String get syncInProgress => 'Fandefasana ny angona…';
+
+  @override
+  String get scanAskTechnician => 'Manontany teknisianina';
+
+  @override
+  String get scanAskTechnicianMessage =>
+      'Manao ahoana, tsy nahafantatra tsara ny olana amin\'ny variko ny fampiharana AgriMada. Azonao jerena ve ny sary ?';
+
+  @override
+  String scanAskTechnicianCandidates(String candidates) {
+    return 'Soso-kevitry ny fampiharana, tsy voamarina : $candidates';
+  }
+
+  @override
+  String get journalFilterAll => 'Rehetra';
+
+  @override
+  String get journalFilterLastSevenDays => '7 andro farany';
+
+  @override
+  String get journalFilterSevere => 'Mihoatra ny ampahatelony voa';
+
+  @override
+  String get journalFilterHealthy => 'Salama';
+
+  @override
+  String get journalFilterEmpty =>
+      'Tsy misy fanadihadiana mifanaraka amin\'ity sivana ity';
+
+  @override
+  String get errorInvalidCredentials =>
+      'Diso ny laharana finday na ny teny miafina';
+
+  @override
+  String get errorTooManyAttempts =>
+      'Andrana be loatra. Andramo indray afaka minitra vitsivitsy.';
+
+  @override
+  String get errorPhoneAlreadyUsed =>
+      'Efa manana kaonty ity laharana finday ity';
+
+  @override
+  String get errorInvalidData => 'Diso ny fampahalalana. Hamarino ireo saha.';
+
+  @override
+  String get errorOffline => 'Tsy misy aterineto';
+
+  @override
+  String get errorTimeout => 'Ela loatra ny valin\'ny mpizara. Andramo indray.';
+
+  @override
+  String get errorSessionExpired => 'Midira indray mba handefasana ny angonao';
+
+  @override
+  String get errorServer =>
+      'Nisy olana tamin\'ny mpizara. Andramo indray any aoriana.';
+
+  @override
+  String get errorUnknown => 'Nisy hadisoana. Andramo indray.';
+
+  @override
+  String get syncErrorServerUnreachable =>
+      'Tsy tratra ny mpizara. Hamarino ny fifandraisana na ny adiresin\'ny mpizara.';
+
+  @override
+  String get syncErrorFailed =>
+      'Tsy nahomby ny fandefasana. Hanandrana indray rehefa misy tambajotra.';
+
+  @override
+  String get resetPasswordRequestSent =>
+      'Raha misy kaonty mifandray amin\'ity laharana ity, dia halefa ny torolalana.';
+
+  @override
+  String get journalStatusToConfirm => 'Tokony hamafisina';
 }

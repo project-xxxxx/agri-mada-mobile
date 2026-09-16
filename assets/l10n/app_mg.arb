@@ -75,10 +75,10 @@
   "scanShareCertainty": "Fahatokisana: {value}",
   "scanShareDate": "Daty: {date}",
   "scanCertaintyProbable": "Tena mety ho izy",
-  "scanCertaintyPossible": "Mety ho izy, mila hamafisina",
+  "scanCertaintyPossible": "Soso-kevitra tokony hamafisina",
   "scanCertaintyUncertain": "Vokatra tsy azo antoka",
   "scanCertaintyExplainProbable": "Mazava tsara ireo soritr'aretina fantarina. Hamarino eo amin'ny zavamaniry alohan'ny hanaovana zavatra.",
-  "scanCertaintyExplainPossible": "Mifanahaka ny aretina maromaro amin'ity sary ity. Asao teknisianina momba ny fambolena hanamafy.",
+  "scanCertaintyExplainPossible": "Modely mbola andrana : matetika diso amin'ny sary nalaina tany an-tsaha. Soso-kevitra fotsiny ity fa tsy fitiliana. Asao teknisianina momba ny fambolena hanamafy alohan'ny hanaovana zavatra.",
   "scanUncertainTitle": "Tsy fantatry ny rindranasa ity sary ity",
   "scanUncertainBody": "Mety tsy vary izy, na manjavozavo na tsy ampy hazavana ny sary. Tsy misy aretina voatazona ary tsy misy voatahiry.",
   "scanRetakeTips": "Ho an'ny sary vaovao: ravina iray mazava tsara, 20-30 cm, amin'ny hazavana voajanahary, tsy manoloana ny masoandro.",
@@ -319,5 +319,29 @@
   "registerPasswordMismatch": "Tsy mitovy ny teny miafina roa",
 
   "splashLogoSemantics": "Sary famantarana AgriMada",
-  "syncInProgress": "Fandefasana ny angona…"
+  "syncInProgress": "Fandefasana ny angona…",
+
+  "scanAskTechnician": "Manontany teknisianina",
+  "scanAskTechnicianMessage": "Manao ahoana, tsy nahafantatra tsara ny olana amin'ny variko ny fampiharana AgriMada. Azonao jerena ve ny sary ?",
+  "scanAskTechnicianCandidates": "Soso-kevitry ny fampiharana, tsy voamarina : {candidates}",
+
+  "journalFilterAll": "Rehetra",
+  "journalFilterLastSevenDays": "7 andro farany",
+  "journalFilterSevere": "Mihoatra ny ampahatelony voa",
+  "journalFilterHealthy": "Salama",
+  "journalFilterEmpty": "Tsy misy fanadihadiana mifanaraka amin'ity sivana ity",
+
+  "errorInvalidCredentials": "Diso ny laharana finday na ny teny miafina",
+  "errorTooManyAttempts": "Andrana be loatra. Andramo indray afaka minitra vitsivitsy.",
+  "errorPhoneAlreadyUsed": "Efa manana kaonty ity laharana finday ity",
+  "errorInvalidData": "Diso ny fampahalalana. Hamarino ireo saha.",
+  "errorOffline": "Tsy misy aterineto",
+  "errorTimeout": "Ela loatra ny valin'ny mpizara. Andramo indray.",
+  "errorSessionExpired": "Midira indray mba handefasana ny angonao",
+  "errorServer": "Nisy olana tamin'ny mpizara. Andramo indray any aoriana.",
+  "errorUnknown": "Nisy hadisoana. Andramo indray.",
+  "syncErrorServerUnreachable": "Tsy tratra ny mpizara. Hamarino ny fifandraisana na ny adiresin'ny mpizara.",
+  "syncErrorFailed": "Tsy nahomby ny fandefasana. Hanandrana indray rehefa misy tambajotra.",
+  "resetPasswordRequestSent": "Raha misy kaonty mifandray amin'ity laharana ity, dia halefa ny torolalana.",
+  "journalStatusToConfirm": "Tokony hamafisina"
 }

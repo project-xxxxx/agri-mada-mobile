@@ -545,7 +545,7 @@ abstract class AppLocalizations {
   /// Certitude : classe en tête mais proche d'autres
   ///
   /// In fr, this message translates to:
-  /// **'Diagnostic possible, à confirmer'**
+  /// **'Piste à confirmer'**
   String get scanCertaintyPossible;
 
   /// Certitude : aucune maladie retenue
@@ -563,7 +563,7 @@ abstract class AppLocalizations {
   /// Explication certitude possible
   ///
   /// In fr, this message translates to:
-  /// **'Plusieurs maladies se ressemblent sur cette photo. Faites confirmer par un technicien agricole.'**
+  /// **'Modèle expérimental : il se trompe souvent sur les photos prises au champ. Ce résultat est une piste, pas un diagnostic. Faites-le confirmer par un technicien agricole avant d\'agir.'**
   String get scanCertaintyExplainPossible;
 
   /// Titre résultat incertain
@@ -1891,6 +1891,132 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Synchronisation…'**
   String get syncInProgress;
+
+  /// No description provided for @scanAskTechnician.
+  ///
+  /// In fr, this message translates to:
+  /// **'Demander à un technicien'**
+  String get scanAskTechnician;
+
+  /// No description provided for @scanAskTechnicianMessage.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bonjour, l\'application AgriMada n\'a pas pu identifier avec certitude le problème sur mon riz. Pouvez-vous regarder la photo ?'**
+  String get scanAskTechnicianMessage;
+
+  /// Maladies évoquées par le modèle, transmises au technicien
+  ///
+  /// In fr, this message translates to:
+  /// **'Pistes de l\'application, non confirmées : {candidates}'**
+  String scanAskTechnicianCandidates(String candidates);
+
+  /// No description provided for @journalFilterAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous'**
+  String get journalFilterAll;
+
+  /// No description provided for @journalFilterLastSevenDays.
+  ///
+  /// In fr, this message translates to:
+  /// **'7 derniers jours'**
+  String get journalFilterLastSevenDays;
+
+  /// No description provided for @journalFilterSevere.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus d\'un tiers touché'**
+  String get journalFilterSevere;
+
+  /// No description provided for @journalFilterHealthy.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sains'**
+  String get journalFilterHealthy;
+
+  /// No description provided for @journalFilterEmpty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune analyse ne correspond à ce filtre'**
+  String get journalFilterEmpty;
+
+  /// No description provided for @errorInvalidCredentials.
+  ///
+  /// In fr, this message translates to:
+  /// **'Numéro de téléphone ou mot de passe incorrect'**
+  String get errorInvalidCredentials;
+
+  /// No description provided for @errorTooManyAttempts.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trop de tentatives. Réessayez dans quelques minutes.'**
+  String get errorTooManyAttempts;
+
+  /// No description provided for @errorPhoneAlreadyUsed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce numéro de téléphone a déjà un compte'**
+  String get errorPhoneAlreadyUsed;
+
+  /// No description provided for @errorInvalidData.
+  ///
+  /// In fr, this message translates to:
+  /// **'Informations invalides. Vérifiez les champs.'**
+  String get errorInvalidData;
+
+  /// No description provided for @errorOffline.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de connexion internet'**
+  String get errorOffline;
+
+  /// No description provided for @errorTimeout.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le serveur met trop de temps à répondre. Réessayez.'**
+  String get errorTimeout;
+
+  /// No description provided for @errorSessionExpired.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reconnectez-vous pour synchroniser vos données'**
+  String get errorSessionExpired;
+
+  /// No description provided for @errorServer.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le serveur a rencontré un problème. Réessayez plus tard.'**
+  String get errorServer;
+
+  /// No description provided for @errorUnknown.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une erreur est survenue. Réessayez.'**
+  String get errorUnknown;
+
+  /// No description provided for @syncErrorServerUnreachable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Serveur injoignable. Vérifiez la connexion ou l\'adresse du serveur.'**
+  String get syncErrorServerUnreachable;
+
+  /// No description provided for @syncErrorFailed.
+  ///
+  /// In fr, this message translates to:
+  /// **'La synchronisation a échoué. Nouvel essai au retour du réseau.'**
+  String get syncErrorFailed;
+
+  /// No description provided for @resetPasswordRequestSent.
+  ///
+  /// In fr, this message translates to:
+  /// **'Si ce numéro est associé à un compte, des instructions seront envoyées.'**
+  String get resetPasswordRequestSent;
+
+  /// No description provided for @journalStatusToConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'À confirmer'**
+  String get journalStatusToConfirm;
 }
 
 class _AppLocalizationsDelegate

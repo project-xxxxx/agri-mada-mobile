@@ -166,13 +166,13 @@
   },
   "scanCertaintyProbable": "Diagnostic probable",
   "@scanCertaintyProbable": { "description": "Certitude : classe nettement en tête" },
-  "scanCertaintyPossible": "Diagnostic possible, à confirmer",
+  "scanCertaintyPossible": "Piste à confirmer",
   "@scanCertaintyPossible": { "description": "Certitude : classe en tête mais proche d'autres" },
   "scanCertaintyUncertain": "Résultat incertain",
   "@scanCertaintyUncertain": { "description": "Certitude : aucune maladie retenue" },
   "scanCertaintyExplainProbable": "Les symptômes reconnus sont nets. Vérifiez sur la plante avant d'agir.",
   "@scanCertaintyExplainProbable": { "description": "Explication certitude probable" },
-  "scanCertaintyExplainPossible": "Plusieurs maladies se ressemblent sur cette photo. Faites confirmer par un technicien agricole.",
+  "scanCertaintyExplainPossible": "Modèle expérimental : il se trompe souvent sur les photos prises au champ. Ce résultat est une piste, pas un diagnostic. Faites-le confirmer par un technicien agricole avant d'agir.",
   "@scanCertaintyExplainPossible": { "description": "Explication certitude possible" },
   "scanUncertainTitle": "L'application ne reconnaît pas cette photo",
   "@scanUncertainTitle": { "description": "Titre résultat incertain" },
@@ -621,5 +621,33 @@
   "registerPasswordMismatch": "Les mots de passe ne correspondent pas",
 
   "splashLogoSemantics": "Logo AgriMada",
-  "syncInProgress": "Synchronisation…"
+  "syncInProgress": "Synchronisation…",
+
+  "scanAskTechnician": "Demander à un technicien",
+  "scanAskTechnicianMessage": "Bonjour, l'application AgriMada n'a pas pu identifier avec certitude le problème sur mon riz. Pouvez-vous regarder la photo ?",
+  "scanAskTechnicianCandidates": "Pistes de l'application, non confirmées : {candidates}",
+  "@scanAskTechnicianCandidates": {
+    "description": "Maladies évoquées par le modèle, transmises au technicien",
+    "placeholders": { "candidates": { "type": "String" } }
+  },
+
+  "journalFilterAll": "Tous",
+  "journalFilterLastSevenDays": "7 derniers jours",
+  "journalFilterSevere": "Plus d'un tiers touché",
+  "journalFilterHealthy": "Sains",
+  "journalFilterEmpty": "Aucune analyse ne correspond à ce filtre",
+
+  "errorInvalidCredentials": "Numéro de téléphone ou mot de passe incorrect",
+  "errorTooManyAttempts": "Trop de tentatives. Réessayez dans quelques minutes.",
+  "errorPhoneAlreadyUsed": "Ce numéro de téléphone a déjà un compte",
+  "errorInvalidData": "Informations invalides. Vérifiez les champs.",
+  "errorOffline": "Pas de connexion internet",
+  "errorTimeout": "Le serveur met trop de temps à répondre. Réessayez.",
+  "errorSessionExpired": "Reconnectez-vous pour synchroniser vos données",
+  "errorServer": "Le serveur a rencontré un problème. Réessayez plus tard.",
+  "errorUnknown": "Une erreur est survenue. Réessayez.",
+  "syncErrorServerUnreachable": "Serveur injoignable. Vérifiez la connexion ou l'adresse du serveur.",
+  "syncErrorFailed": "La synchronisation a échoué. Nouvel essai au retour du réseau.",
+  "resetPasswordRequestSent": "Si ce numéro est associé à un compte, des instructions seront envoyées.",
+  "journalStatusToConfirm": "À confirmer"
 }

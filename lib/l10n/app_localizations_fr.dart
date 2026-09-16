@@ -250,7 +250,7 @@ class AppLocalizationsFr extends AppLocalizations {
   String get scanCertaintyProbable => 'Diagnostic probable';
 
   @override
-  String get scanCertaintyPossible => 'Diagnostic possible, à confirmer';
+  String get scanCertaintyPossible => 'Piste à confirmer';
 
   @override
   String get scanCertaintyUncertain => 'Résultat incertain';
@@ -261,7 +261,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get scanCertaintyExplainPossible =>
-      'Plusieurs maladies se ressemblent sur cette photo. Faites confirmer par un technicien agricole.';
+      'Modèle expérimental : il se trompe souvent sur les photos prises au champ. Ce résultat est une piste, pas un diagnostic. Faites-le confirmer par un technicien agricole avant d\'agir.';
 
   @override
   String get scanUncertainTitle =>
@@ -990,4 +990,78 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get syncInProgress => 'Synchronisation…';
+
+  @override
+  String get scanAskTechnician => 'Demander à un technicien';
+
+  @override
+  String get scanAskTechnicianMessage =>
+      'Bonjour, l\'application AgriMada n\'a pas pu identifier avec certitude le problème sur mon riz. Pouvez-vous regarder la photo ?';
+
+  @override
+  String scanAskTechnicianCandidates(String candidates) {
+    return 'Pistes de l\'application, non confirmées : $candidates';
+  }
+
+  @override
+  String get journalFilterAll => 'Tous';
+
+  @override
+  String get journalFilterLastSevenDays => '7 derniers jours';
+
+  @override
+  String get journalFilterSevere => 'Plus d\'un tiers touché';
+
+  @override
+  String get journalFilterHealthy => 'Sains';
+
+  @override
+  String get journalFilterEmpty => 'Aucune analyse ne correspond à ce filtre';
+
+  @override
+  String get errorInvalidCredentials =>
+      'Numéro de téléphone ou mot de passe incorrect';
+
+  @override
+  String get errorTooManyAttempts =>
+      'Trop de tentatives. Réessayez dans quelques minutes.';
+
+  @override
+  String get errorPhoneAlreadyUsed => 'Ce numéro de téléphone a déjà un compte';
+
+  @override
+  String get errorInvalidData => 'Informations invalides. Vérifiez les champs.';
+
+  @override
+  String get errorOffline => 'Pas de connexion internet';
+
+  @override
+  String get errorTimeout =>
+      'Le serveur met trop de temps à répondre. Réessayez.';
+
+  @override
+  String get errorSessionExpired =>
+      'Reconnectez-vous pour synchroniser vos données';
+
+  @override
+  String get errorServer =>
+      'Le serveur a rencontré un problème. Réessayez plus tard.';
+
+  @override
+  String get errorUnknown => 'Une erreur est survenue. Réessayez.';
+
+  @override
+  String get syncErrorServerUnreachable =>
+      'Serveur injoignable. Vérifiez la connexion ou l\'adresse du serveur.';
+
+  @override
+  String get syncErrorFailed =>
+      'La synchronisation a échoué. Nouvel essai au retour du réseau.';
+
+  @override
+  String get resetPasswordRequestSent =>
+      'Si ce numéro est associé à un compte, des instructions seront envoyées.';
+
+  @override
+  String get journalStatusToConfirm => 'À confirmer';
 }
