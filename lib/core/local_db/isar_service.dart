@@ -8,6 +8,8 @@ import 'package:path_provider/path_provider.dart';
 import 'models/user_local.dart';
 import 'models/parcelle_local.dart';
 import 'models/diagnostic_local.dart';
+import 'models/diagnostic_session_local.dart';
+import 'models/observation_local.dart';
 
 class IsarService {
   IsarService._();
@@ -30,7 +32,13 @@ class IsarService {
 
     final dir = await getApplicationDocumentsDirectory();
     _isar = await Isar.open(
-      [UserLocalSchema, ParcelleLocalSchema, DiagnosticLocalSchema],
+      [
+        UserLocalSchema,
+        ParcelleLocalSchema,
+        DiagnosticLocalSchema,
+        DiagnosticSessionLocalSchema,
+        ObservationLocalSchema,
+      ],
       directory: dir.path,
       name: 'agrimada_local',
     );

@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'app/app.dart';
 import 'core/ai/tflite_service.dart';
 import 'core/local_db/isar_service.dart';
+import 'core/local_db/migrations/session_migration.dart';
 import 'core/local_db/session_service.dart';
 import 'core/providers/locale_provider.dart';
 import 'core/providers/tflite_provider.dart';
@@ -14,6 +15,8 @@ void main() async {
 
   // --- Initialisation des services hors-ligne ---
   await IsarService.instance.init();
+  // Les diagnostics de l'ancienne version deviennent des sessions (tâche P2.3).
+  await migrerDiagnosticsVersSessions(IsarService.instance.db);
 
   final localeCode = await SessionService.instance.getLocaleCode() ?? 'fr';
   final initialLocale = Locale(localeCode);
