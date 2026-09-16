@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:riverpod_annotation/riverpod_annotation.dart';
 
 import '../../../core/errors/failure.dart';
-import '../../../core/local_db/models/diagnostic_local.dart';
+import '../../../core/local_db/models/diagnostic_session_local.dart';
 import '../../../core/local_db/models/parcelle_local.dart';
 import '../../../core/utils/logger.dart';
 import '../../../features/auth/presentation/providers/auth_provider.dart'
@@ -15,15 +15,14 @@ import '../../../features/auth/presentation/providers/session_provider.dart'
     show sessionServiceProvider;
 import '../../../features/journal/presentation/providers/journal_provider.dart'
     show parcelleRepositoryProvider;
-import '../../../features/scan/presentation/providers/scan_provider.dart'
-    show diagnosticRepositoryProvider;
+import '../../../features/scan/presentation/providers/session_scan_provider.dart'
+    show sessionRepositoryProvider;
 import '../data/datasources/sync_remote_datasource.dart';
 
 part 'sync_provider.g.dart';
 
-/// Alias providers for sync layer readability
+/// Alias provider pour la lisibilité de la couche de synchronisation.
 final parcelleLocalRepositoryProvider = parcelleRepositoryProvider;
-final diagnosticLocalRepositoryProvider = diagnosticRepositoryProvider;
 
 sealed class SyncState {
   const SyncState();
@@ -139,7 +138,7 @@ class SyncNotifier extends _$SyncNotifier {
 
     for (var attempt = 1; attempt <= _maxAttempts; attempt++) {
       try {
-        await _syncParcellesAndDiagnostics();
+        await _syncParcellesEtSessions();
         state = const SyncState.success();
         return;
       } on DioException catch (e, st) {
@@ -186,12 +185,12 @@ class SyncNotifier extends _$SyncNotifier {
     }
   }
 
-  /// Envoie parcelles puis diagnostics. Chaque élément porte un client_uuid :
-  /// un renvoi après une réponse perdue ne crée pas de doublon, et la réponse
-  /// est associée par identifiant, jamais par position (tâche P1.9).
-  Future<void> _syncParcellesAndDiagnostics() async {
+  /// Envoie parcelles puis sessions de scan. Chaque élément porte un
+  /// client_uuid : un renvoi après une réponse perdue ne crée pas de doublon,
+  /// et la réponse est associée par identifiant, jamais par position (P1.9).
+  Future<void> _syncParcellesEtSessions() async {
     final parcelleRepo = ref.read(parcelleLocalRepositoryProvider);
-    final diagnosticRepo = ref.read(diagnosticLocalRepositoryProvider);
+    final sessionRepo = ref.read(sessionRepositoryProvider);
     final remoteDataSource = ref.read(syncRemoteDatasourceProvider);
 
     final unsyncedParcelles = await parcelleRepo.getUnsyncedParcelles();
@@ -208,6 +207,14 @@ class SyncNotifier extends _$SyncNotifier {
           'surface': parcelle.surface,
           'latitude': parcelle.latitude,
           'longitude': parcelle.longitude,
+          // Contexte de culture (tâche P2.5).
+          'ecosysteme': parcelle.ecosysteme,
+          'region': parcelle.region,
+          'altitude_tranche': parcelle.altitudeTranche,
+          'altitude_metres': parcelle.altitudeMetres,
+          'variete': parcelle.variete,
+          'saison': parcelle.saison,
+          'date_repiquage': parcelle.dateRepiquage?.toUtc().toIso8601String(),
         });
       }
 
@@ -222,30 +229,53 @@ class SyncNotifier extends _$SyncNotifier {
       }
     }
 
-    final unsyncedDiagnostics = await diagnosticRepo.getUnsyncedDiagnostics();
-    if (unsyncedDiagnostics.isEmpty) {
+    final sessions = await sessionRepo.nonSynchronisees();
+    if (sessions.isEmpty) {
       return;
     }
 
-    final localByUuid = <String, DiagnosticLocal>{};
+    final localByUuid = <String, DiagnosticSessionLocal>{};
     final payload = <Map<String, dynamic>>[];
-    for (final diag in unsyncedDiagnostics) {
-      final parcelle = await parcelleRepo.getParcelleById(diag.parcelleLocalId);
-      // Parcelle pas encore connue du serveur : le diagnostic attend la prochaine fois.
-      if (parcelle == null || parcelle.serverId == null) continue;
+    for (final session in sessions) {
+      String? parcelleClientUuid;
+      int? parcelleServerId;
 
-      final clientUuid = await diagnosticRepo.ensureClientUuid(diag);
-      localByUuid[clientUuid] = diag;
+      if (session.parcelleLocalId != null) {
+        final parcelle = await parcelleRepo.getParcelleById(session.parcelleLocalId!);
+        // Parcelle pas encore connue du serveur : la session attend la prochaine fois.
+        if (parcelle == null || parcelle.serverId == null) continue;
+        parcelleClientUuid = await parcelleRepo.ensureClientUuid(parcelle);
+        parcelleServerId = parcelle.serverId;
+      }
+
+      final observations = await sessionRepo.observations(session.id);
+      localByUuid[session.clientUuid] = session;
       payload.add({
-        'client_uuid': clientUuid,
-        'parcelle_client_uuid': await parcelleRepo.ensureClientUuid(parcelle),
-        'parcelle_id': parcelle.serverId,
-        'maladie_detectee': diag.maladieDetectee,
-        'confiance': diag.confiance,
-        'certitude': diag.certitude,
-        'niveau_gravite': diag.niveauGravite,
-        'recommandations': diag.recommandations,
-        'date_diagnostic': diag.dateDiagnostic.toUtc().toIso8601String(),
+        'client_uuid': session.clientUuid,
+        // Une session peut n'avoir aucune parcelle (tâche P2.6).
+        if (parcelleClientUuid != null) 'parcelle_client_uuid': parcelleClientUuid,
+        if (parcelleServerId != null) 'parcelle_id': parcelleServerId,
+        'created_at': session.createdAt.toUtc().toIso8601String(),
+        'stade': session.stade,
+        'ecosysteme': session.ecosysteme,
+        'resultat_fiche_id': session.resultatFicheId,
+        'certitude': session.certitude,
+        'gravite_declaree': session.graviteDeclaree,
+        'classement': session.classement,
+        'statut_validation': session.statutValidation,
+        'observations': [
+          for (final observation in observations)
+            {
+              'client_uuid': observation.clientUuid,
+              'organe': observation.organeCode,
+              'image_path': observation.imagePath,
+              'qualite_nettete': observation.qualiteNettete,
+              'qualite_luminosite': observation.qualiteLuminosite,
+              'top_k': observation.topK,
+              'reponses': observation.reponses,
+              'created_at': observation.createdAt.toUtc().toIso8601String(),
+            },
+        ],
       });
     }
 
@@ -254,12 +284,12 @@ class SyncNotifier extends _$SyncNotifier {
     }
 
     final response = Map<String, dynamic>.from(
-      await remoteDataSource.syncDiagnostics({'diagnostics': payload}) as Map,
+      await remoteDataSource.syncSessions({'sessions': payload}) as Map,
     );
-    final synced = _itemsByClientUuid(response, 'diagnostics');
+    final synced = _itemsByClientUuid(response, 'sessions');
     for (final MapEntry(key: clientUuid, value: local) in localByUuid.entries) {
       if (synced[clientUuid]?['id'] case final int serverId) {
-        await diagnosticRepo.markAsSynced(local.id, serverId);
+        await sessionRepo.marquerSynchronisee(local.id, serverId);
       }
     }
   }

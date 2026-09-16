@@ -18,7 +18,12 @@ from app.deps import get_current_user
 from app.models.user import User
 from app.schemas.parcelle import ParcelleSync, ParcelleSyncResponse
 from app.schemas.diagnostic import DiagnosticSync, DiagnosticSyncResponse
-from app.crud import bulk_upsert_parcelles, bulk_upsert_diagnostics
+from app.schemas.diagnostic_session import SessionSync, SessionSyncResponse
+from app.crud import (
+    bulk_upsert_parcelles,
+    bulk_upsert_diagnostics,
+    bulk_upsert_sessions,
+)
 
 router = APIRouter(prefix="/sync", tags=["Synchronisation"])
 
@@ -90,4 +95,44 @@ def sync_diagnostics(
         message=message,
         diagnostics=processed,
         diagnostics_crees=created,
+    )
+
+
+@router.post(
+    "/sessions",
+    response_model=SessionSyncResponse,
+    summary="Synchroniser les sessions de scan",
+    description=(
+        "Reçoit les sessions de diagnostic multi-photos créées hors ligne, avec "
+        "leurs observations. La parcelle est facultative : une session peut être "
+        "rattachée plus tard. Un renvoi ne crée pas de doublon, mais une photo "
+        "ajoutée après coup rejoint sa session."
+    ),
+)
+def sync_sessions(
+    data: SessionSync,
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user),
+):
+    """Synchronisation en bloc des sessions de scan (tâche P2.3)."""
+    processed, created, skipped, observations_created = bulk_upsert_sessions(
+        db=db,
+        user_id=current_user.id,
+        sessions_data=data.sessions,
+    )
+
+    message = (
+        f"{len(created)} session(s) créée(s), "
+        f"{observations_created} observation(s) ajoutée(s)."
+    )
+    if skipped > 0:
+        message += f" {skipped} ignorée(s) (parcelle introuvable ou non autorisée)."
+
+    return SessionSyncResponse(
+        total_received=len(data.sessions),
+        total_created=len(created),
+        total_skipped=skipped,
+        total_observations_created=observations_created,
+        message=message,
+        sessions=processed,
     )

@@ -14,4 +14,8 @@ abstract class SyncRemoteDatasource {
 
   @POST('/sync/diagnostics')
   Future<dynamic> syncDiagnostics(@Body() Map<String, dynamic> body);
+
+  /// Sessions de scan multi-photos et leurs observations (tâche P2.3).
+  @POST('/sync/sessions')
+  Future<dynamic> syncSessions(@Body() Map<String, dynamic> body);
 }

@@ -8,6 +8,10 @@ from sqlalchemy import engine_from_config, pool
 from app.core.config import settings
 from app.db.session import Base
 from app.models.diagnostic import Diagnostic  # noqa: F401
+from app.models.diagnostic_session import (  # noqa: F401
+    DiagnosticSession,
+    Observation,
+)
 from app.models.parcelle import Parcelle  # noqa: F401
 from app.models.refresh_token import RefreshToken  # noqa: F401
 from app.models.user import User  # noqa: F401

@@ -16,14 +16,18 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:agri_mada/core/constants/api_constants.dart';
 import 'package:agri_mada/core/local_db/isar_service.dart';
-import 'package:agri_mada/core/local_db/models/diagnostic_local.dart';
+import 'package:agri_mada/core/ai/diagnosis_certainty.dart';
+import 'package:agri_mada/core/ai/diagnosis_fusion.dart';
+import 'package:agri_mada/core/local_db/models/diagnostic_session_local.dart';
+import 'package:agri_mada/core/local_db/models/observation_local.dart';
 import 'package:agri_mada/core/local_db/models/parcelle_local.dart';
 import 'package:agri_mada/core/local_db/models/user_local.dart';
 import 'package:agri_mada/core/local_db/session_service.dart';
 import 'package:agri_mada/core/network/dio_client.dart';
 import 'package:agri_mada/core/sync/providers/sync_provider.dart';
 import 'package:agri_mada/features/journal/data/repositories/parcelle_local_repository.dart';
-import 'package:agri_mada/features/scan/data/repositories/diagnostic_local_repository.dart';
+import 'package:agri_mada/features/scan/data/repositories/session_local_repository.dart';
+import 'package:agri_mada/features/scan/domain/entities/organe.dart';
 
 import '../helpers/isar_test_core.dart';
 
@@ -80,7 +84,7 @@ class _Backend implements HttpClientAdapter {
 
     return switch (options.path) {
       '/sync/parcelles' => _json(200, {'parcelles': itemsOf('parcelles', 700)}),
-      '/sync/diagnostics' => _json(200, {'diagnostics': itemsOf('diagnostics', 900)}),
+      '/sync/sessions' => _json(200, {'sessions': itemsOf('sessions', 900)}),
       _ => _json(404, {'detail': 'Route inconnue'}),
     };
   }
@@ -130,7 +134,8 @@ void main() {
   tearDown(() async {
     final db = IsarService.instance.db;
     await db.writeTxn(() async {
-      await db.diagnosticLocals.clear();
+      await db.diagnosticSessionLocals.clear();
+      await db.observationLocals.clear();
       await db.parcelleLocals.clear();
       await db.userLocals.clear();
     });
@@ -160,11 +165,22 @@ void main() {
     );
     await session.saveLocaleCode('mg');
     final parcelle = await parcelles.createParcelle(nomParcelle: 'Tanimbary ambany');
-    final diagnostic = await DiagnosticLocalRepository().saveDiagnostic(
-      parcelleLocalId: parcelle.id,
-      maladieDetectee: 'Brown spot',
-      certitude: 'probable',
-      niveauGravite: 'moins_tiers',
+    final sessions = SessionLocalRepository();
+    final scanSession = await sessions.ouvrirSession(parcelleLocalId: parcelle.id);
+    await sessions.ajouterObservation(
+      sessionId: scanSession.id,
+      organe: Organe.feuille,
+      imagePath: 'feuille.jpg',
+      topK: const [ScoredLabel('Brown spot', 0.62)],
+    );
+    await sessions.enregistrerResultat(
+      sessionId: scanSession.id,
+      fusion: const FusedDiagnosis(
+        classement: [ScoredLabel('Brown spot', 0.62)],
+        certitude: DiagnosisCertainty.possible,
+        nommable: true,
+      ),
+      graviteDeclaree: 'moins_tiers',
     );
 
     final backend = _Backend();
@@ -203,9 +219,9 @@ void main() {
     final storedParcelle = (await parcelles.getParcelleById(parcelle.id))!;
     expect(storedParcelle.isSynced, isTrue);
     expect(storedParcelle.serverId, 700);
-    final storedDiagnostic =
-        (await IsarService.instance.db.diagnosticLocals.get(diagnostic.id))!;
-    expect(storedDiagnostic.isSynced, isTrue);
-    expect(storedDiagnostic.serverId, 900);
+    final storedSession =
+        (await IsarService.instance.db.diagnosticSessionLocals.get(scanSession.id))!;
+    expect(storedSession.isSynced, isTrue);
+    expect(storedSession.serverId, 900);
   });
 }

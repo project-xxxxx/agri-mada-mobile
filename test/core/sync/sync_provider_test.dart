@@ -9,6 +9,11 @@ import 'package:mocktail/mocktail.dart';
 
 import 'package:agri_mada/core/errors/failure.dart';
 import 'package:agri_mada/core/local_db/models/diagnostic_local.dart';
+import 'package:agri_mada/core/ai/diagnosis_certainty.dart';
+import 'package:agri_mada/core/ai/diagnosis_fusion.dart';
+import 'package:agri_mada/core/local_db/models/diagnostic_session_local.dart';
+import 'package:agri_mada/features/scan/data/repositories/session_local_repository.dart';
+import 'package:agri_mada/features/scan/domain/entities/organe.dart';
 import 'package:agri_mada/core/local_db/isar_service.dart';
 import 'package:agri_mada/core/local_db/models/parcelle_local.dart';
 import 'package:agri_mada/core/local_db/models/user_local.dart';
@@ -19,7 +24,6 @@ import 'package:agri_mada/features/auth/data/repositories/auth_repository_impl.d
 import 'package:agri_mada/features/auth/presentation/providers/auth_provider.dart';
 import 'package:agri_mada/features/auth/presentation/providers/session_provider.dart';
 import 'package:agri_mada/features/journal/data/repositories/parcelle_local_repository.dart';
-import 'package:agri_mada/features/scan/data/repositories/diagnostic_local_repository.dart';
 
 import '../../helpers/isar_test_core.dart';
 
@@ -243,26 +247,37 @@ void main() {
       }
     });
 
-    test('diagnostic envoyé avec son client_uuid, celui de la parcelle et la certitude',
-        () async {
+    test('session envoyée avec ses observations, sa parcelle et sa certitude', () async {
       // Arrange
       final parcelleRepo = ParcelleLocalRepository();
       final parcelle = await parcelleRepo.createParcelle(nomParcelle: 'Sud');
       await parcelleRepo.markAsSynced(parcelle.id, 7);
-      final diagnostic = await DiagnosticLocalRepository().saveDiagnostic(
-        parcelleLocalId: parcelle.id,
-        maladieDetectee: 'Brown spot',
-        certitude: 'probable',
-        niveauGravite: 'moins_tiers',
+
+      final sessionRepo = SessionLocalRepository();
+      final session = await sessionRepo.ouvrirSession(parcelleLocalId: parcelle.id);
+      await sessionRepo.ajouterObservation(
+        sessionId: session.id,
+        organe: Organe.feuille,
+        imagePath: 'feuille.jpg',
+        topK: const [ScoredLabel('Brown spot', 0.62)],
+      );
+      await sessionRepo.enregistrerResultat(
+        sessionId: session.id,
+        fusion: const FusedDiagnosis(
+          classement: [ScoredLabel('Brown spot', 0.62)],
+          certitude: DiagnosisCertainty.possible,
+          nommable: true,
+        ),
+        graviteDeclaree: 'moins_tiers',
       );
 
       late Map<String, dynamic> sent;
-      when(() => mockSyncRemoteDatasource.syncDiagnostics(any()))
+      when(() => mockSyncRemoteDatasource.syncSessions(any()))
           .thenAnswer((invocation) async {
         final body = invocation.positionalArguments.first as Map<String, dynamic>;
-        sent = (body['diagnostics'] as List).cast<Map<String, dynamic>>().single;
+        sent = (body['sessions'] as List).cast<Map<String, dynamic>>().single;
         return {
-          'diagnostics': [
+          'sessions': [
             {'id': 55, 'client_uuid': sent['client_uuid']},
           ],
         };
@@ -273,14 +288,59 @@ void main() {
 
       // Assert
       final db = IsarService.instance.db;
-      final stored = (await db.diagnosticLocals.get(diagnostic.id))!;
+      final stored = (await db.diagnosticSessionLocals.get(session.id))!;
       final storedParcelle = (await db.parcelleLocals.get(parcelle.id))!;
       expect(sent['client_uuid'], stored.clientUuid);
       expect(sent['parcelle_client_uuid'], storedParcelle.clientUuid);
       expect(sent['parcelle_id'], 7);
-      expect(sent['certitude'], 'probable');
+      expect(sent['certitude'], 'possible');
+      expect(sent['gravite_declaree'], 'moins_tiers');
+      final observations = (sent['observations'] as List).cast<Map<String, dynamic>>();
+      expect(observations.single['organe'], 'feuille');
       expect(stored.isSynced, isTrue);
       expect(stored.serverId, 55);
+    });
+
+    test('une session sans parcelle part quand même (P2.6)', () async {
+      // Arrange
+      final sessionRepo = SessionLocalRepository();
+      final session = await sessionRepo.ouvrirSession();
+      await sessionRepo.ajouterObservation(
+        sessionId: session.id,
+        organe: Organe.racines,
+        imagePath: 'racines.jpg',
+      );
+      await sessionRepo.enregistrerResultat(
+        sessionId: session.id,
+        fusion: const FusedDiagnosis(
+          classement: [],
+          certitude: DiagnosisCertainty.incertain,
+          nommable: false,
+        ),
+      );
+
+      late Map<String, dynamic> sent;
+      when(() => mockSyncRemoteDatasource.syncSessions(any()))
+          .thenAnswer((invocation) async {
+        final body = invocation.positionalArguments.first as Map<String, dynamic>;
+        sent = (body['sessions'] as List).cast<Map<String, dynamic>>().single;
+        return {
+          'sessions': [
+            {'id': 77, 'client_uuid': sent['client_uuid']},
+          ],
+        };
+      });
+
+      // Act
+      await container.read(syncNotifierProvider.notifier).syncData();
+
+      // Assert
+      expect(sent.containsKey('parcelle_id'), isFalse);
+      expect(sent['resultat_fiche_id'], isNull);
+      final stored = (await IsarService.instance.db.diagnosticSessionLocals
+          .get(session.id))!;
+      expect(stored.isSynced, isTrue);
+      expect(stored.serverId, 77);
     });
   });
 }

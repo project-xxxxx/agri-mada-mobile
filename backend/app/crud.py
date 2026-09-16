@@ -17,6 +17,7 @@ from app.core.security import (
 from app.models.user import User
 from app.models.parcelle import Parcelle
 from app.models.diagnostic import Diagnostic
+from app.models.diagnostic_session import DiagnosticSession, Observation
 from app.models.refresh_token import RefreshToken, utcnow_naive
 
 # Étiquettes du modèle qui désignent une plante saine.
@@ -220,6 +221,13 @@ def bulk_upsert_parcelles(
             "surface": p_data.surface,
             "latitude": p_data.latitude,
             "longitude": p_data.longitude,
+            "ecosysteme": p_data.ecosysteme,
+            "region": p_data.region,
+            "altitude_tranche": p_data.altitude_tranche,
+            "altitude_metres": p_data.altitude_metres,
+            "variete": p_data.variete,
+            "saison": p_data.saison,
+            "date_repiquage": p_data.date_repiquage,
         }
         parcelle = known.get(client_uuid) if client_uuid else None
         if parcelle is None:
@@ -400,3 +408,116 @@ def get_journal_agricole(db: Session, user_id: int) -> list:
         )
 
     return journal
+
+
+def bulk_upsert_sessions(
+    db: Session, user_id: int, sessions_data: list
+) -> Tuple[List[DiagnosticSession], List[DiagnosticSession], int, int]:
+    """
+    Synchronisation des sessions de scan multi-photos (tâche P2.3).
+
+    Idempotente par client_uuid, comme les parcelles et les diagnostics (P1.9).
+    La parcelle est facultative (P2.6) ; si elle est désignée mais inconnue ou
+    appartenant à un autre utilisateur, la session est ignorée. Une session déjà
+    reçue n'est pas modifiée, mais ses nouvelles observations sont ajoutées :
+    un renvoi après une photo de plus fonctionne.
+
+    Retourne (sessions acceptées, sessions créées, ignorées, observations créées).
+    """
+    user_parcelles = get_parcelles_by_user(db, user_id)
+    parcelles_by_id = {p.id: p for p in user_parcelles}
+    parcelles_by_uuid = {p.client_uuid: p for p in user_parcelles if p.client_uuid}
+
+    uuids = {u for s in sessions_data if (u := _normalise_uuid(s.client_uuid))}
+    known = (
+        {
+            s.client_uuid: s
+            for s in db.query(DiagnosticSession).filter(
+                DiagnosticSession.user_id == user_id,
+                DiagnosticSession.client_uuid.in_(uuids),
+            )
+        }
+        if uuids
+        else {}
+    )
+
+    processed: List[DiagnosticSession] = []
+    created: List[DiagnosticSession] = []
+    observations_created = 0
+    skipped = 0
+
+    for s_data in sessions_data:
+        client_uuid = _normalise_uuid(s_data.client_uuid)
+        session = known.get(client_uuid) if client_uuid else None
+
+        if session is None:
+            parcelle = None
+            if s_data.parcelle_client_uuid:
+                parcelle = parcelles_by_uuid.get(
+                    _normalise_uuid(s_data.parcelle_client_uuid)
+                )
+            if parcelle is None and s_data.parcelle_id is not None:
+                parcelle = parcelles_by_id.get(s_data.parcelle_id)
+
+            parcelle_designee = (
+                s_data.parcelle_client_uuid is not None or s_data.parcelle_id is not None
+            )
+            if parcelle_designee and parcelle is None:
+                # Sécurité : parcelle inconnue ou appartenant à un autre utilisateur.
+                skipped += 1
+                continue
+
+            session = DiagnosticSession(
+                user_id=user_id,
+                parcelle_id=parcelle.id if parcelle else None,
+                client_uuid=client_uuid,
+                created_at=s_data.created_at,
+                stade=s_data.stade,
+                ecosysteme=s_data.ecosysteme,
+                resultat_fiche_id=s_data.resultat_fiche_id,
+                certitude=s_data.certitude,
+                gravite_declaree=s_data.gravite_declaree,
+                classement=s_data.classement,
+                statut_validation=s_data.statut_validation or "non_valide",
+            )
+            db.add(session)
+            db.flush()
+            created.append(session)
+            if client_uuid:
+                known[client_uuid] = session
+
+        observations_created += _ajouter_observations(session, s_data.observations)
+        processed.append(session)
+
+    db.commit()
+    _refresh_all(db, processed)
+    return processed, created, skipped, observations_created
+
+
+def _ajouter_observations(session: DiagnosticSession, observations_data: list) -> int:
+    """Ajoute les observations encore inconnues de la session."""
+    deja_connues = {o.client_uuid for o in session.observations if o.client_uuid}
+    ajoutees = 0
+
+    for o_data in observations_data:
+        client_uuid = _normalise_uuid(o_data.client_uuid)
+        if client_uuid and client_uuid in deja_connues:
+            continue
+
+        session.observations.append(
+            Observation(
+                client_uuid=client_uuid,
+                organe=o_data.organe,
+                image_path=o_data.image_path,
+                qualite_nettete=o_data.qualite_nettete,
+                qualite_luminosite=o_data.qualite_luminosite,
+                top_k=o_data.top_k,
+                reponses=o_data.reponses,
+                created_at=o_data.created_at,
+            )
+        )
+        if client_uuid:
+            deja_connues.add(client_uuid)
+        ajoutees += 1
+
+    return ajoutees
