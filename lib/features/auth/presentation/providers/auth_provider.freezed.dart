@@ -21,7 +21,7 @@ mixin _$AuthState {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(UserProfile user) authenticated,
-    required TResult Function(String message) error,
+    required TResult Function(FailureCode code) error,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -29,7 +29,7 @@ mixin _$AuthState {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(UserProfile user)? authenticated,
-    TResult? Function(String message)? error,
+    TResult? Function(FailureCode code)? error,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -37,7 +37,7 @@ mixin _$AuthState {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(UserProfile user)? authenticated,
-    TResult Function(String message)? error,
+    TResult Function(FailureCode code)? error,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -126,7 +126,7 @@ class _$AuthInitialImpl implements AuthInitial {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(UserProfile user) authenticated,
-    required TResult Function(String message) error,
+    required TResult Function(FailureCode code) error,
   }) {
     return initial();
   }
@@ -137,7 +137,7 @@ class _$AuthInitialImpl implements AuthInitial {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(UserProfile user)? authenticated,
-    TResult? Function(String message)? error,
+    TResult? Function(FailureCode code)? error,
   }) {
     return initial?.call();
   }
@@ -148,7 +148,7 @@ class _$AuthInitialImpl implements AuthInitial {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(UserProfile user)? authenticated,
-    TResult Function(String message)? error,
+    TResult Function(FailureCode code)? error,
     required TResult orElse(),
   }) {
     if (initial != null) {
@@ -240,7 +240,7 @@ class _$AuthLoadingImpl implements AuthLoading {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(UserProfile user) authenticated,
-    required TResult Function(String message) error,
+    required TResult Function(FailureCode code) error,
   }) {
     return loading();
   }
@@ -251,7 +251,7 @@ class _$AuthLoadingImpl implements AuthLoading {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(UserProfile user)? authenticated,
-    TResult? Function(String message)? error,
+    TResult? Function(FailureCode code)? error,
   }) {
     return loading?.call();
   }
@@ -262,7 +262,7 @@ class _$AuthLoadingImpl implements AuthLoading {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(UserProfile user)? authenticated,
-    TResult Function(String message)? error,
+    TResult Function(FailureCode code)? error,
     required TResult orElse(),
   }) {
     if (loading != null) {
@@ -391,7 +391,7 @@ class _$AuthAuthenticatedImpl implements AuthAuthenticated {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(UserProfile user) authenticated,
-    required TResult Function(String message) error,
+    required TResult Function(FailureCode code) error,
   }) {
     return authenticated(user);
   }
@@ -402,7 +402,7 @@ class _$AuthAuthenticatedImpl implements AuthAuthenticated {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(UserProfile user)? authenticated,
-    TResult? Function(String message)? error,
+    TResult? Function(FailureCode code)? error,
   }) {
     return authenticated?.call(user);
   }
@@ -413,7 +413,7 @@ class _$AuthAuthenticatedImpl implements AuthAuthenticated {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(UserProfile user)? authenticated,
-    TResult Function(String message)? error,
+    TResult Function(FailureCode code)? error,
     required TResult orElse(),
   }) {
     if (authenticated != null) {
@@ -476,7 +476,7 @@ abstract class _$$AuthErrorImplCopyWith<$Res> {
           _$AuthErrorImpl value, $Res Function(_$AuthErrorImpl) then) =
       __$$AuthErrorImplCopyWithImpl<$Res>;
   @useResult
-  $Res call({String message});
+  $Res call({FailureCode code});
 }
 
 /// @nodoc
@@ -490,13 +490,13 @@ class __$$AuthErrorImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? message = null,
+    Object? code = null,
   }) {
     return _then(_$AuthErrorImpl(
-      null == message
-          ? _value.message
-          : message // ignore: cast_nullable_to_non_nullable
-              as String,
+      null == code
+          ? _value.code
+          : code // ignore: cast_nullable_to_non_nullable
+              as FailureCode,
     ));
   }
 }
@@ -504,14 +504,14 @@ class __$$AuthErrorImplCopyWithImpl<$Res>
 /// @nodoc
 
 class _$AuthErrorImpl implements AuthError {
-  const _$AuthErrorImpl(this.message);
+  const _$AuthErrorImpl(this.code);
 
   @override
-  final String message;
+  final FailureCode code;
 
   @override
   String toString() {
-    return 'AuthState.error(message: $message)';
+    return 'AuthState.error(code: $code)';
   }
 
   @override
@@ -519,11 +519,11 @@ class _$AuthErrorImpl implements AuthError {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$AuthErrorImpl &&
-            (identical(other.message, message) || other.message == message));
+            (identical(other.code, code) || other.code == code));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, message);
+  int get hashCode => Object.hash(runtimeType, code);
 
   @JsonKey(ignore: true)
   @override
@@ -537,9 +537,9 @@ class _$AuthErrorImpl implements AuthError {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function(UserProfile user) authenticated,
-    required TResult Function(String message) error,
+    required TResult Function(FailureCode code) error,
   }) {
-    return error(message);
+    return error(code);
   }
 
   @override
@@ -548,9 +548,9 @@ class _$AuthErrorImpl implements AuthError {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function(UserProfile user)? authenticated,
-    TResult? Function(String message)? error,
+    TResult? Function(FailureCode code)? error,
   }) {
-    return error?.call(message);
+    return error?.call(code);
   }
 
   @override
@@ -559,11 +559,11 @@ class _$AuthErrorImpl implements AuthError {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function(UserProfile user)? authenticated,
-    TResult Function(String message)? error,
+    TResult Function(FailureCode code)? error,
     required TResult orElse(),
   }) {
     if (error != null) {
-      return error(message);
+      return error(code);
     }
     return orElse();
   }
@@ -607,9 +607,9 @@ class _$AuthErrorImpl implements AuthError {
 }
 
 abstract class AuthError implements AuthState {
-  const factory AuthError(final String message) = _$AuthErrorImpl;
+  const factory AuthError(final FailureCode code) = _$AuthErrorImpl;
 
-  String get message;
+  FailureCode get code;
   @JsonKey(ignore: true)
   _$$AuthErrorImplCopyWith<_$AuthErrorImpl> get copyWith =>
       throw _privateConstructorUsedError;
@@ -622,7 +622,7 @@ mixin _$RegisterState {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function() success,
-    required TResult Function(String message) error,
+    required TResult Function(FailureCode code) error,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -630,7 +630,7 @@ mixin _$RegisterState {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function()? success,
-    TResult? Function(String message)? error,
+    TResult? Function(FailureCode code)? error,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
@@ -638,7 +638,7 @@ mixin _$RegisterState {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function()? success,
-    TResult Function(String message)? error,
+    TResult Function(FailureCode code)? error,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -728,7 +728,7 @@ class _$RegisterInitialImpl implements RegisterInitial {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function() success,
-    required TResult Function(String message) error,
+    required TResult Function(FailureCode code) error,
   }) {
     return initial();
   }
@@ -739,7 +739,7 @@ class _$RegisterInitialImpl implements RegisterInitial {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function()? success,
-    TResult? Function(String message)? error,
+    TResult? Function(FailureCode code)? error,
   }) {
     return initial?.call();
   }
@@ -750,7 +750,7 @@ class _$RegisterInitialImpl implements RegisterInitial {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function()? success,
-    TResult Function(String message)? error,
+    TResult Function(FailureCode code)? error,
     required TResult orElse(),
   }) {
     if (initial != null) {
@@ -842,7 +842,7 @@ class _$RegisterLoadingImpl implements RegisterLoading {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function() success,
-    required TResult Function(String message) error,
+    required TResult Function(FailureCode code) error,
   }) {
     return loading();
   }
@@ -853,7 +853,7 @@ class _$RegisterLoadingImpl implements RegisterLoading {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function()? success,
-    TResult? Function(String message)? error,
+    TResult? Function(FailureCode code)? error,
   }) {
     return loading?.call();
   }
@@ -864,7 +864,7 @@ class _$RegisterLoadingImpl implements RegisterLoading {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function()? success,
-    TResult Function(String message)? error,
+    TResult Function(FailureCode code)? error,
     required TResult orElse(),
   }) {
     if (loading != null) {
@@ -956,7 +956,7 @@ class _$RegisterSuccessImpl implements RegisterSuccess {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function() success,
-    required TResult Function(String message) error,
+    required TResult Function(FailureCode code) error,
   }) {
     return success();
   }
@@ -967,7 +967,7 @@ class _$RegisterSuccessImpl implements RegisterSuccess {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function()? success,
-    TResult? Function(String message)? error,
+    TResult? Function(FailureCode code)? error,
   }) {
     return success?.call();
   }
@@ -978,7 +978,7 @@ class _$RegisterSuccessImpl implements RegisterSuccess {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function()? success,
-    TResult Function(String message)? error,
+    TResult Function(FailureCode code)? error,
     required TResult orElse(),
   }) {
     if (success != null) {
@@ -1035,7 +1035,7 @@ abstract class _$$RegisterErrorImplCopyWith<$Res> {
           _$RegisterErrorImpl value, $Res Function(_$RegisterErrorImpl) then) =
       __$$RegisterErrorImplCopyWithImpl<$Res>;
   @useResult
-  $Res call({String message});
+  $Res call({FailureCode code});
 }
 
 /// @nodoc
@@ -1049,13 +1049,13 @@ class __$$RegisterErrorImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? message = null,
+    Object? code = null,
   }) {
     return _then(_$RegisterErrorImpl(
-      null == message
-          ? _value.message
-          : message // ignore: cast_nullable_to_non_nullable
-              as String,
+      null == code
+          ? _value.code
+          : code // ignore: cast_nullable_to_non_nullable
+              as FailureCode,
     ));
   }
 }
@@ -1063,14 +1063,14 @@ class __$$RegisterErrorImplCopyWithImpl<$Res>
 /// @nodoc
 
 class _$RegisterErrorImpl implements RegisterError {
-  const _$RegisterErrorImpl(this.message);
+  const _$RegisterErrorImpl(this.code);
 
   @override
-  final String message;
+  final FailureCode code;
 
   @override
   String toString() {
-    return 'RegisterState.error(message: $message)';
+    return 'RegisterState.error(code: $code)';
   }
 
   @override
@@ -1078,11 +1078,11 @@ class _$RegisterErrorImpl implements RegisterError {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$RegisterErrorImpl &&
-            (identical(other.message, message) || other.message == message));
+            (identical(other.code, code) || other.code == code));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, message);
+  int get hashCode => Object.hash(runtimeType, code);
 
   @JsonKey(ignore: true)
   @override
@@ -1096,9 +1096,9 @@ class _$RegisterErrorImpl implements RegisterError {
     required TResult Function() initial,
     required TResult Function() loading,
     required TResult Function() success,
-    required TResult Function(String message) error,
+    required TResult Function(FailureCode code) error,
   }) {
-    return error(message);
+    return error(code);
   }
 
   @override
@@ -1107,9 +1107,9 @@ class _$RegisterErrorImpl implements RegisterError {
     TResult? Function()? initial,
     TResult? Function()? loading,
     TResult? Function()? success,
-    TResult? Function(String message)? error,
+    TResult? Function(FailureCode code)? error,
   }) {
-    return error?.call(message);
+    return error?.call(code);
   }
 
   @override
@@ -1118,11 +1118,11 @@ class _$RegisterErrorImpl implements RegisterError {
     TResult Function()? initial,
     TResult Function()? loading,
     TResult Function()? success,
-    TResult Function(String message)? error,
+    TResult Function(FailureCode code)? error,
     required TResult orElse(),
   }) {
     if (error != null) {
-      return error(message);
+      return error(code);
     }
     return orElse();
   }
@@ -1166,9 +1166,9 @@ class _$RegisterErrorImpl implements RegisterError {
 }
 
 abstract class RegisterError implements RegisterState {
-  const factory RegisterError(final String message) = _$RegisterErrorImpl;
+  const factory RegisterError(final FailureCode code) = _$RegisterErrorImpl;
 
-  String get message;
+  FailureCode get code;
   @JsonKey(ignore: true)
   _$$RegisterErrorImplCopyWith<_$RegisterErrorImpl> get copyWith =>
       throw _privateConstructorUsedError;
@@ -1180,24 +1180,24 @@ mixin _$ForgotPasswordState {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function(String message) success,
-    required TResult Function(String message) error,
+    required TResult Function() success,
+    required TResult Function(FailureCode code) error,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function(String message)? success,
-    TResult? Function(String message)? error,
+    TResult? Function()? success,
+    TResult? Function(FailureCode code)? error,
   }) =>
       throw _privateConstructorUsedError;
   @optionalTypeArgs
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function(String message)? success,
-    TResult Function(String message)? error,
+    TResult Function()? success,
+    TResult Function(FailureCode code)? error,
     required TResult orElse(),
   }) =>
       throw _privateConstructorUsedError;
@@ -1288,8 +1288,8 @@ class _$ForgotPasswordInitialImpl implements ForgotPasswordInitial {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function(String message) success,
-    required TResult Function(String message) error,
+    required TResult Function() success,
+    required TResult Function(FailureCode code) error,
   }) {
     return initial();
   }
@@ -1299,8 +1299,8 @@ class _$ForgotPasswordInitialImpl implements ForgotPasswordInitial {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function(String message)? success,
-    TResult? Function(String message)? error,
+    TResult? Function()? success,
+    TResult? Function(FailureCode code)? error,
   }) {
     return initial?.call();
   }
@@ -1310,8 +1310,8 @@ class _$ForgotPasswordInitialImpl implements ForgotPasswordInitial {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function(String message)? success,
-    TResult Function(String message)? error,
+    TResult Function()? success,
+    TResult Function(FailureCode code)? error,
     required TResult orElse(),
   }) {
     if (initial != null) {
@@ -1404,8 +1404,8 @@ class _$ForgotPasswordLoadingImpl implements ForgotPasswordLoading {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function(String message) success,
-    required TResult Function(String message) error,
+    required TResult Function() success,
+    required TResult Function(FailureCode code) error,
   }) {
     return loading();
   }
@@ -1415,8 +1415,8 @@ class _$ForgotPasswordLoadingImpl implements ForgotPasswordLoading {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function(String message)? success,
-    TResult? Function(String message)? error,
+    TResult? Function()? success,
+    TResult? Function(FailureCode code)? error,
   }) {
     return loading?.call();
   }
@@ -1426,8 +1426,8 @@ class _$ForgotPasswordLoadingImpl implements ForgotPasswordLoading {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function(String message)? success,
-    TResult Function(String message)? error,
+    TResult Function()? success,
+    TResult Function(FailureCode code)? error,
     required TResult orElse(),
   }) {
     if (loading != null) {
@@ -1484,8 +1484,6 @@ abstract class _$$ForgotPasswordSuccessImplCopyWith<$Res> {
           _$ForgotPasswordSuccessImpl value,
           $Res Function(_$ForgotPasswordSuccessImpl) then) =
       __$$ForgotPasswordSuccessImplCopyWithImpl<$Res>;
-  @useResult
-  $Res call({String message});
 }
 
 /// @nodoc
@@ -1495,61 +1493,37 @@ class __$$ForgotPasswordSuccessImplCopyWithImpl<$Res>
   __$$ForgotPasswordSuccessImplCopyWithImpl(_$ForgotPasswordSuccessImpl _value,
       $Res Function(_$ForgotPasswordSuccessImpl) _then)
       : super(_value, _then);
-
-  @pragma('vm:prefer-inline')
-  @override
-  $Res call({
-    Object? message = null,
-  }) {
-    return _then(_$ForgotPasswordSuccessImpl(
-      null == message
-          ? _value.message
-          : message // ignore: cast_nullable_to_non_nullable
-              as String,
-    ));
-  }
 }
 
 /// @nodoc
 
 class _$ForgotPasswordSuccessImpl implements ForgotPasswordSuccess {
-  const _$ForgotPasswordSuccessImpl(this.message);
-
-  @override
-  final String message;
+  const _$ForgotPasswordSuccessImpl();
 
   @override
   String toString() {
-    return 'ForgotPasswordState.success(message: $message)';
+    return 'ForgotPasswordState.success()';
   }
 
   @override
   bool operator ==(Object other) {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
-            other is _$ForgotPasswordSuccessImpl &&
-            (identical(other.message, message) || other.message == message));
+            other is _$ForgotPasswordSuccessImpl);
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, message);
-
-  @JsonKey(ignore: true)
-  @override
-  @pragma('vm:prefer-inline')
-  _$$ForgotPasswordSuccessImplCopyWith<_$ForgotPasswordSuccessImpl>
-      get copyWith => __$$ForgotPasswordSuccessImplCopyWithImpl<
-          _$ForgotPasswordSuccessImpl>(this, _$identity);
+  int get hashCode => runtimeType.hashCode;
 
   @override
   @optionalTypeArgs
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function(String message) success,
-    required TResult Function(String message) error,
+    required TResult Function() success,
+    required TResult Function(FailureCode code) error,
   }) {
-    return success(message);
+    return success();
   }
 
   @override
@@ -1557,10 +1531,10 @@ class _$ForgotPasswordSuccessImpl implements ForgotPasswordSuccess {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function(String message)? success,
-    TResult? Function(String message)? error,
+    TResult? Function()? success,
+    TResult? Function(FailureCode code)? error,
   }) {
-    return success?.call(message);
+    return success?.call();
   }
 
   @override
@@ -1568,12 +1542,12 @@ class _$ForgotPasswordSuccessImpl implements ForgotPasswordSuccess {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function(String message)? success,
-    TResult Function(String message)? error,
+    TResult Function()? success,
+    TResult Function(FailureCode code)? error,
     required TResult orElse(),
   }) {
     if (success != null) {
-      return success(message);
+      return success();
     }
     return orElse();
   }
@@ -1617,13 +1591,7 @@ class _$ForgotPasswordSuccessImpl implements ForgotPasswordSuccess {
 }
 
 abstract class ForgotPasswordSuccess implements ForgotPasswordState {
-  const factory ForgotPasswordSuccess(final String message) =
-      _$ForgotPasswordSuccessImpl;
-
-  String get message;
-  @JsonKey(ignore: true)
-  _$$ForgotPasswordSuccessImplCopyWith<_$ForgotPasswordSuccessImpl>
-      get copyWith => throw _privateConstructorUsedError;
+  const factory ForgotPasswordSuccess() = _$ForgotPasswordSuccessImpl;
 }
 
 /// @nodoc
@@ -1632,7 +1600,7 @@ abstract class _$$ForgotPasswordErrorImplCopyWith<$Res> {
           $Res Function(_$ForgotPasswordErrorImpl) then) =
       __$$ForgotPasswordErrorImplCopyWithImpl<$Res>;
   @useResult
-  $Res call({String message});
+  $Res call({FailureCode code});
 }
 
 /// @nodoc
@@ -1646,13 +1614,13 @@ class __$$ForgotPasswordErrorImplCopyWithImpl<$Res>
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? message = null,
+    Object? code = null,
   }) {
     return _then(_$ForgotPasswordErrorImpl(
-      null == message
-          ? _value.message
-          : message // ignore: cast_nullable_to_non_nullable
-              as String,
+      null == code
+          ? _value.code
+          : code // ignore: cast_nullable_to_non_nullable
+              as FailureCode,
     ));
   }
 }
@@ -1660,14 +1628,14 @@ class __$$ForgotPasswordErrorImplCopyWithImpl<$Res>
 /// @nodoc
 
 class _$ForgotPasswordErrorImpl implements ForgotPasswordError {
-  const _$ForgotPasswordErrorImpl(this.message);
+  const _$ForgotPasswordErrorImpl(this.code);
 
   @override
-  final String message;
+  final FailureCode code;
 
   @override
   String toString() {
-    return 'ForgotPasswordState.error(message: $message)';
+    return 'ForgotPasswordState.error(code: $code)';
   }
 
   @override
@@ -1675,11 +1643,11 @@ class _$ForgotPasswordErrorImpl implements ForgotPasswordError {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$ForgotPasswordErrorImpl &&
-            (identical(other.message, message) || other.message == message));
+            (identical(other.code, code) || other.code == code));
   }
 
   @override
-  int get hashCode => Object.hash(runtimeType, message);
+  int get hashCode => Object.hash(runtimeType, code);
 
   @JsonKey(ignore: true)
   @override
@@ -1693,10 +1661,10 @@ class _$ForgotPasswordErrorImpl implements ForgotPasswordError {
   TResult when<TResult extends Object?>({
     required TResult Function() initial,
     required TResult Function() loading,
-    required TResult Function(String message) success,
-    required TResult Function(String message) error,
+    required TResult Function() success,
+    required TResult Function(FailureCode code) error,
   }) {
-    return error(message);
+    return error(code);
   }
 
   @override
@@ -1704,10 +1672,10 @@ class _$ForgotPasswordErrorImpl implements ForgotPasswordError {
   TResult? whenOrNull<TResult extends Object?>({
     TResult? Function()? initial,
     TResult? Function()? loading,
-    TResult? Function(String message)? success,
-    TResult? Function(String message)? error,
+    TResult? Function()? success,
+    TResult? Function(FailureCode code)? error,
   }) {
-    return error?.call(message);
+    return error?.call(code);
   }
 
   @override
@@ -1715,12 +1683,12 @@ class _$ForgotPasswordErrorImpl implements ForgotPasswordError {
   TResult maybeWhen<TResult extends Object?>({
     TResult Function()? initial,
     TResult Function()? loading,
-    TResult Function(String message)? success,
-    TResult Function(String message)? error,
+    TResult Function()? success,
+    TResult Function(FailureCode code)? error,
     required TResult orElse(),
   }) {
     if (error != null) {
-      return error(message);
+      return error(code);
     }
     return orElse();
   }
@@ -1764,10 +1732,10 @@ class _$ForgotPasswordErrorImpl implements ForgotPasswordError {
 }
 
 abstract class ForgotPasswordError implements ForgotPasswordState {
-  const factory ForgotPasswordError(final String message) =
+  const factory ForgotPasswordError(final FailureCode code) =
       _$ForgotPasswordErrorImpl;
 
-  String get message;
+  FailureCode get code;
   @JsonKey(ignore: true)
   _$$ForgotPasswordErrorImplCopyWith<_$ForgotPasswordErrorImpl> get copyWith =>
       throw _privateConstructorUsedError;

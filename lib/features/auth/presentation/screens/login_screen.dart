@@ -6,6 +6,7 @@ import '../../../../app/router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../core/errors/failure_messages.dart';
 import '../../../../core/widgets/app_button/app_button.dart';
 import '../providers/auth_provider.dart';
 
@@ -81,10 +82,13 @@ class _LoginScreenState extends ConsumerState<LoginScreen>
     final authState = ref.read(authNotifierProvider);
     authState.whenOrNull(
       authenticated: (_) => context.go(AppRoutes.home),
-      error: (message) {
+      error: (code) {
         _shakeController.forward(from: 0.0);
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message), backgroundColor: AppColors.error),
+          SnackBar(
+            content: Text(failureMessage(code, AppLocalizations.of(context))),
+            backgroundColor: AppColors.error,
+          ),
         );
       },
     );

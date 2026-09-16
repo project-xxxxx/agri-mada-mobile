@@ -6,6 +6,7 @@ import '../../../../app/router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../core/errors/failure_messages.dart';
 import '../../../../core/widgets/app_button/app_button.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
@@ -39,19 +40,19 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
   Widget build(BuildContext context) {
     ref.listen<ForgotPasswordState>(forgotPasswordNotifierProvider, (_, next) {
       next.whenOrNull(
-        error: (message) {
+        error: (code) {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(message),
+              content: Text(failureMessage(code, AppLocalizations.of(context))),
               backgroundColor: AppColors.error,
             ),
           );
         },
-        success: (message) {
+        success: () {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(message)),
+            SnackBar(content: Text(AppLocalizations.of(context).resetPasswordRequestSent)),
           );
         },
       );

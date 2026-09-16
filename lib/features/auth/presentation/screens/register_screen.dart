@@ -7,6 +7,7 @@ import '../../../../app/router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../core/errors/failure_messages.dart';
 import '../../../../core/widgets/app_button/app_button.dart';
 import '../providers/auth_provider.dart';
 
@@ -64,11 +65,11 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   Widget build(BuildContext context) {
     ref.listen<RegisterState>(registerNotifierProvider, (_, next) {
       next.whenOrNull(
-        error: (message) {
+        error: (code) {
           if (!mounted) return;
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
-              content: Text(message),
+              content: Text(failureMessage(code, AppLocalizations.of(context))),
               backgroundColor: AppColors.error,
             ),
           );

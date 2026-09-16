@@ -31,7 +31,7 @@ sealed class SyncState {
   const factory SyncState.idle() = SyncIdle;
   const factory SyncState.syncing() = SyncSyncing;
   const factory SyncState.success() = SyncSuccess;
-  const factory SyncState.error(String message) = SyncError;
+  const factory SyncState.error(SyncErrorReason reason) = SyncError;
 }
 
 class SyncIdle extends SyncState {
@@ -47,9 +47,17 @@ class SyncSuccess extends SyncState {
 }
 
 class SyncError extends SyncState {
-  const SyncError(this.message);
+  const SyncError(this.reason);
 
-  final String message;
+  final SyncErrorReason reason;
+}
+
+/// Cause d'un échec de synchronisation, traduite par SyncStatusIndicator (P1.5).
+enum SyncErrorReason {
+  /// Le serveur a refusé la session : l'agriculteur doit se reconnecter (P1.8).
+  reauthRequired,
+  serverUnreachable,
+  failed,
 }
 
 @riverpod
@@ -75,11 +83,6 @@ Map<String, Map<String, dynamic>> _itemsByClientUuid(
 class SyncNotifier extends _$SyncNotifier {
   StreamSubscription<List<ConnectivityResult>>? _connectivitySubscription;
   static const int _maxAttempts = 2;
-
-  /// La session locale est conservée : seule la synchronisation attend que
-  /// l'agriculteur se reconnecte (tâche P1.8).
-  static const reauthRequiredMessage =
-      'Reconnectez-vous pour synchroniser vos données';
 
   bool _isDnsLookupFailure(DioException exception) {
     final details =
@@ -129,7 +132,7 @@ class SyncNotifier extends _$SyncNotifier {
   Future<void> syncData() async {
     if (state is SyncSyncing) return;
     if (await _isReauthRequired()) {
-      state = const SyncState.error(reauthRequiredMessage);
+      state = const SyncState.error(SyncErrorReason.reauthRequired);
       return;
     }
     state = const SyncState.syncing();
@@ -149,7 +152,7 @@ class SyncNotifier extends _$SyncNotifier {
             error: e.error ?? e,
             stackTrace: st,
           );
-          state = const SyncState.error(reauthRequiredMessage);
+          state = const SyncState.error(SyncErrorReason.reauthRequired);
           return;
         }
 
@@ -161,13 +164,11 @@ class SyncNotifier extends _$SyncNotifier {
 
         if (attempt == _maxAttempts) {
           if (_isDnsLookupFailure(e)) {
-            state = const SyncState.error(
-              'Serveur non joignable. Verifiez la configuration API.',
-            );
+            state = const SyncState.error(SyncErrorReason.serverUnreachable);
             return;
           }
 
-          state = const SyncState.error('Erreur de synchronisation');
+          state = const SyncState.error(SyncErrorReason.failed);
           return;
         }
       } catch (e, st) {
@@ -178,7 +179,7 @@ class SyncNotifier extends _$SyncNotifier {
         );
 
         if (attempt == _maxAttempts) {
-          state = const SyncState.error('Erreur de synchronisation');
+          state = const SyncState.error(SyncErrorReason.failed);
           return;
         }
       }

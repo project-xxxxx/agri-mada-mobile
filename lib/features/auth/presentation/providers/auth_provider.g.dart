@@ -99,7 +99,7 @@ final forgotPasswordUseCaseProvider =
 
 typedef ForgotPasswordUseCaseRef
     = AutoDisposeProviderRef<ForgotPasswordUseCase>;
-String _$authNotifierHash() => r'38c2d8aff48dc7935fcc5b602d212a733e858cdf';
+String _$authNotifierHash() => r'a8eee807e42fb5ede98149b8f42f02bf8fe9de1d';
 
 /// See also [AuthNotifier].
 @ProviderFor(AuthNotifier)
@@ -114,7 +114,7 @@ final authNotifierProvider =
 );
 
 typedef _$AuthNotifier = AutoDisposeNotifier<AuthState>;
-String _$registerNotifierHash() => r'e362c4bc22ffae0f8ba6ce6f6c1d20350d846071';
+String _$registerNotifierHash() => r'91cac6d73e769e1ceb27dfa2b607b10c84016521';
 
 /// See also [RegisterNotifier].
 @ProviderFor(RegisterNotifier)
@@ -131,7 +131,7 @@ final registerNotifierProvider =
 
 typedef _$RegisterNotifier = AutoDisposeNotifier<RegisterState>;
 String _$forgotPasswordNotifierHash() =>
-    r'57748da71e4155a59d3d7368f942933824b4f457';
+    r'384c229d05bc952a848f82dc90a560a3f3a6f201';
 
 /// See also [ForgotPasswordNotifier].
 @ProviderFor(ForgotPasswordNotifier)

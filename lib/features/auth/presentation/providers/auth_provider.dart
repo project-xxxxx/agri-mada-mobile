@@ -25,7 +25,7 @@ class AuthState with _$AuthState {
   const factory AuthState.initial() = AuthInitial;
   const factory AuthState.loading() = AuthLoading;
   const factory AuthState.authenticated(AuthEntity user) = AuthAuthenticated;
-  const factory AuthState.error(String message) = AuthError;
+  const factory AuthState.error(FailureCode code) = AuthError;
 }
 
 @freezed
@@ -33,16 +33,15 @@ class RegisterState with _$RegisterState {
   const factory RegisterState.initial() = RegisterInitial;
   const factory RegisterState.loading() = RegisterLoading;
   const factory RegisterState.success() = RegisterSuccess;
-  const factory RegisterState.error(String message) = RegisterError;
+  const factory RegisterState.error(FailureCode code) = RegisterError;
 }
 
 @freezed
 class ForgotPasswordState with _$ForgotPasswordState {
   const factory ForgotPasswordState.initial() = ForgotPasswordInitial;
   const factory ForgotPasswordState.loading() = ForgotPasswordLoading;
-  const factory ForgotPasswordState.success(String message) =
-      ForgotPasswordSuccess;
-  const factory ForgotPasswordState.error(String message) = ForgotPasswordError;
+  const factory ForgotPasswordState.success() = ForgotPasswordSuccess;
+  const factory ForgotPasswordState.error(FailureCode code) = ForgotPasswordError;
 }
 
 // ---------------------------------------------------------------------------
@@ -105,13 +104,16 @@ class AuthNotifier extends _$AuthNotifier {
     state = const AuthState.initial();
   }
 
-  AuthState _mapFailureToState(Failure failure) => switch (failure) {
-        AuthFailure() => AuthState.error(failure.message),
-        ValidationFailure() => AuthState.error(failure.message),
-        NetworkFailure() => const AuthState.error('Pas de connexion internet'),
-        _ => AuthState.error(failure.message),
-      };
+  AuthState _mapFailureToState(Failure failure) =>
+      AuthState.error(_codeOf(failure));
 }
+
+/// Cause affichable d'un échec (tâche P1.5) : un échec réseau sans cause
+/// précise est présenté comme une absence de connexion.
+FailureCode _codeOf(Failure failure) =>
+    failure.code == FailureCode.unknown && failure is NetworkFailure
+        ? FailureCode.offline
+        : failure.code;
 
 @riverpod
 class RegisterNotifier extends _$RegisterNotifier {
@@ -136,7 +138,7 @@ class RegisterNotifier extends _$RegisterNotifier {
         );
 
     state = result.fold(
-      (failure) => RegisterState.error(failure.message),
+      (failure) => RegisterState.error(_codeOf(failure)),
       (_) => const RegisterState.success(),
     );
   }
@@ -157,10 +159,8 @@ class ForgotPasswordNotifier extends _$ForgotPasswordNotifier {
     final result = await ref.read(forgotPasswordUseCaseProvider).call(tel: tel);
 
     state = result.fold(
-      (failure) => ForgotPasswordState.error(failure.message),
-      (_) => const ForgotPasswordState.success(
-        'Si ce numero est associe a un compte, des instructions seront envoyees.',
-      ),
+      (failure) => ForgotPasswordState.error(_codeOf(failure)),
+      (_) => const ForgotPasswordState.success(),
     );
   }
 

@@ -134,7 +134,7 @@ void main() {
       // Assert
       expect(
         container.read(syncNotifierProvider),
-        const SyncState.error(SyncNotifier.reauthRequiredMessage),
+        const SyncState.error(SyncErrorReason.reauthRequired),
       );
       verifyNever(() => mockAuthRepository.logout());
     });
@@ -160,7 +160,7 @@ void main() {
       verify(() => mockSyncRemoteDatasource.syncParcelles(any())).called(2);
       expect(
         container.read(syncNotifierProvider),
-        const SyncState.error('Erreur de synchronisation'),
+        const SyncState.error(SyncErrorReason.failed),
       );
     });
 
@@ -179,7 +179,7 @@ void main() {
       // Assert
       expect(
         container.read(syncNotifierProvider),
-        const SyncState.error(SyncNotifier.reauthRequiredMessage),
+        const SyncState.error(SyncErrorReason.reauthRequired),
       );
       verifyNever(() => mockAuthRepository.logout());
     });
@@ -197,7 +197,7 @@ void main() {
       verifyNever(() => mockSyncRemoteDatasource.syncParcelles(any()));
       expect(
         container.read(syncNotifierProvider),
-        const SyncState.error(SyncNotifier.reauthRequiredMessage),
+        const SyncState.error(SyncErrorReason.reauthRequired),
       );
     });
 

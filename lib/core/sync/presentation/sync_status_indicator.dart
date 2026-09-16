@@ -7,6 +7,13 @@ import '../../../app/theme/app_spacing.dart';
 import '../../../app/theme/app_typography.dart';
 import '../providers/sync_provider.dart';
 
+String _syncErrorMessage(SyncErrorReason reason, AppLocalizations loc) =>
+    switch (reason) {
+      SyncErrorReason.reauthRequired => loc.errorSessionExpired,
+      SyncErrorReason.serverUnreachable => loc.syncErrorServerUnreachable,
+      SyncErrorReason.failed => loc.syncErrorFailed,
+    };
+
 class SyncStatusIndicator extends ConsumerWidget {
   const SyncStatusIndicator({super.key});
 
@@ -32,10 +39,10 @@ class SyncStatusIndicator extends ConsumerWidget {
             ),
           ],
         ),
-      SyncError(:final message) => Tooltip(
-          message: message,
+      SyncError(:final reason) => Tooltip(
+          message: _syncErrorMessage(reason, AppLocalizations.of(context)),
           child: Semantics(
-            label: message,
+            label: _syncErrorMessage(reason, AppLocalizations.of(context)),
             child: const Icon(
               Icons.sync_problem,
               color: AppColors.severityHigh,

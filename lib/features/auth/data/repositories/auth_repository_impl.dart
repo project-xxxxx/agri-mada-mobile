@@ -36,14 +36,15 @@ class AuthRepositoryImpl implements AuthRepository {
       });
       return const Right(unit);
     } on DioException catch (e, st) {
-      if (e.response?.statusCode == 400 || e.response?.statusCode == 409) {
-        AppLogger.error('Inscription échouée', error: e, stackTrace: st);
-        return Left(AuthFailure(NetworkException.fromDioError(e).message));
-      }
-
       final exception = NetworkException.fromDioError(e);
       AppLogger.error('Inscription échouée', error: exception, stackTrace: st);
-      return Left(NetworkFailure(exception.message));
+
+      final status = e.response?.statusCode;
+      if (status == 400 || status == 409) {
+        // Le serveur refuse un numéro déjà enregistré.
+        return Left(AuthFailure(exception.message, code: FailureCode.phoneAlreadyUsed));
+      }
+      return Left(NetworkFailure(exception.message, code: failureCodeForDio(e)));
     } catch (e, st) {
       AppLogger.error('Erreur inconnue', error: e, stackTrace: st);
       return Left(UnknownFailure(e.toString()));
@@ -58,24 +59,18 @@ class AuthRepositoryImpl implements AuthRepository {
       await _remote.forgotPassword({'tel': tel});
       return const Right(unit);
     } on DioException catch (e, st) {
-      if (e.response?.statusCode == 400 ||
-          e.response?.statusCode == 422 ||
-          e.response?.statusCode == 429) {
-        AppLogger.error(
-          'Demande de reinitialisation echouee',
-          error: e,
-          stackTrace: st,
-        );
-        return Left(AuthFailure(NetworkException.fromDioError(e).message));
-      }
-
       final exception = NetworkException.fromDioError(e);
       AppLogger.error(
         'Demande de reinitialisation echouee',
         error: exception,
         stackTrace: st,
       );
-      return Left(NetworkFailure(exception.message));
+
+      return switch (e.response?.statusCode) {
+        400 || 422 => Left(AuthFailure(exception.message, code: FailureCode.invalidData)),
+        429 => Left(AuthFailure(exception.message, code: FailureCode.tooManyAttempts)),
+        _ => Left(NetworkFailure(exception.message, code: failureCodeForDio(e))),
+      };
     } catch (e, st) {
       AppLogger.error('Erreur inconnue', error: e, stackTrace: st);
       return Left(UnknownFailure(e.toString()));
@@ -127,24 +122,25 @@ class AuthRepositoryImpl implements AuthRepository {
       AppLogger.debug('Login réussi: ${profile.userId}');
       return Right(profile);
     } on DioException catch (e, st) {
-      if (e.response?.statusCode == 401) {
-        AppLogger.error('Login échoué', error: e, stackTrace: st);
-        return const Left(AuthFailure('Identifiants incorrects'));
-      }
-
-      if (e.type == DioExceptionType.connectionTimeout ||
-          e.type == DioExceptionType.sendTimeout ||
-          e.type == DioExceptionType.receiveTimeout) {
-        AppLogger.error('Login échoué', error: e, stackTrace: st);
-        return const Left(NetworkFailure('Délai de connexion dépassé'));
-      }
-
-      final exception = NetworkException.fromDioError(e);
-      AppLogger.error('Login échoué', error: exception, stackTrace: st);
-      return Left(NetworkFailure(exception.message));
+      AppLogger.error('Login échoué', error: e, stackTrace: st);
+      return switch (e.response?.statusCode) {
+        401 => const Left(
+            AuthFailure('Identifiants incorrects', code: FailureCode.invalidCredentials),
+          ),
+        // Limitation des tentatives côté serveur (tâche P1.11).
+        429 => const Left(
+            AuthFailure('Trop de tentatives de connexion', code: FailureCode.tooManyAttempts),
+          ),
+        _ => Left(
+            NetworkFailure(
+              NetworkException.fromDioError(e).message,
+              code: failureCodeForDio(e),
+            ),
+          ),
+      };
     } on ParseException catch (e, st) {
       AppLogger.error('Erreur de parsing', error: e, stackTrace: st);
-      return Left(ServerFailure(e.message));
+      return Left(ServerFailure(e.message, code: FailureCode.server));
     } catch (e, st) {
       AppLogger.error('Erreur inconnue', error: e, stackTrace: st);
       return Left(UnknownFailure(e.toString()));

@@ -144,5 +144,7 @@ class AuthInterceptor extends QueuedInterceptor {
   }
 
   DioException _asAuthFailure(DioException error) =>
-      error.copyWith(error: const AuthFailure('Session expirée'));
+      error.copyWith(
+        error: const AuthFailure('Session expirée', code: FailureCode.sessionExpired),
+      );
 }

@@ -1,5 +1,23 @@
 import 'package:dio/dio.dart';
 
+import 'failure.dart';
+
+/// Cause d'un échec réseau déduite de l'exception Dio (tâche P1.5).
+FailureCode failureCodeForDio(DioException e) => switch (e.type) {
+      DioExceptionType.connectionTimeout ||
+      DioExceptionType.sendTimeout ||
+      DioExceptionType.receiveTimeout =>
+        FailureCode.timeout,
+      DioExceptionType.connectionError => FailureCode.offline,
+      DioExceptionType.badResponse => switch (e.response?.statusCode) {
+          401 || 403 => FailureCode.sessionExpired,
+          422 => FailureCode.invalidData,
+          429 => FailureCode.tooManyAttempts,
+          _ => FailureCode.server,
+        },
+      _ => e.error is AuthFailure ? FailureCode.sessionExpired : FailureCode.unknown,
+    };
+
 sealed class AppException implements Exception {
   const AppException(this.message);
   final String message;

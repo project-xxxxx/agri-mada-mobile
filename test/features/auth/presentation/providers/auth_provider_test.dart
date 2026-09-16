@@ -78,7 +78,7 @@ void main() {
           tel: any(named: 'tel'),
           password: any(named: 'password'))).thenAnswer(
         (_) async => const Left<Failure, UserProfile>(
-          AuthFailure('Identifiants incorrects'),
+          AuthFailure('Identifiants incorrects', code: FailureCode.invalidCredentials),
         ),
       );
 
@@ -88,7 +88,7 @@ void main() {
 
       expect(
         container.read(authNotifierProvider),
-        const AuthState.error('Identifiants incorrects'),
+        const AuthState.error(FailureCode.invalidCredentials),
       );
     });
 
@@ -108,7 +108,7 @@ void main() {
 
       expect(
         container.read(authNotifierProvider),
-        const AuthState.error('Pas de connexion internet'),
+        const AuthState.error(FailureCode.offline),
       );
     });
 

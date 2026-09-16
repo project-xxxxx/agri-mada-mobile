@@ -83,7 +83,7 @@ void main() {
       // Assert
       expect(
         find.text(
-          'Si ce numero est associe a un compte, des instructions seront envoyees.',
+          'Si ce numéro est associé à un compte, des instructions seront envoyées.',
         ),
         findsOneWidget,
       );
