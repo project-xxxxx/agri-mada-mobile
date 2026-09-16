@@ -39,6 +39,31 @@ class Parcelle(Base):
         DateTime, default=lambda: datetime.now(timezone.utc), nullable=False
     )
 
+    # --- Contexte de culture (tâche P2.5) ---
+    ecosysteme = Column(
+        String(50), nullable=True, comment="irrigue, bas_fond, tanety_pluvial"
+    )
+    region = Column(
+        String(100), nullable=True, comment="Une des 23 régions de Madagascar"
+    )
+    altitude_tranche = Column(
+        String(20),
+        nullable=True,
+        comment="moins_800, 800_1200, 1200_1500, plus_1500",
+    )
+    altitude_metres = Column(Float, nullable=True, comment="Altitude GPS si connue")
+    variete = Column(
+        String(100), nullable=True, comment="Variété FOFIFA ou locale_ou_inconnue"
+    )
+    saison = Column(
+        String(30),
+        nullable=True,
+        comment="vary_aloha, saison_principale, contre_saison",
+    )
+    date_repiquage = Column(
+        DateTime, nullable=True, comment="Sert à situer le stade de la culture"
+    )
+
     # --- Relations ---
     owner = relationship("User", back_populates="parcelles")
     diagnostics = relationship(

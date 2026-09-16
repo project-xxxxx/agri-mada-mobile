@@ -14,3 +14,12 @@ double? parseLocalizedDecimal(String input) {
   }
   return value;
 }
+
+/// Surface saisie en hectares ou en ares, toujours rendue en hectares
+/// (tâche P2.5). Beaucoup de parcelles font quelques ares : « 0,05 ha » est
+/// pénible à écrire et facile à rater d'un facteur dix.
+double? parseSurfaceEnHectares(String input, {required bool enAres}) {
+  final valeur = parseLocalizedDecimal(input);
+  if (valeur == null) return null;
+  return enAres ? valeur / 100 : valeur;
+}

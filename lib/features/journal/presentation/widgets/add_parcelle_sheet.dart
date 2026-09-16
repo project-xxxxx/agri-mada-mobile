@@ -8,6 +8,10 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/utils/number_parsing.dart';
+import '../../domain/entities/contexte_parcelle.dart';
+import '../../domain/entities/regions_madagascar.dart';
+import '../../domain/entities/varietes_riz.dart';
+import '../contexte_labels.dart';
 import '../providers/journal_provider.dart';
 
 class AddParcelleSheet extends ConsumerStatefulWidget {
@@ -26,6 +30,15 @@ class _AddParcelleSheetState extends ConsumerState<AddParcelleSheet> {
   final _emplacementController = TextEditingController();
   final _picker = ImagePicker();
   XFile? _selectedPhoto;
+
+  // Contexte de culture (tâche P2.5) : tout est facultatif.
+  bool _surfaceEnAres = false;
+  Ecosysteme? _ecosysteme;
+  String? _region;
+  TrancheAltitude? _altitude;
+  String? _variete;
+  SaisonRiz? _saison;
+  DateTime? _dateRepiquage;
 
   @override
   void dispose() {
@@ -98,8 +111,17 @@ class _AddParcelleSheetState extends ConsumerState<AddParcelleSheet> {
           nom: _nomController.text.trim(),
           description: location.isEmpty ? null : location,
           culture: culture.isEmpty ? null : culture,
-          surface: parseLocalizedDecimal(_surfaceController.text),
+          surface: parseSurfaceEnHectares(
+            _surfaceController.text,
+            enAres: _surfaceEnAres,
+          ),
           photoPath: photoPath,
+          ecosysteme: _ecosysteme?.code,
+          region: _region,
+          altitudeTranche: _altitude?.code,
+          variete: _variete,
+          saison: _saison?.code,
+          dateRepiquage: _dateRepiquage,
         );
 
     if (!mounted) return;
@@ -217,15 +239,24 @@ class _AddParcelleSheetState extends ConsumerState<AddParcelleSheet> {
               TextFormField(
                 controller: _surfaceController,
                 keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                decoration: _inputDecoration(loc.plotSurfaceHint).copyWith(
-                  suffixText: loc.plotSurfaceSuffix,
-                  suffixStyle: AppTypography.bodyMedium.copyWith(color: AppColors.textSecondary),
-                ),
+                decoration: _inputDecoration(loc.plotSurfaceHint),
                 validator: (value) {
                   final text = value?.trim() ?? '';
                   if (text.isEmpty) return null;
                   return parseLocalizedDecimal(text) == null ? loc.plotSurfaceInvalid : null;
                 },
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              // Beaucoup de parcelles font quelques ares : on évite « 0,05 ha ».
+              SegmentedButton<bool>(
+                segments: [
+                  ButtonSegment(value: false, label: Text(loc.plotSurfaceUnitHectare)),
+                  ButtonSegment(value: true, label: Text(loc.plotSurfaceUnitAre)),
+                ],
+                selected: {_surfaceEnAres},
+                onSelectionChanged: (choix) =>
+                    setState(() => _surfaceEnAres = choix.first),
+                showSelectedIcon: false,
               ),
               const SizedBox(height: AppSpacing.md),
 
@@ -234,6 +265,107 @@ class _AddParcelleSheetState extends ConsumerState<AddParcelleSheet> {
                 controller: _emplacementController,
                 decoration: _inputDecoration(loc.plotLocationHint),
               ),
+              const SizedBox(height: AppSpacing.lg),
+
+              Text(loc.plotContextTitle,
+                  style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+              Text(loc.plotContextOptional,
+                  style: AppTypography.caption.copyWith(color: AppColors.textSecondary)),
+              const SizedBox(height: AppSpacing.md),
+
+              _buildLabel(loc.plotEcosystemLabel),
+              DropdownButtonFormField<Ecosysteme>(
+                initialValue: _ecosysteme,
+                decoration: _inputDecoration(loc.plotEcosystemLabel),
+                items: [
+                  for (final ecosysteme in Ecosysteme.values)
+                    DropdownMenuItem(
+                      value: ecosysteme,
+                      child: Text(ecosystemeLabel(ecosysteme, loc)),
+                    ),
+                ],
+                onChanged: (valeur) => setState(() => _ecosysteme = valeur),
+              ),
+              const SizedBox(height: AppSpacing.md),
+
+              _buildLabel(loc.plotRegionLabel),
+              DropdownButtonFormField<String>(
+                initialValue: _region,
+                isExpanded: true,
+                decoration: _inputDecoration(loc.plotRegionLabel),
+                items: [
+                  for (final region in regionsMadagascar)
+                    DropdownMenuItem(value: region, child: Text(region)),
+                ],
+                onChanged: (valeur) => setState(() => _region = valeur),
+              ),
+              const SizedBox(height: AppSpacing.md),
+
+              _buildLabel(loc.plotAltitudeLabel),
+              DropdownButtonFormField<TrancheAltitude>(
+                initialValue: _altitude,
+                decoration: _inputDecoration(loc.plotAltitudeLabel),
+                items: [
+                  for (final tranche in TrancheAltitude.values)
+                    DropdownMenuItem(
+                      value: tranche,
+                      child: Text(altitudeLabel(tranche, loc)),
+                    ),
+                ],
+                onChanged: (valeur) => setState(() => _altitude = valeur),
+              ),
+              const SizedBox(height: AppSpacing.md),
+
+              _buildLabel(loc.plotVarietyLabel),
+              DropdownButtonFormField<String>(
+                initialValue: _variete ?? varieteLocaleOuInconnue,
+                isExpanded: true,
+                decoration: _inputDecoration(loc.plotVarietyLabel),
+                items: [
+                  DropdownMenuItem(
+                    value: varieteLocaleOuInconnue,
+                    child: Text(loc.varietyLocalUnknown),
+                  ),
+                  for (final variete in varietesRiz)
+                    DropdownMenuItem(value: variete, child: Text(variete)),
+                ],
+                onChanged: (valeur) => setState(() => _variete = valeur),
+              ),
+              const SizedBox(height: AppSpacing.md),
+
+              _buildLabel(loc.plotSeasonLabel),
+              DropdownButtonFormField<SaisonRiz>(
+                initialValue: _saison,
+                decoration: _inputDecoration(loc.plotSeasonLabel),
+                items: [
+                  for (final saison in SaisonRiz.values)
+                    DropdownMenuItem(
+                      value: saison,
+                      child: Text(saisonLabel(saison, loc)),
+                    ),
+                ],
+                onChanged: (valeur) => setState(() => _saison = valeur),
+              ),
+              const SizedBox(height: AppSpacing.md),
+
+              _buildLabel(loc.plotTransplantDateLabel),
+              OutlinedButton.icon(
+                onPressed: _choisirDateRepiquage,
+                icon: const Icon(Icons.event_outlined),
+                label: Text(
+                  _dateRepiquage == null
+                      ? loc.plotTransplantDateChoose
+                      : _formatDate(_dateRepiquage!),
+                ),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size.fromHeight(48),
+                  side: BorderSide(color: AppColors.textSecondary.withAlpha(50)),
+                  shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(AppSpacing.sm)),
+                ),
+              ),
+              Text(loc.plotTransplantDateHint,
+                  style: AppTypography.caption.copyWith(color: AppColors.textSecondary)),
               const SizedBox(height: AppSpacing.xl),
 
               Row(
@@ -275,6 +407,21 @@ class _AddParcelleSheetState extends ConsumerState<AddParcelleSheet> {
       ),
     );
   }
+
+  Future<void> _choisirDateRepiquage() async {
+    final aujourdhui = DateTime.now();
+    final choisie = await showDatePicker(
+      context: context,
+      initialDate: _dateRepiquage ?? aujourdhui,
+      firstDate: DateTime(aujourdhui.year - 2),
+      lastDate: aujourdhui,
+    );
+    if (choisie != null && mounted) setState(() => _dateRepiquage = choisie);
+  }
+
+  String _formatDate(DateTime date) =>
+      '${date.day.toString().padLeft(2, '0')}/'
+      '${date.month.toString().padLeft(2, '0')}/${date.year}';
 
   InputDecoration _inputDecoration(String hint) {
     return InputDecoration(

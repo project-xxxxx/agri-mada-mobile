@@ -36,6 +36,15 @@ class ParcelleCreate(BaseModel):
     latitude: Optional[float] = Field(None, examples=[-18.9137])
     longitude: Optional[float] = Field(None, examples=[47.5361])
 
+    # Contexte de culture (tâche P2.5), tout est facultatif.
+    ecosysteme: Optional[str] = Field(None, max_length=50, examples=["bas_fond"])
+    region: Optional[str] = Field(None, max_length=100, examples=["Vakinankaratra"])
+    altitude_tranche: Optional[str] = Field(None, max_length=20, examples=["1200_1500"])
+    altitude_metres: Optional[float] = Field(None, ge=-500, le=9000)
+    variete: Optional[str] = Field(None, max_length=100, examples=["FOFIFA 184"])
+    saison: Optional[str] = Field(None, max_length=30, examples=["saison_principale"])
+    date_repiquage: Optional[datetime] = None
+
 
 class ParcelleSync(BaseModel):
     """
@@ -57,6 +66,13 @@ class ParcelleResponse(BaseModel):
     surface: Optional[float] = None
     latitude: Optional[float] = None
     longitude: Optional[float] = None
+    ecosysteme: Optional[str] = None
+    region: Optional[str] = None
+    altitude_tranche: Optional[str] = None
+    altitude_metres: Optional[float] = None
+    variete: Optional[str] = None
+    saison: Optional[str] = None
+    date_repiquage: Optional[datetime] = None
     created_at: datetime
     nb_diagnostics: int = 0
     derniere_maladie: Optional[str] = None
