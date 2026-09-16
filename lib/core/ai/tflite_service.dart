@@ -17,6 +17,7 @@ import 'package:tflite_flutter/tflite_flutter.dart';
 import '../utils/logger.dart';
 import 'diagnosis_certainty.dart';
 import 'image_checks.dart';
+import 'image_quality.dart';
 
 @visibleForTesting
 bool hasValidTfliteModelHeader(Uint8List buffer) {
@@ -76,8 +77,9 @@ _PreparedImage _prepareImage(Object params) {
   final originalImage = img.decodeImage(p.imageBytes);
   if (originalImage == null) throw Exception('Image invalide ou corrompue');
 
+  // Sans cela, une photo prise en portrait arrive couchée dans le modèle (P2.2).
   final resized = img.copyResize(
-    originalImage,
+    bakeExifOrientation(originalImage),
     width: p.inputSize,
     height: p.inputSize,
   );
