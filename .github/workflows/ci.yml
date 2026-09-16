@@ -34,6 +34,9 @@ jobs:
       - name: Dépendances
         run: flutter pub get
 
+      - name: Métadonnées du modèle à jour
+        run: dart run tool/gen_model_version.dart --check
+
       - name: Analyse statique
         run: flutter analyze --fatal-warnings --no-fatal-infos
 

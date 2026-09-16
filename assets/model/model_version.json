@@ -1,6 +1,7 @@
 {
   "version": "1.0.0",
   "date": "2026-05-07",
+  "modele_sha256": "ffa8f840561225bd8200c8ab2abe5a1f5aea446a4c491b8c9fd1d9d4331e2afa",
   "maladies_supportees": [
     "Bacterial leaf blight",
     "Brown spot",

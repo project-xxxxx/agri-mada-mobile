@@ -54,6 +54,8 @@ dev_dependencies:
   json_serializable: ^6.8.0
   retrofit_generator: ^8.2.1
   mocktail: ^1.0.3
+  # --- Empreinte du modèle (tool/gen_model_version.dart) ---
+  crypto: ^3.0.3
   # --- Générateur de code Isar ---
   isar_generator: ^3.1.0+1
   patrol: ^4.5.0
