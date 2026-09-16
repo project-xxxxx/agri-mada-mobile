@@ -89,10 +89,10 @@ class MyParcellesScreen extends ConsumerWidget {
               return _EmptyJournal(
                   onAdd: () => _showAddParcelleSheet(context, ref));
             }
-            // Tri : malades en premier
-            final sorted = [...journal]..sort((a, b) =>
-                (a.statut == 'malade' ? 0 : 1)
-                    .compareTo(b.statut == 'malade' ? 0 : 1));
+            // Tri : malades, puis parcelles à confirmer, puis les autres
+            int rank(JournalEntry entry) =>
+                switch (entry.statut) { 'malade' => 0, 'a_confirmer' => 1, _ => 2 };
+            final sorted = [...journal]..sort((a, b) => rank(a).compareTo(rank(b)));
 
             return Column(
               children: [
@@ -262,6 +262,7 @@ class _QuickStats extends StatelessWidget {
     final loc = AppLocalizations.of(context);
     final saines = journal.where((e) => e.statut == 'sain').length;
     final malades = journal.where((e) => e.statut == 'malade').length;
+    final aConfirmer = journal.where((e) => e.statut == 'a_confirmer').length;
     final total = journal.length;
 
     return Container(
@@ -273,22 +274,35 @@ class _QuickStats extends StatelessWidget {
         borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
       ),
       child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          _StatItem(
-            label: loc.journalTotal,
-            value: '$total',
-            color: AppColors.primary,
+          Expanded(
+            child: _StatItem(
+              label: loc.journalTotal,
+              value: '$total',
+              color: AppColors.primary,
+            ),
           ),
-          _StatItem(
-            label: loc.journalHealthyPlural,
-            value: '$saines',
-            color: AppColors.severityLow,
+          Expanded(
+            child: _StatItem(
+              label: loc.journalHealthyPlural,
+              value: '$saines',
+              color: AppColors.severityLow,
+            ),
           ),
-          _StatItem(
-            label: loc.journalSickPlural,
-            value: '$malades',
-            color: AppColors.severityHigh,
+          Expanded(
+            child: _StatItem(
+              label: loc.journalSickPlural,
+              value: '$malades',
+              color: AppColors.severityHigh,
+            ),
+          ),
+          Expanded(
+            child: _StatItem(
+              label: loc.journalStatusToConfirm,
+              value: '$aConfirmer',
+              color: AppColors.severityMedium,
+            ),
           ),
         ],
       ),
@@ -311,6 +325,7 @@ class _StatItem extends StatelessWidget {
             style: AppTypography.displayMedium
                 .copyWith(color: color, fontWeight: FontWeight.bold)),
         Text(label,
+            textAlign: TextAlign.center,
             style: AppTypography.bodySmall
                 .copyWith(color: AppColors.textSecondary)),
       ],
@@ -333,17 +348,13 @@ class _ParcelleCard extends StatelessWidget {
     final dernierDiag = entry.dernierDiagnostic;
     final nbDiag = entry.nbDiagnostics;
 
-    final isHealthy = statut == 'sain';
     final isMalade = statut == 'malade';
-    final statusColor = isMalade
-        ? AppColors.severityHigh
-        : (isHealthy ? AppColors.severityLow : AppColors.textSecondary);
-    final statusLabel = isMalade
-        ? loc.journalStatusSick
-        : (isHealthy ? loc.journalStatusHealthy : loc.journalStatusNotAnalyzed);
-    final statusIcon = isMalade
-        ? Icons.warning_amber_outlined
-        : (isHealthy ? Icons.check_circle_outline : Icons.help_outline);
+    final (statusColor, statusLabel, statusIcon) = switch (statut) {
+      'malade' => (AppColors.severityHigh, loc.journalStatusSick, Icons.warning_amber_outlined),
+      'sain' => (AppColors.severityLow, loc.journalStatusHealthy, Icons.check_circle_outline),
+      'a_confirmer' => (AppColors.severityMedium, loc.journalStatusToConfirm, Icons.help_outline),
+      _ => (AppColors.textSecondary, loc.journalStatusNotAnalyzed, Icons.help_outline),
+    };
 
     return GestureDetector(
       onTap: () => context.push('${AppRoutes.parcelleDetail}/${parcelle.id}'),

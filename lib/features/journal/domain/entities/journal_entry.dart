@@ -18,6 +18,7 @@ class JournalEntry {
   final String? derniereMaladie;
   final DiagnosticLocal? dernierDiagnostic;
 
-  /// Statut de santé de la parcelle : 'sain', 'malade', 'aucun_diagnostic'
+  /// Statut de santé de la parcelle : 'sain', 'malade' (diagnostic probable),
+  /// 'a_confirmer' (piste non confirmée), 'aucun_diagnostic'
   final String statut;
 }

@@ -8,18 +8,27 @@ import '../../../../app/router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
+import '../../../../core/ai/diagnosis_certainty.dart';
 import '../../../../core/ai/disease_catalog.dart';
 import '../../../../core/local_db/models/diagnostic_local.dart';
 import '../../../../core/widgets/app_sidebar.dart';
 import '../../../scan/domain/entities/declared_severity.dart';
 import '../../../scan/presentation/diagnosis_labels.dart';
+import '../diagnostic_filter.dart';
 import '../providers/journal_provider.dart';
 
-class JournalScreen extends ConsumerWidget {
+class JournalScreen extends ConsumerStatefulWidget {
   const JournalScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<JournalScreen> createState() => _JournalScreenState();
+}
+
+class _JournalScreenState extends ConsumerState<JournalScreen> {
+  DiagnosticFilter _filter = DiagnosticFilter.all;
+
+  @override
+  Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     final diagnosticsAsync = ref.watch(diagnosticsHistoryProvider);
 
@@ -45,8 +54,6 @@ class JournalScreen extends ConsumerWidget {
           ],
         ),
       ),
-      // Les puces de filtre factices (« Cette semaine », « Grave »…) ont été
-      // retirées : elles ne filtraient rien (tâche P1.10).
       body: Container(
         width: double.infinity,
         decoration: const BoxDecoration(
@@ -64,14 +71,35 @@ class JournalScreen extends ConsumerWidget {
               return _EmptyHistory(onScan: () => context.go(AppRoutes.scanning));
             }
 
-            return ListView.separated(
-              padding: const EdgeInsets.all(AppSpacing.md),
-              itemCount: diagnostics.length,
-              separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
-              itemBuilder: (context, index) {
-                final diag = diagnostics[index];
-                return _DiagnosticCard(diagnostic: diag);
-              },
+            final visible = applyDiagnosticFilter(diagnostics, _filter);
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                _FilterBar(
+                  selected: _filter,
+                  onSelected: (filter) => setState(() => _filter = filter),
+                ),
+                Expanded(
+                  child: visible.isEmpty
+                      ? Center(
+                          child: Padding(
+                            padding: const EdgeInsets.all(AppSpacing.lg),
+                            child: Text(
+                              loc.journalFilterEmpty,
+                              style: AppTypography.bodySmall,
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                        )
+                      : ListView.separated(
+                          padding: const EdgeInsets.all(AppSpacing.md),
+                          itemCount: visible.length,
+                          separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+                          itemBuilder: (context, index) =>
+                              _DiagnosticCard(diagnostic: visible[index]),
+                        ),
+                ),
+              ],
             );
           },
         ),
@@ -80,6 +108,42 @@ class JournalScreen extends ConsumerWidget {
         onPressed: () => context.go(AppRoutes.scanning),
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.add, color: AppColors.textOnPrimary),
+      ),
+    );
+  }
+}
+
+/// Filtres réellement appliqués à l'historique (tâche P1.10).
+class _FilterBar extends StatelessWidget {
+  const _FilterBar({required this.selected, required this.onSelected});
+
+  final DiagnosticFilter selected;
+  final ValueChanged<DiagnosticFilter> onSelected;
+
+  String _label(DiagnosticFilter filter, AppLocalizations loc) => switch (filter) {
+        DiagnosticFilter.all => loc.journalFilterAll,
+        DiagnosticFilter.lastSevenDays => loc.journalFilterLastSevenDays,
+        DiagnosticFilter.severe => loc.journalFilterSevere,
+        DiagnosticFilter.healthy => loc.journalFilterHealthy,
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    // Wrap plutôt qu'un défilement horizontal : aucun filtre n'est caché hors écran.
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.md, 0),
+      child: Wrap(
+        spacing: AppSpacing.sm,
+        runSpacing: AppSpacing.xs,
+        children: [
+          for (final filter in DiagnosticFilter.values)
+            ChoiceChip(
+              label: Text(_label(filter, loc)),
+              selected: filter == selected,
+              onSelected: (_) => onSelected(filter),
+            ),
+        ],
       ),
     );
   }
@@ -159,6 +223,12 @@ class _DiagnosticCard extends StatelessWidget {
                     Text(
                       info.scientificName,
                       style: AppTypography.caption.copyWith(color: AppColors.textSecondary, fontStyle: FontStyle.italic),
+                    ),
+                  // Une piste du modèle n'est pas un diagnostic (P1.2).
+                  if (!isHealthy && diagnostic.certitude != DiagnosisCertainty.probable.name)
+                    Text(
+                      loc.journalStatusToConfirm,
+                      style: AppTypography.caption.copyWith(color: AppColors.severityMedium, fontWeight: FontWeight.w600),
                     ),
                   const SizedBox(height: AppSpacing.sm),
                   Container(

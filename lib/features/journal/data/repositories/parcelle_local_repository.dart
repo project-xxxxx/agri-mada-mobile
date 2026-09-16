@@ -5,6 +5,7 @@ import 'dart:io';
 import 'package:fpdart/fpdart.dart';
 import 'package:isar/isar.dart';
 
+import '../../../../core/ai/diagnosis_certainty.dart';
 import '../../../../core/ai/disease_catalog.dart';
 import '../../../../core/errors/failure.dart';
 import '../../../../core/local_db/isar_service.dart';
@@ -217,10 +218,13 @@ class ParcelleLocalRepository implements JournalRepository {
       final nb = diagnostics.length;
       final dernierDiag = nb > 0 ? diagnostics.first : null;
       final derniereMaladie = dernierDiag?.maladieDetectee;
-      final statut = switch (derniereMaladie) {
+      final statut = switch (dernierDiag) {
         null => 'aucun_diagnostic',
-        final label when DiseaseCatalog.isHealthy(label) => 'sain',
-        _ => 'malade',
+        final diag when DiseaseCatalog.isHealthy(diag.maladieDetectee) => 'sain',
+        // Seul un diagnostic « probable » classe la parcelle malade : une piste
+        // du modèle reste à confirmer (P1.2, évaluation du 2026-09-16).
+        final diag when diag.certitude == DiagnosisCertainty.probable.name => 'malade',
+        _ => 'a_confirmer',
       };
 
       journal.add(JournalEntry(

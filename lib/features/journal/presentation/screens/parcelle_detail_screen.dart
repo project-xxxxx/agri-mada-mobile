@@ -215,10 +215,13 @@ class _ParcelleHealthCard extends StatelessWidget {
 
     final latest = diagnostics.first;
     final isHealthy = DiseaseCatalog.isHealthy(latest.maladieDetectee);
-    final statusColor = isHealthy ? AppColors.severityLow : AppColors.severityHigh;
-    final statusIcon = isHealthy ? Icons.check_circle_outline : Icons.warning_amber_outlined;
-    final statusLabel = isHealthy ? loc.journalStatusHealthy : loc.journalStatusSick;
     final certainty = DiagnosisCertainty.fromName(latest.certitude);
+    // Seul un diagnostic « probable » classe la parcelle malade (P1.2).
+    final (statusColor, statusIcon, statusLabel) = isHealthy
+        ? (AppColors.severityLow, Icons.check_circle_outline, loc.journalStatusHealthy)
+        : certainty == DiagnosisCertainty.probable
+            ? (AppColors.severityHigh, Icons.warning_amber_outlined, loc.journalStatusSick)
+            : (AppColors.severityMedium, Icons.help_outline, loc.journalStatusToConfirm);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.screenHorizontal, vertical: AppSpacing.md),
@@ -264,7 +267,10 @@ class _DiagnosticHistoryItem extends StatelessWidget {
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     final isHealthy = DiseaseCatalog.isHealthy(diagnostic.maladieDetectee);
-    final statusColor = isHealthy ? AppColors.severityLow : AppColors.severityHigh;
+    final isConfirmed = diagnostic.certitude == DiagnosisCertainty.probable.name;
+    final statusColor = isHealthy
+        ? AppColors.severityLow
+        : (isConfirmed ? AppColors.severityHigh : AppColors.severityMedium);
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: AppSpacing.screenHorizontal, vertical: 4),
