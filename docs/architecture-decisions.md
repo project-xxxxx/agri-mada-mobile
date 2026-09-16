@@ -168,3 +168,32 @@ Chaque décision structurante du projet AgriMada est consignée ici : contexte, 
   - Relever le seuil sans rien changer d'autre : la plupart des photos hors sujet et des feuilles saines seraient restées affichées comme « possible » avec un nom de maladie, sans mise en garde.
   - Ne nommer aucune maladie : plus sûr, mais cela privait les techniciens des pistes du modèle.
   - Retirer le scan : il reste utile pour photographier la plante et l'envoyer à un technicien.
+
+---
+
+## ADR-007 — Session de scan multi-organes, multi-photos (2026-09-16)
+
+**Statut :** adopté (phase P2)
+
+- **Contexte :** jusqu'ici, une photo de feuille valait un diagnostic. Trois problèmes :
+  - le modèle ne connaît que la feuille, alors que le flétrissement bactérien, la pyriculariose du collet ou les maladies de racines se lisent ailleurs sur la plante ;
+  - trois photos de la même plante créaient trois lignes de journal, donc trois « maladies » là où il n'y en avait qu'une (P1.7) ;
+  - une photo floue ou à contre-jour produisait quand même un nom de maladie.
+
+  Les cours de pathologie de l'école partenaire (`docs/connaissances/sources.md`) décrivent les symptômes par organe et par stade : c'est la structure retenue.
+- **Décision :**
+  - **Unité de travail : la session.** `DiagnosticSessionLocal` (une session) porte N `ObservationLocal` (une photo + sa qualité + son top-k + ses réponses). Le journal, l'export et la synchronisation lisent les sessions ; un seul résultat par session. Les anciens diagnostics sont migrés au démarrage (`session_migration.dart`, idempotente par `origineDiagnosticId`).
+  - **Étape « Qu'observez-vous ? »** (P2.1) : six organes plus « Je ne sais pas », qui enchaîne la séquence guidée plante entière → feuille → collet. Seule la feuille passe par le modèle (`Organe.usesModel`).
+  - **Contrôle de qualité avant analyse** (P2.2) : netteté (variance du laplacien) et exposition mesurées hors du thread UI ; une photo refusée n'est ni analysée ni enregistrée, et le message dit quoi corriger. Les seuils viennent de 120 photos de terrain (`ml/reports/qualite_photo_2026-09-16.md`). L'exposition est jugée **avant** la netteté : une photo sombre est floue par conséquence, dire « trop sombre » est la consigne utile.
+  - **Fusion** (P2.4) : somme des log-probabilités des photos, pondérée à `poidsModele = 0.5`, probabilités bornées à [0,05 ; 0,95] ; les réponses au questionnaire et le contexte de parcelle ajoutent des indices ; softmax, top-3. Sans aucune observation passée par un modèle, `nommable` est faux : **aucune maladie n'est nommée**, la session part au technicien.
+  - **Contexte de parcelle** (P2.5) : écosystème, région, tranche d'altitude, variété, saison, date de repiquage. Il suit la session, alimente l'a priori de la fusion et le message au technicien.
+  - **Scan sans parcelle** (P2.6) : `parcelleLocalId` est nullable partout (local et serveur). Une session peut être rattachée à une parcelle après coup, depuis l'écran de résultat.
+- **Conséquences :**
+  - Le poids 0,5 et le bornage traduisent l'ADR-006 dans la fusion : le modèle ne peut à lui seul écraser ce que l'observateur déclare, et une fiche absente du top-k du modèle reste atteignable par les réponses.
+  - Les pondérations du questionnaire sont des estimations d'expert, pas des mesures : elles seront recalibrées en P4 sur des diagnostics validés par des techniciens.
+  - Le refus de photo peut bloquer un utilisateur sur un vieux téléphone ; les seuils sont volontairement plus permissifs que la calibration (p05 des photos nettes à 636, seuil à 350).
+  - Le garde-fou petit écran (P1.10) couvre les quatre écrans du parcours, en français et en malgache.
+- **Alternatives écartées :**
+  - Garder une photo = un diagnostic et dédupliquer à l'affichage : le journal aurait menti sur ce qui a été observé, et rien n'aurait permis de croiser feuille et collet.
+  - Moyenne des probabilités entre photos : une seule photo très confiante (souvent à tort, cf. ADR-006) aurait emporté la décision.
+  - Analyser quand même les photos floues en baissant la certitude : le modèle donne des scores élevés sur du flou, la baisse de certitude n'aurait rien corrigé.
