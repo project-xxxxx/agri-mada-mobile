@@ -142,3 +142,29 @@ Chaque décision structurante du projet AgriMada est consignée ici : contexte, 
   - Le contenu des fiches reste à valider par FOFIFA (P2).
   - Le garde-fou `test/l10n/no_hardcoded_text_test.dart` bloque tout nouveau texte visible écrit en dur dans `lib/`.
 - **Alternative écartée :** traduire l'écran tel quel, ce qui aurait diffusé des conseils non sourcés en malgache.
+
+---
+
+## ADR-006 — Résultats du modèle actuel présentés comme des pistes à confirmer (2026-09-16)
+
+**Statut :** adopté par l'équipe (tâche P1.2)
+
+- **Contexte :** l'évaluation du 16 septembre (`ml/reports/eval_hors_sujet_2026-09-16.md`) porte sur 50 photos hors sujet et 600 feuilles de riz prises au champ. Avec le seuil provisoire de 0,70 :
+  - 21 photos hors sujet (sol, eau, outils, zébus…) étaient des maladies « probables » ;
+  - 105 feuilles saines sur 200 étaient présentées comme malades ;
+  - la tache brune n'était jamais reconnue.
+
+  Aucun seuil ne sépare le vrai du faux : à partir de 0,997, il n'y a plus de « probable » faux, mais plus de « probable » juste non plus.
+- **Décision :**
+  - `CertaintyThresholds.probableMinScore` passe à 0,999 : avec ce modèle, aucun résultat n'est « probable ».
+  - Contrôle de végétation (`lib/core/ai/image_checks.dart`) : sous 10 % de pixels végétaux, le résultat est « incertain ».
+  - Un résultat « possible » s'affiche « Piste à confirmer », avec la mention « modèle expérimental ». « Demander à un technicien » (partage de la photo et des pistes) passe avant « Enregistrer ».
+  - Journal et détail de parcelle : une parcelle dont le dernier résultat n'est qu'une piste est « À confirmer », pas « Malade ».
+- **Conséquences :**
+  - L'app ne donne plus de diagnostic affirmatif tant que les modèles v2 ne sont pas validés sur le jeu de test malgache (P4.6) ; les seuils seront alors recalibrés (P4.4).
+  - Le script d'évaluation lit les seuils dans le code de l'app : il reste la référence pour mesurer chaque futur modèle.
+  - Les pistes restent souvent fausses : la mention « modèle expérimental » et le renvoi au technicien sont indispensables.
+- **Alternatives écartées :**
+  - Relever le seuil sans rien changer d'autre : la plupart des photos hors sujet et des feuilles saines seraient restées affichées comme « possible » avec un nom de maladie, sans mise en garde.
+  - Ne nommer aucune maladie : plus sûr, mais cela privait les techniciens des pistes du modèle.
+  - Retirer le scan : il reste utile pour photographier la plante et l'envoyer à un technicien.

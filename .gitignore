@@ -55,4 +55,5 @@ GoogleService-Info.plist
 # ── Données publiques téléchargées (ml/scripts/fetch_public_data.py) ─────────
 ml/data/raw/
 ml/data/interim/
+ml/.venv/
 knowledge/sources/

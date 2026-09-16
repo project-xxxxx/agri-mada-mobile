@@ -16,6 +16,7 @@ import 'package:tflite_flutter/tflite_flutter.dart';
 
 import '../utils/logger.dart';
 import 'diagnosis_certainty.dart';
+import 'image_checks.dart';
 
 @visibleForTesting
 bool hasValidTfliteModelHeader(Uint8List buffer) {
@@ -60,9 +61,17 @@ class _ImageConvertParams {
   final int inputSize;
 }
 
+// Image prête pour le modèle, avec sa part de pixels végétaux (tâche P1.2).
+class _PreparedImage {
+  const _PreparedImage(this.buffer, this.vegetationRatio);
+  final Float32List buffer;
+  final double vegetationRatio;
+}
+
 // ─── Fonction top-level pour compute() — doit être hors de toute classe ─────
-// Retourne un Float32List [1, inputSize, inputSize, 3] aplati.
-Float32List _convertImageToFloat32(Object params) {
+// Retourne un Float32List [1, inputSize, inputSize, 3] aplati et la part de
+// végétation mesurée sur la même image.
+_PreparedImage _prepareImage(Object params) {
   final p = params as _ImageConvertParams;
   final originalImage = img.decodeImage(p.imageBytes);
   if (originalImage == null) throw Exception('Image invalide ou corrompue');
@@ -85,7 +94,7 @@ Float32List _convertImageToFloat32(Object params) {
       buffer[i++] = pixel.bNormalized.toDouble();
     }
   }
-  return buffer;
+  return _PreparedImage(buffer, vegetationRatio(resized));
 }
 
 // ─── Service principal ───────────────────────────────────────────────────────
@@ -201,8 +210,8 @@ class TFLiteService {
     final bytes = await imageFile.readAsBytes();
 
     // 2. Convertir en Float32List dans un isolate séparé (pas de freeze UI)
-    final inputData = await compute(
-      _convertImageToFloat32,
+    final prepared = await compute(
+      _prepareImage,
       _ImageConvertParams(bytes, _inputSize),
     );
 
@@ -212,7 +221,7 @@ class TFLiteService {
 
     // 4. Inférence (TFLite gère son propre threading interne)
     _interpreter!.run(
-      inputData.reshape<double>([1, _inputSize, _inputSize, 3]),
+      prepared.buffer.reshape<double>([1, _inputSize, _inputSize, 3]),
       outputList,
     );
 
@@ -228,7 +237,7 @@ class TFLiteService {
       maladieDetectee: best.label,
       confiance: best.score,
       classement: ranked,
-      certitude: certaintyOf(ranked),
+      certitude: certaintyOf(ranked, vegetationRatio: prepared.vegetationRatio),
     );
   }
 

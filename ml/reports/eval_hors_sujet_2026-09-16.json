@@ -1,0 +1,755 @@
+{
+  "date": "2026-09-16",
+  "seuils_app": {
+    "probable_min_score": 0.999,
+    "probable_min_margin": 0.2,
+    "possible_min_score": 0.5,
+    "min_vegetation": 0.1
+  },
+  "entree_modele": {
+    "dtype": "<class 'numpy.float32'>",
+    "forme": [
+      1,
+      224,
+      224,
+      3
+    ]
+  },
+  "resume": {
+    "hors_sujet": {
+      "total": 50,
+      "probable": 0,
+      "possible": 30,
+      "incertain": 20,
+      "probable_juste": 0
+    },
+    "riz_blb": {
+      "total": 200,
+      "probable": 0,
+      "possible": 193,
+      "incertain": 7,
+      "probable_juste": 0
+    },
+    "riz_tache_brune": {
+      "total": 200,
+      "probable": 0,
+      "possible": 185,
+      "incertain": 15,
+      "probable_juste": 0
+    },
+    "riz_sain": {
+      "total": 200,
+      "probable": 0,
+      "possible": 179,
+      "incertain": 21,
+      "probable_juste": 0
+    }
+  },
+  "hors_sujet_affiches_probable": [],
+  "balayage_seuils": [
+    {
+      "score_min": 0.7,
+      "ecart_min": 0.2,
+      "hors_sujet_probable": 16,
+      "riz_probable_faux": 242,
+      "riz_sain_probable": 105,
+      "maladies_probable_juste_pct": 39.8
+    },
+    {
+      "score_min": 0.7,
+      "ecart_min": 0.5,
+      "hors_sujet_probable": 16,
+      "riz_probable_faux": 233,
+      "riz_sain_probable": 99,
+      "maladies_probable_juste_pct": 39.0
+    },
+    {
+      "score_min": 0.8,
+      "ecart_min": 0.2,
+      "hors_sujet_probable": 11,
+      "riz_probable_faux": 157,
+      "riz_sain_probable": 62,
+      "maladies_probable_juste_pct": 30.2
+    },
+    {
+      "score_min": 0.8,
+      "ecart_min": 0.5,
+      "hors_sujet_probable": 11,
+      "riz_probable_faux": 157,
+      "riz_sain_probable": 62,
+      "maladies_probable_juste_pct": 30.2
+    },
+    {
+      "score_min": 0.8,
+      "ecart_min": 0.8,
+      "hors_sujet_probable": 6,
+      "riz_probable_faux": 96,
+      "riz_sain_probable": 34,
+      "maladies_probable_juste_pct": 17.0
+    },
+    {
+      "score_min": 0.9,
+      "ecart_min": 0.2,
+      "hors_sujet_probable": 5,
+      "riz_probable_faux": 83,
+      "riz_sain_probable": 27,
+      "maladies_probable_juste_pct": 13.8
+    },
+    {
+      "score_min": 0.9,
+      "ecart_min": 0.5,
+      "hors_sujet_probable": 5,
+      "riz_probable_faux": 83,
+      "riz_sain_probable": 27,
+      "maladies_probable_juste_pct": 13.8
+    },
+    {
+      "score_min": 0.9,
+      "ecart_min": 0.8,
+      "hors_sujet_probable": 5,
+      "riz_probable_faux": 83,
+      "riz_sain_probable": 27,
+      "maladies_probable_juste_pct": 13.8
+    },
+    {
+      "score_min": 0.9,
+      "ecart_min": 0.9,
+      "hors_sujet_probable": 2,
+      "riz_probable_faux": 45,
+      "riz_sain_probable": 12,
+      "maladies_probable_juste_pct": 7.0
+    },
+    {
+      "score_min": 0.95,
+      "ecart_min": 0.2,
+      "hors_sujet_probable": 2,
+      "riz_probable_faux": 42,
+      "riz_sain_probable": 12,
+      "maladies_probable_juste_pct": 5.8
+    },
+    {
+      "score_min": 0.95,
+      "ecart_min": 0.5,
+      "hors_sujet_probable": 2,
+      "riz_probable_faux": 42,
+      "riz_sain_probable": 12,
+      "maladies_probable_juste_pct": 5.8
+    },
+    {
+      "score_min": 0.95,
+      "ecart_min": 0.8,
+      "hors_sujet_probable": 2,
+      "riz_probable_faux": 42,
+      "riz_sain_probable": 12,
+      "maladies_probable_juste_pct": 5.8
+    },
+    {
+      "score_min": 0.95,
+      "ecart_min": 0.9,
+      "hors_sujet_probable": 2,
+      "riz_probable_faux": 42,
+      "riz_sain_probable": 12,
+      "maladies_probable_juste_pct": 5.8
+    },
+    {
+      "score_min": 0.95,
+      "ecart_min": 0.95,
+      "hors_sujet_probable": 1,
+      "riz_probable_faux": 21,
+      "riz_sain_probable": 6,
+      "maladies_probable_juste_pct": 2.2
+    },
+    {
+      "score_min": 0.97,
+      "ecart_min": 0.2,
+      "hors_sujet_probable": 1,
+      "riz_probable_faux": 21,
+      "riz_sain_probable": 5,
+      "maladies_probable_juste_pct": 3.0
+    },
+    {
+      "score_min": 0.97,
+      "ecart_min": 0.5,
+      "hors_sujet_probable": 1,
+      "riz_probable_faux": 21,
+      "riz_sain_probable": 5,
+      "maladies_probable_juste_pct": 3.0
+    },
+    {
+      "score_min": 0.97,
+      "ecart_min": 0.8,
+      "hors_sujet_probable": 1,
+      "riz_probable_faux": 21,
+      "riz_sain_probable": 5,
+      "maladies_probable_juste_pct": 3.0
+    },
+    {
+      "score_min": 0.97,
+      "ecart_min": 0.9,
+      "hors_sujet_probable": 1,
+      "riz_probable_faux": 21,
+      "riz_sain_probable": 5,
+      "maladies_probable_juste_pct": 3.0
+    },
+    {
+      "score_min": 0.97,
+      "ecart_min": 0.95,
+      "hors_sujet_probable": 1,
+      "riz_probable_faux": 19,
+      "riz_sain_probable": 5,
+      "maladies_probable_juste_pct": 2.0
+    },
+    {
+      "score_min": 0.98,
+      "ecart_min": 0.2,
+      "hors_sujet_probable": 1,
+      "riz_probable_faux": 10,
+      "riz_sain_probable": 3,
+      "maladies_probable_juste_pct": 1.2
+    },
+    {
+      "score_min": 0.98,
+      "ecart_min": 0.5,
+      "hors_sujet_probable": 1,
+      "riz_probable_faux": 10,
+      "riz_sain_probable": 3,
+      "maladies_probable_juste_pct": 1.2
+    },
+    {
+      "score_min": 0.98,
+      "ecart_min": 0.8,
+      "hors_sujet_probable": 1,
+      "riz_probable_faux": 10,
+      "riz_sain_probable": 3,
+      "maladies_probable_juste_pct": 1.2
+    },
+    {
+      "score_min": 0.98,
+      "ecart_min": 0.9,
+      "hors_sujet_probable": 1,
+      "riz_probable_faux": 10,
+      "riz_sain_probable": 3,
+      "maladies_probable_juste_pct": 1.2
+    },
+    {
+      "score_min": 0.98,
+      "ecart_min": 0.95,
+      "hors_sujet_probable": 1,
+      "riz_probable_faux": 10,
+      "riz_sain_probable": 3,
+      "maladies_probable_juste_pct": 1.2
+    },
+    {
+      "score_min": 0.99,
+      "ecart_min": 0.2,
+      "hors_sujet_probable": 1,
+      "riz_probable_faux": 3,
+      "riz_sain_probable": 1,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.99,
+      "ecart_min": 0.5,
+      "hors_sujet_probable": 1,
+      "riz_probable_faux": 3,
+      "riz_sain_probable": 1,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.99,
+      "ecart_min": 0.8,
+      "hors_sujet_probable": 1,
+      "riz_probable_faux": 3,
+      "riz_sain_probable": 1,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.99,
+      "ecart_min": 0.9,
+      "hors_sujet_probable": 1,
+      "riz_probable_faux": 3,
+      "riz_sain_probable": 1,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.99,
+      "ecart_min": 0.95,
+      "hors_sujet_probable": 1,
+      "riz_probable_faux": 3,
+      "riz_sain_probable": 1,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.995,
+      "ecart_min": 0.2,
+      "hors_sujet_probable": 0,
+      "riz_probable_faux": 1,
+      "riz_sain_probable": 0,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.995,
+      "ecart_min": 0.5,
+      "hors_sujet_probable": 0,
+      "riz_probable_faux": 1,
+      "riz_sain_probable": 0,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.995,
+      "ecart_min": 0.8,
+      "hors_sujet_probable": 0,
+      "riz_probable_faux": 1,
+      "riz_sain_probable": 0,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.995,
+      "ecart_min": 0.9,
+      "hors_sujet_probable": 0,
+      "riz_probable_faux": 1,
+      "riz_sain_probable": 0,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.995,
+      "ecart_min": 0.95,
+      "hors_sujet_probable": 0,
+      "riz_probable_faux": 1,
+      "riz_sain_probable": 0,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.997,
+      "ecart_min": 0.2,
+      "hors_sujet_probable": 0,
+      "riz_probable_faux": 0,
+      "riz_sain_probable": 0,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.997,
+      "ecart_min": 0.5,
+      "hors_sujet_probable": 0,
+      "riz_probable_faux": 0,
+      "riz_sain_probable": 0,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.997,
+      "ecart_min": 0.8,
+      "hors_sujet_probable": 0,
+      "riz_probable_faux": 0,
+      "riz_sain_probable": 0,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.997,
+      "ecart_min": 0.9,
+      "hors_sujet_probable": 0,
+      "riz_probable_faux": 0,
+      "riz_sain_probable": 0,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.997,
+      "ecart_min": 0.95,
+      "hors_sujet_probable": 0,
+      "riz_probable_faux": 0,
+      "riz_sain_probable": 0,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.998,
+      "ecart_min": 0.2,
+      "hors_sujet_probable": 0,
+      "riz_probable_faux": 0,
+      "riz_sain_probable": 0,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.998,
+      "ecart_min": 0.5,
+      "hors_sujet_probable": 0,
+      "riz_probable_faux": 0,
+      "riz_sain_probable": 0,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.998,
+      "ecart_min": 0.8,
+      "hors_sujet_probable": 0,
+      "riz_probable_faux": 0,
+      "riz_sain_probable": 0,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.998,
+      "ecart_min": 0.9,
+      "hors_sujet_probable": 0,
+      "riz_probable_faux": 0,
+      "riz_sain_probable": 0,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.998,
+      "ecart_min": 0.95,
+      "hors_sujet_probable": 0,
+      "riz_probable_faux": 0,
+      "riz_sain_probable": 0,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.999,
+      "ecart_min": 0.2,
+      "hors_sujet_probable": 0,
+      "riz_probable_faux": 0,
+      "riz_sain_probable": 0,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.999,
+      "ecart_min": 0.5,
+      "hors_sujet_probable": 0,
+      "riz_probable_faux": 0,
+      "riz_sain_probable": 0,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.999,
+      "ecart_min": 0.8,
+      "hors_sujet_probable": 0,
+      "riz_probable_faux": 0,
+      "riz_sain_probable": 0,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.999,
+      "ecart_min": 0.9,
+      "hors_sujet_probable": 0,
+      "riz_probable_faux": 0,
+      "riz_sain_probable": 0,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.999,
+      "ecart_min": 0.95,
+      "hors_sujet_probable": 0,
+      "riz_probable_faux": 0,
+      "riz_sain_probable": 0,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.9995,
+      "ecart_min": 0.2,
+      "hors_sujet_probable": 0,
+      "riz_probable_faux": 0,
+      "riz_sain_probable": 0,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.9995,
+      "ecart_min": 0.5,
+      "hors_sujet_probable": 0,
+      "riz_probable_faux": 0,
+      "riz_sain_probable": 0,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.9995,
+      "ecart_min": 0.8,
+      "hors_sujet_probable": 0,
+      "riz_probable_faux": 0,
+      "riz_sain_probable": 0,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.9995,
+      "ecart_min": 0.9,
+      "hors_sujet_probable": 0,
+      "riz_probable_faux": 0,
+      "riz_sain_probable": 0,
+      "maladies_probable_juste_pct": 0.0
+    },
+    {
+      "score_min": 0.9995,
+      "ecart_min": 0.95,
+      "hors_sujet_probable": 0,
+      "riz_probable_faux": 0,
+      "riz_sain_probable": 0,
+      "maladies_probable_juste_pct": 0.0
+    }
+  ],
+  "controle_vegetation": [
+    {
+      "vegetation_min": 0.0,
+      "affichage_min": 0.5,
+      "hors_sujet": 38,
+      "riz_sain": 179,
+      "riz_blb": 193,
+      "riz_tache_brune": 185,
+      "maladies_bon_nom_pct": 47.5
+    },
+    {
+      "vegetation_min": 0.0,
+      "affichage_min": 0.6,
+      "hors_sujet": 31,
+      "riz_sain": 136,
+      "riz_blb": 182,
+      "riz_tache_brune": 161,
+      "maladies_bon_nom_pct": 45.0
+    },
+    {
+      "vegetation_min": 0.0,
+      "affichage_min": 0.7,
+      "hors_sujet": 21,
+      "riz_sain": 105,
+      "riz_blb": 159,
+      "riz_tache_brune": 137,
+      "maladies_bon_nom_pct": 39.8
+    },
+    {
+      "vegetation_min": 0.0,
+      "affichage_min": 0.8,
+      "hors_sujet": 14,
+      "riz_sain": 62,
+      "riz_blb": 121,
+      "riz_tache_brune": 95,
+      "maladies_bon_nom_pct": 30.2
+    },
+    {
+      "vegetation_min": 0.0,
+      "affichage_min": 0.9,
+      "hors_sujet": 6,
+      "riz_sain": 27,
+      "riz_blb": 55,
+      "riz_tache_brune": 56,
+      "maladies_bon_nom_pct": 13.8
+    },
+    {
+      "vegetation_min": 0.05,
+      "affichage_min": 0.5,
+      "hors_sujet": 33,
+      "riz_sain": 179,
+      "riz_blb": 193,
+      "riz_tache_brune": 185,
+      "maladies_bon_nom_pct": 47.5
+    },
+    {
+      "vegetation_min": 0.05,
+      "affichage_min": 0.6,
+      "hors_sujet": 26,
+      "riz_sain": 136,
+      "riz_blb": 182,
+      "riz_tache_brune": 161,
+      "maladies_bon_nom_pct": 45.0
+    },
+    {
+      "vegetation_min": 0.05,
+      "affichage_min": 0.7,
+      "hors_sujet": 17,
+      "riz_sain": 105,
+      "riz_blb": 159,
+      "riz_tache_brune": 137,
+      "maladies_bon_nom_pct": 39.8
+    },
+    {
+      "vegetation_min": 0.05,
+      "affichage_min": 0.8,
+      "hors_sujet": 12,
+      "riz_sain": 62,
+      "riz_blb": 121,
+      "riz_tache_brune": 95,
+      "maladies_bon_nom_pct": 30.2
+    },
+    {
+      "vegetation_min": 0.05,
+      "affichage_min": 0.9,
+      "hors_sujet": 6,
+      "riz_sain": 27,
+      "riz_blb": 55,
+      "riz_tache_brune": 56,
+      "maladies_bon_nom_pct": 13.8
+    },
+    {
+      "vegetation_min": 0.1,
+      "affichage_min": 0.5,
+      "hors_sujet": 30,
+      "riz_sain": 179,
+      "riz_blb": 193,
+      "riz_tache_brune": 185,
+      "maladies_bon_nom_pct": 47.5
+    },
+    {
+      "vegetation_min": 0.1,
+      "affichage_min": 0.6,
+      "hors_sujet": 25,
+      "riz_sain": 136,
+      "riz_blb": 182,
+      "riz_tache_brune": 161,
+      "maladies_bon_nom_pct": 45.0
+    },
+    {
+      "vegetation_min": 0.1,
+      "affichage_min": 0.7,
+      "hors_sujet": 16,
+      "riz_sain": 105,
+      "riz_blb": 159,
+      "riz_tache_brune": 137,
+      "maladies_bon_nom_pct": 39.8
+    },
+    {
+      "vegetation_min": 0.1,
+      "affichage_min": 0.8,
+      "hors_sujet": 11,
+      "riz_sain": 62,
+      "riz_blb": 121,
+      "riz_tache_brune": 95,
+      "maladies_bon_nom_pct": 30.2
+    },
+    {
+      "vegetation_min": 0.1,
+      "affichage_min": 0.9,
+      "hors_sujet": 5,
+      "riz_sain": 27,
+      "riz_blb": 55,
+      "riz_tache_brune": 56,
+      "maladies_bon_nom_pct": 13.8
+    },
+    {
+      "vegetation_min": 0.15,
+      "affichage_min": 0.5,
+      "hors_sujet": 29,
+      "riz_sain": 179,
+      "riz_blb": 193,
+      "riz_tache_brune": 185,
+      "maladies_bon_nom_pct": 47.5
+    },
+    {
+      "vegetation_min": 0.15,
+      "affichage_min": 0.6,
+      "hors_sujet": 24,
+      "riz_sain": 136,
+      "riz_blb": 182,
+      "riz_tache_brune": 161,
+      "maladies_bon_nom_pct": 45.0
+    },
+    {
+      "vegetation_min": 0.15,
+      "affichage_min": 0.7,
+      "hors_sujet": 15,
+      "riz_sain": 105,
+      "riz_blb": 159,
+      "riz_tache_brune": 137,
+      "maladies_bon_nom_pct": 39.8
+    },
+    {
+      "vegetation_min": 0.15,
+      "affichage_min": 0.8,
+      "hors_sujet": 11,
+      "riz_sain": 62,
+      "riz_blb": 121,
+      "riz_tache_brune": 95,
+      "maladies_bon_nom_pct": 30.2
+    },
+    {
+      "vegetation_min": 0.15,
+      "affichage_min": 0.9,
+      "hors_sujet": 5,
+      "riz_sain": 27,
+      "riz_blb": 55,
+      "riz_tache_brune": 56,
+      "maladies_bon_nom_pct": 13.8
+    },
+    {
+      "vegetation_min": 0.2,
+      "affichage_min": 0.5,
+      "hors_sujet": 27,
+      "riz_sain": 179,
+      "riz_blb": 193,
+      "riz_tache_brune": 184,
+      "maladies_bon_nom_pct": 47.5
+    },
+    {
+      "vegetation_min": 0.2,
+      "affichage_min": 0.6,
+      "hors_sujet": 22,
+      "riz_sain": 136,
+      "riz_blb": 182,
+      "riz_tache_brune": 160,
+      "maladies_bon_nom_pct": 45.0
+    },
+    {
+      "vegetation_min": 0.2,
+      "affichage_min": 0.7,
+      "hors_sujet": 14,
+      "riz_sain": 105,
+      "riz_blb": 159,
+      "riz_tache_brune": 136,
+      "maladies_bon_nom_pct": 39.8
+    },
+    {
+      "vegetation_min": 0.2,
+      "affichage_min": 0.8,
+      "hors_sujet": 10,
+      "riz_sain": 62,
+      "riz_blb": 121,
+      "riz_tache_brune": 94,
+      "maladies_bon_nom_pct": 30.2
+    },
+    {
+      "vegetation_min": 0.2,
+      "affichage_min": 0.9,
+      "hors_sujet": 4,
+      "riz_sain": 27,
+      "riz_blb": 55,
+      "riz_tache_brune": 56,
+      "maladies_bon_nom_pct": 13.8
+    },
+    {
+      "vegetation_min": 0.3,
+      "affichage_min": 0.5,
+      "hors_sujet": 20,
+      "riz_sain": 179,
+      "riz_blb": 193,
+      "riz_tache_brune": 184,
+      "maladies_bon_nom_pct": 47.5
+    },
+    {
+      "vegetation_min": 0.3,
+      "affichage_min": 0.6,
+      "hors_sujet": 17,
+      "riz_sain": 136,
+      "riz_blb": 182,
+      "riz_tache_brune": 160,
+      "maladies_bon_nom_pct": 45.0
+    },
+    {
+      "vegetation_min": 0.3,
+      "affichage_min": 0.7,
+      "hors_sujet": 9,
+      "riz_sain": 105,
+      "riz_blb": 159,
+      "riz_tache_brune": 136,
+      "maladies_bon_nom_pct": 39.8
+    },
+    {
+      "vegetation_min": 0.3,
+      "affichage_min": 0.8,
+      "hors_sujet": 8,
+      "riz_sain": 62,
+      "riz_blb": 121,
+      "riz_tache_brune": 94,
+      "maladies_bon_nom_pct": 30.2
+    },
+    {
+      "vegetation_min": 0.3,
+      "affichage_min": 0.9,
+      "hors_sujet": 4,
+      "riz_sain": 27,
+      "riz_blb": 55,
+      "riz_tache_brune": 56,
+      "maladies_bon_nom_pct": 13.8
+    }
+  ]
+}
