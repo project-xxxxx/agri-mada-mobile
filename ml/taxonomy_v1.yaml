@@ -12,6 +12,7 @@ version: 1
 statut: brouillon
 valide_par: null
 date_validation: null
+derniere_maj: 2026-09-16  # cours de l'école partenaire (docs/connaissances/sources.md)
 
 legende:
   priorite: [haute, moyenne, basse]
@@ -71,7 +72,10 @@ problemes:
       agent: Magnaporthe oryzae
       presence_madagascar: confirmee
       priorite: haute
-      sources: [fofifa_aretina_alaotra, cirad_pyriculariose]
+      sources: [fofifa_aretina_alaotra, cirad_pyriculariose, cours_rafalimanana_maladies_riz]
+      notes: >-
+        Dégâts surtout sur les Hautes Terres, pertes de 20 à 60 % ; favorisée par une
+        humidité supérieure à 90 %, des nuits de 20 à 25 °C et un excès d'azote.
       jeux_publics: [paddy_doctor, banglariceleaf, mendeley_hx6f852hw4, sethy_5932, dhan_shomadhan, hf_rice_disease]
     - id: blb
       nature: maladie
@@ -98,7 +102,8 @@ problemes:
       agent: Bipolaris oryzae
       presence_madagascar: confirmee
       priorite: haute
-      sources: [fofifa_aretina_alaotra]
+      sources: [fofifa_aretina_alaotra, cours_epsa_pathologie_riz]
+      notes: attaque les feuilles et les grains ; pertes pouvant atteindre 75 % (cours EPSA)
       jeux_publics: [paddy_doctor, mendeley_hx6f852hw4, sethy_5932, dhan_shomadhan, hf_rice_disease]
     - id: cercosporiose
       nature: maladie
@@ -117,6 +122,10 @@ problemes:
       agent: Microdochium oryzae
       presence_madagascar: a_confirmer
       priorite: basse
+      sources: [cours_epsa_pathologie_riz, cours_rafalimanana_maladies_riz]
+      notes: >-
+        Citée par les deux cours sous le nom de rhynchosporiose, sans localisation
+        malgache précise : la présence reste à confirmer.
       jeux_publics: [mendeley_hx6f852hw4, dhan_shomadhan]
     - id: degats_hispa
       nature: ravageur
@@ -144,7 +153,10 @@ problemes:
       nom_mg: null
       presence_madagascar: confirmee
       priorite: haute
-      sources: [ird_toxicite_ferreuse, cirad_toxicite_ferreuse]
+      sources: [ird_toxicite_ferreuse, cirad_toxicite_ferreuse, cours_epsa_pathologie_riz]
+      notes: >-
+        Pigmentation orange rouille qui commence à la pointe des feuilles puis gagne
+        tout le feuillage ; bas-fonds et parties mal drainées des périmètres irrigués.
       jeux_publics: []
     - id: carence_azote
       nature: abiotique
@@ -202,7 +214,24 @@ problemes:
       agent: Sarocladium oryzae (probable, à confirmer par le laboratoire)
       presence_madagascar: confirmee
       priorite: moyenne
-      sources: [fofifa_aretina_alaotra, fofifa_catalogue_rpa]
+      sources: [fofifa_aretina_alaotra, fofifa_catalogue_rpa, cours_rafalimanana_maladies_riz]
+      notes: >-
+        Observée dans toute l'île, pertes jusqu'à 26 % ; se voit au début de la
+        montaison et fait mal sortir les panicules.
+      jeux_publics: []
+    - id: bacteriose_gaine_altitude
+      nature: maladie
+      nom_fr: Pourriture brune de la gaine (bactériose d'altitude)
+      nom_mg: null
+      agent: Pseudomonas fuscovaginae
+      presence_madagascar: confirmee
+      priorite: haute
+      sources: [cours_rafalimanana_maladies_riz]
+      notes: >-
+        Dégâts importants au-dessus de 1600 m, donc sur les Hautes Terres ; stries
+        anguleuses sur les gaines, visibles à la formation de la panicule, stérilité
+        variable selon les variétés. Se confond à l'œil avec la stérilité due au
+        froid (panicule_grains) : les deux sont à distinguer avec l'agronome.
       jeux_publics: []
     - id: rhizoctone
       nature: maladie
@@ -272,7 +301,11 @@ problemes:
       agent: Bipolaris oryzae et autres
       presence_madagascar: confirmee
       priorite: moyenne
-      sources: [fofifa_aretina_alaotra]
+      sources: [fofifa_aretina_alaotra, cours_epsa_pathologie_riz]
+      notes: >-
+        Complexe de champignons (Alternaria, Curvularia, Fusarium, Nigrospora,
+        Sarocladium), favorisé par les pluies à maturité, les parcelles non drainées
+        et le stockage au-dessus de 14 % d'humidité.
       jeux_publics: []
     - id: degats_punaises
       nature: ravageur
@@ -288,7 +321,10 @@ problemes:
       nom_mg: null
       presence_madagascar: a_confirmer
       priorite: moyenne
-      notes: connue sur les Hautes Terres ; source malgache à rattacher avant validation
+      notes: >-
+        Connue sur les Hautes Terres ; source malgache à rattacher avant validation.
+        À distinguer de la bactériose des gaines d'altitude (tige_gaine), qui donne
+        aussi de la stérilité au-dessus de 1600 m.
       jeux_publics: []
     - id: faux_charbon
       nature: maladie
@@ -297,6 +333,8 @@ problemes:
       agent: Ustilaginoidea virens
       presence_madagascar: a_confirmer
       priorite: basse
+      sources: [cours_rafalimanana_maladies_riz, cours_epsa_pathologie_riz]
+      notes: citée parmi les maladies mineures du cours malgache, sans localisation ; présence à confirmer
       jeux_publics: [rice_grain_disease, frontiers_33026]
     - id: brunissure_bacterienne_panicule
       nature: maladie
@@ -321,7 +359,8 @@ problemes:
       agent: Meloidogyne graminicola
       presence_madagascar: confirmee
       priorite: moyenne
-      sources: [nematodes_madagascar_2016]
+      sources: [nematodes_madagascar_2016, cours_epsa_pathologie_riz]
+      notes: le cours EPSA cite aussi Hirschmaniella comme endoparasite des racines du riz
       jeux_publics: []
     - id: racines_ferreuses
       nature: abiotique
@@ -361,8 +400,14 @@ problemes:
       agent: Rice yellow mottle virus, souche S4mg
       presence_madagascar: confirmee
       priorite: haute
-      sources: [fofifa_aretina_alaotra, rymv_madagascar]
-      notes: la fiche FOFIFA recommande de brûler les plants atteints ; confirmation par ELISA pour l'annotation
+      autres_noms_mg: [Mativondrana, Fondrabe]
+      sources: [fofifa_aretina_alaotra, rymv_madagascar, cours_rafalimanana_maladies_riz]
+      notes: >-
+        La fiche FOFIFA recommande de brûler les plants atteints ; confirmation par
+        ELISA pour l'annotation. Le cours Rafalimanana donne les noms mativondrana et
+        fondrabe, les vecteurs Hispa gestroi, Trichispa sericea et Chaetocnema pulla,
+        des pertes de 0 à 80 % et une répartition côtière ; aucune lutte curative
+        n'existe.
       jeux_publics: []
     - id: foyers_desseches
       nature: symptome_a_preciser
@@ -426,3 +471,11 @@ sources:
   rymv_madagascar:
     titre: Comparing patterns and scales of plant virus phylogeography - RYMV in Madagascar
     url: https://pmc.ncbi.nlm.nih.gov/articles/PMC6671560/
+  cours_epsa_pathologie_riz:
+    titre: Reconnaissance et gestion intégrée des principales maladies du riz (cours L2, école professionnelle supérieure agricole)
+    fichier: knowledge/sources/cours/Pathologie riz.pdf
+    notes: cours non republiable ; pages sur les fongicides et les doses écartées de l'app (P1.1)
+  cours_rafalimanana_maladies_riz:
+    titre: Importance des maladies de riz et proposition de lutte (Halitiana Rafalimanana, contexte malgache)
+    fichier: knowledge/sources/cours/Maladies de riz.pdf
+    notes: cours non republiable ; cas de Vakinankaratra, noms malgaches et répartitions relevés
