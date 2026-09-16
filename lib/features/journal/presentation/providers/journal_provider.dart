@@ -1,15 +1,16 @@
 // Providers Riverpod pour la gestion du journal agricole (Isar)
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../core/local_db/models/diagnostic_local.dart';
 import '../../../../core/local_db/models/parcelle_local.dart';
+import '../../domain/entities/resultat_scan.dart';
+import '../../../scan/presentation/providers/session_scan_provider.dart'
+    show sessionRepositoryProvider;
 import '../../data/repositories/parcelle_local_repository.dart';
 import '../../data/services/export_service.dart';
 import '../../domain/entities/journal_entry.dart';
 import '../../domain/repositories/journal_repository.dart';
 import '../../domain/usecases/export_journal_usecase.dart';
 import '../../domain/usecases/get_parcelles_usecase.dart';
-import '../../../scan/presentation/providers/scan_provider.dart' show diagnosticRepositoryProvider;
 
 /// Accès au repository des parcelles
 final parcelleRepositoryProvider = Provider<ParcelleLocalRepository>(
@@ -34,7 +35,7 @@ final exportServiceProvider = Provider<ExportService>(
 
 final exportJournalUseCaseProvider = Provider<ExportJournalUseCase>(
   (ref) => ExportJournalUseCase(
-    diagnosticRepository: ref.watch(diagnosticRepositoryProvider),
+    sessionRepository: ref.watch(sessionRepositoryProvider),
     parcelleRepository: ref.watch(parcelleRepositoryProvider),
     exportService: ref.watch(exportServiceProvider),
   ),
@@ -52,9 +53,15 @@ final parcellesProvider = FutureProvider<List<ParcelleLocal>>((ref) {
   return ref.read(parcelleRepositoryProvider).getAllParcelles();
 });
 
-/// Liste complète de l'historique des diagnostics
-final diagnosticsHistoryProvider = FutureProvider<List<DiagnosticLocal>>((ref) async {
-  return ref.read(diagnosticRepositoryProvider).getAllDiagnostics();
+/// Historique complet des scans, sessions terminées comprises (tâche P2.3).
+final resultatsHistoryProvider = FutureProvider<List<ResultatScan>>((ref) async {
+  return ref.read(sessionRepositoryProvider).resultats();
+});
+
+/// Scans d'une parcelle donnée.
+final resultatsParParcelleProvider =
+    FutureProvider.family<List<ResultatScan>, int>((ref, parcelleId) async {
+  return ref.read(sessionRepositoryProvider).resultats(parcelleLocalId: parcelleId);
 });
 
 /// Notifier pour les actions de création / mise à jour des parcelles
@@ -73,6 +80,13 @@ class ParcelleNotifier extends StateNotifier<AsyncValue<void>> {
     double? latitude,
     double? longitude,
     String? photoPath,
+    String? ecosysteme,
+    String? region,
+    String? altitudeTranche,
+    double? altitudeMetres,
+    String? variete,
+    String? saison,
+    DateTime? dateRepiquage,
   }) async {
     state = const AsyncValue.loading();
     try {
@@ -84,6 +98,13 @@ class ParcelleNotifier extends StateNotifier<AsyncValue<void>> {
         latitude: latitude,
         longitude: longitude,
         photoPath: photoPath,
+        ecosysteme: ecosysteme,
+        region: region,
+        altitudeTranche: altitudeTranche,
+        altitudeMetres: altitudeMetres,
+        variete: variete,
+        saison: saison,
+        dateRepiquage: dateRepiquage,
       );
       state = const AsyncValue.data(null);
       return parcelle;

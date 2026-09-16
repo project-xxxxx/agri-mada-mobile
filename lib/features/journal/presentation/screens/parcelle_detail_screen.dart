@@ -10,12 +10,11 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/local_db/models/parcelle_local.dart';
-import '../../../../core/local_db/models/diagnostic_local.dart';
 import '../../../../core/widgets/app_sidebar.dart';
-import '../../../scan/presentation/providers/scan_provider.dart';
+import '../../domain/entities/resultat_scan.dart';
 import '../providers/journal_provider.dart';
+import '../resultat_labels.dart';
 import '../../../../core/ai/diagnosis_certainty.dart';
-import '../../../../core/ai/disease_catalog.dart';
 import '../../../scan/presentation/diagnosis_labels.dart';
 
 class ParcelleDetailScreen extends ConsumerWidget {
@@ -26,7 +25,7 @@ class ParcelleDetailScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final loc = AppLocalizations.of(context);
     final parcellesAsync = ref.watch(parcellesProvider);
-    final diagnosticsAsync = ref.watch(diagnosticsParParcelleProvider(parcelleId));
+    final resultatsAsync = ref.watch(resultatsParParcelleProvider(parcelleId));
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
@@ -50,7 +49,7 @@ class ParcelleDetailScreen extends ConsumerWidget {
           ),
           IconButton(
             icon: const Icon(Icons.camera_alt_outlined),
-            onPressed: () => context.push('${AppRoutes.scanning}?parcelleId=$parcelleId'),
+            onPressed: () => context.push('${AppRoutes.scanOrgane}?parcelleId=$parcelleId'),
             tooltip: loc.parcelDetailNewAnalysis,
           ),
         ],
@@ -68,15 +67,15 @@ class ParcelleDetailScreen extends ConsumerWidget {
               SliverToBoxAdapter(child: _ParcelleHeader(parcelle: parcelle)),
               const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.md)),
               SliverToBoxAdapter(
-                child: diagnosticsAsync.when(
+                child: resultatsAsync.when(
                   loading: () => const Center(child: Padding(
                     padding: EdgeInsets.all(AppSpacing.xl),
                     child: CircularProgressIndicator(color: AppColors.primary),
                   )),
                   error: (e, _) => Center(child: Text(loc.journalError('$e'))),
-                  data: (diagnostics) => _ParcelleHealthCard(
+                  data: (resultats) => _ParcelleHealthCard(
                     parcelle: parcelle,
-                    diagnostics: diagnostics,
+                    resultats: resultats,
                   ),
                 ),
               ),
@@ -88,11 +87,11 @@ class ParcelleDetailScreen extends ConsumerWidget {
                 ),
               ),
               const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
-              diagnosticsAsync.when(
+              resultatsAsync.when(
                 loading: () => const SliverToBoxAdapter(child: SizedBox.shrink()),
                 error: (_, __) => const SliverToBoxAdapter(child: SizedBox.shrink()),
-                data: (diagnostics) {
-                  if (diagnostics.isEmpty) {
+                data: (resultats) {
+                  if (resultats.isEmpty) {
                     return SliverToBoxAdapter(
                       child: Padding(
                         padding: const EdgeInsets.all(AppSpacing.xl),
@@ -104,7 +103,7 @@ class ParcelleDetailScreen extends ConsumerWidget {
                               Text(loc.parcelDetailNoAnalysis, style: AppTypography.bodyMedium, textAlign: TextAlign.center),
                               const SizedBox(height: AppSpacing.md),
                               ElevatedButton.icon(
-                                onPressed: () => context.push('${AppRoutes.scanning}?parcelleId=$parcelleId'),
+                                onPressed: () => context.push('${AppRoutes.scanOrgane}?parcelleId=$parcelleId'),
                                 icon: const Icon(Icons.camera_alt_outlined),
                                 label: Text(loc.journalStartDiagnosis),
                               ),
@@ -117,10 +116,9 @@ class ParcelleDetailScreen extends ConsumerWidget {
                   return SliverList(
                     delegate: SliverChildBuilderDelegate(
                       (context, index) {
-                        final diag = diagnostics[index];
-                        return _DiagnosticHistoryItem(diagnostic: diag);
+                        return _ResultatHistoryItem(resultat: resultats[index]);
                       },
-                      childCount: diagnostics.length,
+                      childCount: resultats.length,
                     ),
                   );
                 },
@@ -191,14 +189,14 @@ class _ParcelleHeader extends StatelessWidget {
 }
 
 class _ParcelleHealthCard extends StatelessWidget {
-  const _ParcelleHealthCard({required this.parcelle, required this.diagnostics});
+  const _ParcelleHealthCard({required this.parcelle, required this.resultats});
   final ParcelleLocal parcelle;
-  final List<DiagnosticLocal> diagnostics;
+  final List<ResultatScan> resultats;
 
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    if (diagnostics.isEmpty) {
+    if (resultats.isEmpty) {
       return Container(
         margin: const EdgeInsets.symmetric(horizontal: AppSpacing.screenHorizontal, vertical: AppSpacing.md),
         padding: const EdgeInsets.all(AppSpacing.md),
@@ -213,10 +211,10 @@ class _ParcelleHealthCard extends StatelessWidget {
       );
     }
 
-    final latest = diagnostics.first;
-    final isHealthy = DiseaseCatalog.isHealthy(latest.maladieDetectee);
+    final latest = resultats.first;
+    final isHealthy = latest.estSain;
     final certainty = DiagnosisCertainty.fromName(latest.certitude);
-    // Seul un diagnostic « probable » classe la parcelle malade (P1.2).
+    // Seul un résultat « probable » classe la parcelle malade (P1.2).
     final (statusColor, statusIcon, statusLabel) = isHealthy
         ? (AppColors.severityLow, Icons.check_circle_outline, loc.journalStatusHealthy)
         : certainty == DiagnosisCertainty.probable
@@ -248,9 +246,9 @@ class _ParcelleHealthCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.sm),
-          Text(DiseaseCatalog.displayName(latest.maladieDetectee, loc), style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w500)),
+          Text(nomResultat(latest, loc), style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w500)),
           const SizedBox(height: 4),
-          Text(declaredSeverityLabel(latest.niveauGravite, loc), style: AppTypography.caption.copyWith(color: AppColors.textSecondary)),
+          Text(declaredSeverityLabel(latest.graviteDeclaree, loc), style: AppTypography.caption.copyWith(color: AppColors.textSecondary)),
           if (certainty != null)
             Text(certainty.label(loc), style: AppTypography.caption.copyWith(color: AppColors.textSecondary)),
         ],
@@ -259,15 +257,15 @@ class _ParcelleHealthCard extends StatelessWidget {
   }
 }
 
-class _DiagnosticHistoryItem extends StatelessWidget {
-  const _DiagnosticHistoryItem({required this.diagnostic});
-  final DiagnosticLocal diagnostic;
+class _ResultatHistoryItem extends StatelessWidget {
+  const _ResultatHistoryItem({required this.resultat});
+  final ResultatScan resultat;
 
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final isHealthy = DiseaseCatalog.isHealthy(diagnostic.maladieDetectee);
-    final isConfirmed = diagnostic.certitude == DiagnosisCertainty.probable.name;
+    final isHealthy = resultat.estSain;
+    final isConfirmed = resultat.estConfirme;
     final statusColor = isHealthy
         ? AppColors.severityLow
         : (isConfirmed ? AppColors.severityHigh : AppColors.severityMedium);
@@ -286,8 +284,8 @@ class _DiagnosticHistoryItem extends StatelessWidget {
             width: 56,
             height: 56,
             decoration: BoxDecoration(color: statusColor.withAlpha(20), borderRadius: BorderRadius.circular(AppSpacing.sm)),
-            child: diagnostic.imagePath != null && File(diagnostic.imagePath!).existsSync()
-                ? ClipRRect(borderRadius: BorderRadius.circular(AppSpacing.sm), child: Image.file(File(diagnostic.imagePath!), fit: BoxFit.cover))
+            child: resultat.imagePath != null && File(resultat.imagePath!).existsSync()
+                ? ClipRRect(borderRadius: BorderRadius.circular(AppSpacing.sm), child: Image.file(File(resultat.imagePath!), fit: BoxFit.cover))
                 : const Icon(Icons.image_outlined, color: AppColors.textSecondary),
           ),
           const SizedBox(width: AppSpacing.sm),
@@ -295,13 +293,13 @@ class _DiagnosticHistoryItem extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(DiseaseCatalog.displayName(diagnostic.maladieDetectee, loc), style: AppTypography.bodySmall.copyWith(fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(nomResultat(resultat, loc), style: AppTypography.bodySmall.copyWith(fontWeight: FontWeight.w600), maxLines: 1, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 2),
-                Text(declaredSeverityLabel(diagnostic.niveauGravite, loc), style: AppTypography.caption.copyWith(color: AppColors.textSecondary)),
+                Text(declaredSeverityLabel(resultat.graviteDeclaree, loc), style: AppTypography.caption.copyWith(color: AppColors.textSecondary)),
               ],
             ),
           ),
-          Text(DateFormat('dd/MM/yyyy').format(diagnostic.dateDiagnostic), style: AppTypography.caption.copyWith(color: AppColors.textSecondary)),
+          Text(DateFormat('dd/MM/yyyy').format(resultat.date), style: AppTypography.caption.copyWith(color: AppColors.textSecondary)),
         ],
       ),
     );

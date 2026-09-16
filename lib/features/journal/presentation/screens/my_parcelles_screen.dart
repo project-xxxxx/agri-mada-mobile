@@ -16,7 +16,10 @@ import '../../domain/usecases/export_journal_usecase.dart';
 import '../../data/services/export_service.dart';
 import '../../../../core/widgets/app_sidebar.dart';
 import '../providers/journal_provider.dart';
+import '../../../scan/presentation/organ_labels.dart';
+import '../resultat_labels.dart';
 import '../widgets/add_parcelle_sheet.dart';
+import '../../../../core/ai/diagnosis_certainty.dart';
 import '../../../../core/ai/disease_catalog.dart';
 import '../../../scan/presentation/diagnosis_labels.dart';
 
@@ -120,7 +123,7 @@ class MyParcellesScreen extends ConsumerWidget {
                             opacity: value,
                             child: _ParcelleCard(
                               entry: sorted[index],
-                              onScan: () => context.go(AppRoutes.scanning),
+                              onScan: () => context.go(AppRoutes.scanOrgane),
                             ),
                           ),
                         );
@@ -213,16 +216,22 @@ class MyParcellesScreen extends ConsumerWidget {
       csvPlot: loc.exportCsvPlot,
       csvDisease: loc.exportCsvDisease,
       csvSeverity: loc.exportCsvSeverity,
-      csvConfidence: loc.exportCsvConfidence,
-      csvRecommendations: loc.exportCsvRecommendations,
+      csvCertainty: loc.exportCsvCertainty,
+      csvOrgans: loc.exportCsvOrgans,
       csvTreatment: loc.exportCsvTreatment,
       pdfGeneratedBy: loc.exportPdfGeneratedBy,
       pdfTitle: loc.exportPdfTitle,
       pdfAllPlots: loc.exportPdfAllPlots,
       pdfPlotLabel: loc.exportPdfPlotLabel,
       pdfDateLabel: loc.exportPdfDateLabel,
-      diseaseName: (label) => DiseaseCatalog.displayName(label, loc),
+      noPlot: loc.exportNoPlot,
+      diseaseName: (label) => label == null
+          ? loc.journalUnnamedResult
+          : DiseaseCatalog.displayName(label, loc),
       severityLabel: (code) => declaredSeverityLabel(code, loc),
+      certaintyLabel: (code) =>
+          DiagnosisCertainty.fromName(code)?.label(loc) ?? '—',
+      organName: (organe) => organe.label(loc),
     );
 
     final result = await ref
@@ -345,7 +354,7 @@ class _ParcelleCard extends StatelessWidget {
     final loc = AppLocalizations.of(context);
     final parcelle = entry.parcelle;
     final statut = entry.statut;
-    final dernierDiag = entry.dernierDiagnostic;
+    final dernierResultat = entry.dernierResultat;
     final nbDiag = entry.nbDiagnostics;
 
     final isMalade = statut == 'malade';
@@ -439,7 +448,7 @@ class _ParcelleCard extends StatelessWidget {
             ),
           ),
           // Dernier diagnostic
-          if (dernierDiag != null) ...[
+          if (dernierResultat != null) ...[
             const Divider(height: 1),
             Padding(
               padding: const EdgeInsets.symmetric(
@@ -452,9 +461,9 @@ class _ParcelleCard extends StatelessWidget {
                   Expanded(
                     child: Text(
                       loc.journalLastDiagnostic(
-                        DiseaseCatalog.displayName(dernierDiag.maladieDetectee, loc),
+                        nomResultat(dernierResultat, loc),
                         DateFormat('dd/MM/yyyy')
-                            .format(dernierDiag.dateDiagnostic),
+                            .format(dernierResultat.date),
                       ),
                       style: AppTypography.caption
                           .copyWith(color: AppColors.textSecondary),

@@ -8,14 +8,15 @@ import '../../../../app/router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
-import '../../../../core/ai/diagnosis_certainty.dart';
 import '../../../../core/ai/disease_catalog.dart';
-import '../../../../core/local_db/models/diagnostic_local.dart';
 import '../../../../core/widgets/app_sidebar.dart';
 import '../../../scan/domain/entities/declared_severity.dart';
 import '../../../scan/presentation/diagnosis_labels.dart';
+import '../../../scan/presentation/organ_labels.dart';
+import '../../domain/entities/resultat_scan.dart';
 import '../diagnostic_filter.dart';
 import '../providers/journal_provider.dart';
+import '../resultat_labels.dart';
 
 class JournalScreen extends ConsumerStatefulWidget {
   const JournalScreen({super.key});
@@ -30,7 +31,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final diagnosticsAsync = ref.watch(diagnosticsHistoryProvider);
+    final resultatsAsync = ref.watch(resultatsHistoryProvider);
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
@@ -63,15 +64,15 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
             topRight: Radius.circular(AppSpacing.cardRadius),
           ),
         ),
-        child: diagnosticsAsync.when(
+        child: resultatsAsync.when(
           loading: () => const Center(child: CircularProgressIndicator(color: AppColors.primary)),
           error: (e, _) => Center(child: Text(loc.journalError(e.toString()))),
-          data: (diagnostics) {
-            if (diagnostics.isEmpty) {
-              return _EmptyHistory(onScan: () => context.go(AppRoutes.scanning));
+          data: (resultats) {
+            if (resultats.isEmpty) {
+              return _EmptyHistory(onScan: () => context.go(AppRoutes.scanOrgane));
             }
 
-            final visible = applyDiagnosticFilter(diagnostics, _filter);
+            final visible = applyDiagnosticFilter(resultats, _filter);
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -96,7 +97,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
                           itemCount: visible.length,
                           separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
                           itemBuilder: (context, index) =>
-                              _DiagnosticCard(diagnostic: visible[index]),
+                              _ResultatCard(resultat: visible[index]),
                         ),
                 ),
               ],
@@ -105,7 +106,7 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () => context.go(AppRoutes.scanning),
+        onPressed: () => context.go(AppRoutes.scanOrgane),
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.add, color: AppColors.textOnPrimary),
       ),
@@ -149,20 +150,20 @@ class _FilterBar extends StatelessWidget {
   }
 }
 
-class _DiagnosticCard extends StatelessWidget {
-  const _DiagnosticCard({required this.diagnostic});
-  final DiagnosticLocal diagnostic;
+class _ResultatCard extends StatelessWidget {
+  const _ResultatCard({required this.resultat});
+
+  final ResultatScan resultat;
 
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
-    final info = DiseaseCatalog.of(diagnostic.maladieDetectee);
-    final isHealthy = info?.isHealthy ?? false;
-    final severity = DeclaredSeverity.fromCode(diagnostic.niveauGravite);
+    final info = resultat.ficheId == null ? null : DiseaseCatalog.of(resultat.ficheId!);
+    final severity = DeclaredSeverity.fromCode(resultat.graviteDeclaree);
 
     // La couleur suit la part de parcelle déclarée par l'agriculteur,
     // jamais la confiance du modèle (tâche P1.3).
-    final Color statusColor = isHealthy
+    final Color statusColor = resultat.estSain
         ? AppColors.severityLow
         : switch (severity) {
             DeclaredSeverity.quelquesPlants => AppColors.severityLow,
@@ -170,10 +171,10 @@ class _DiagnosticCard extends StatelessWidget {
             DeclaredSeverity.plusDunTiers => AppColors.severityHigh,
             null => AppColors.textSecondary,
           };
-    final String statusText = isHealthy
+    final String statusText = resultat.estSain
         ? loc.journalStatusHealthy
-        : declaredSeverityLabel(diagnostic.niveauGravite, loc);
-    final IconData statusIcon = isHealthy
+        : declaredSeverityLabel(resultat.graviteDeclaree, loc);
+    final IconData statusIcon = resultat.estSain
         ? Icons.check_circle_outline
         : (severity == null ? Icons.help_outline : Icons.warning_amber_outlined);
 
@@ -193,7 +194,6 @@ class _DiagnosticCard extends StatelessWidget {
         padding: const EdgeInsets.all(AppSpacing.sm),
         child: Row(
           children: [
-            // Image
             Container(
               width: 80,
               height: 80,
@@ -202,33 +202,41 @@ class _DiagnosticCard extends StatelessWidget {
                 borderRadius: BorderRadius.circular(AppSpacing.sm),
               ),
               clipBehavior: Clip.antiAlias,
-              child: diagnostic.imagePath != null && File(diagnostic.imagePath!).existsSync()
-                  ? Image.file(File(diagnostic.imagePath!), fit: BoxFit.cover)
+              child: resultat.imagePath != null && File(resultat.imagePath!).existsSync()
+                  ? Image.file(File(resultat.imagePath!), fit: BoxFit.cover)
                   : const Icon(Icons.image_outlined, color: AppColors.primary),
             ),
             const SizedBox(width: AppSpacing.md),
-
-            // Text Content
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    DiseaseCatalog.displayName(diagnostic.maladieDetectee, loc),
-                    style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600, color: AppColors.textPrimary),
+                    nomResultat(resultat, loc),
+                    style: AppTypography.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w600, color: AppColors.textPrimary),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
                   ),
                   if (info != null && info.scientificName.isNotEmpty)
                     Text(
                       info.scientificName,
-                      style: AppTypography.caption.copyWith(color: AppColors.textSecondary, fontStyle: FontStyle.italic),
+                      style: AppTypography.caption.copyWith(
+                          color: AppColors.textSecondary, fontStyle: FontStyle.italic),
+                    ),
+                  if (resultat.organes.isNotEmpty)
+                    Text(
+                      resultat.organes.map((organe) => organe.label(loc)).join(' · '),
+                      style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   // Une piste du modèle n'est pas un diagnostic (P1.2).
-                  if (!isHealthy && diagnostic.certitude != DiagnosisCertainty.probable.name)
+                  if (!resultat.estSain && !resultat.estConfirme)
                     Text(
                       loc.journalStatusToConfirm,
-                      style: AppTypography.caption.copyWith(color: AppColors.severityMedium, fontWeight: FontWeight.w600),
+                      style: AppTypography.caption.copyWith(
+                          color: AppColors.severityMedium, fontWeight: FontWeight.w600),
                     ),
                   const SizedBox(height: AppSpacing.sm),
                   Container(
@@ -245,7 +253,8 @@ class _DiagnosticCard extends StatelessWidget {
                         Flexible(
                           child: Text(
                             statusText,
-                            style: AppTypography.caption.copyWith(color: statusColor, fontWeight: FontWeight.w600),
+                            style: AppTypography.caption
+                                .copyWith(color: statusColor, fontWeight: FontWeight.w600),
                             overflow: TextOverflow.ellipsis,
                           ),
                         ),
@@ -255,19 +264,24 @@ class _DiagnosticCard extends StatelessWidget {
                 ],
               ),
             ),
-
-            // Date
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 Text(
-                  DateFormat('dd MMM').format(diagnostic.dateDiagnostic),
-                  style: AppTypography.caption.copyWith(color: AppColors.textSecondary, fontWeight: FontWeight.w500),
+                  DateFormat('dd MMM').format(resultat.date),
+                  style: AppTypography.caption.copyWith(
+                      color: AppColors.textSecondary, fontWeight: FontWeight.w500),
                 ),
                 Text(
-                  DateFormat('yyyy').format(diagnostic.dateDiagnostic),
-                  style: AppTypography.caption.copyWith(color: AppColors.textSecondary.withAlpha(150)),
+                  DateFormat('yyyy').format(resultat.date),
+                  style: AppTypography.caption
+                      .copyWith(color: AppColors.textSecondary.withAlpha(150)),
                 ),
+                if (resultat.nbPhotos > 1)
+                  Text(
+                    loc.journalPhotoCount(resultat.nbPhotos),
+                    style: AppTypography.caption.copyWith(color: AppColors.textSecondary),
+                  ),
               ],
             ),
             const SizedBox(width: AppSpacing.xs),

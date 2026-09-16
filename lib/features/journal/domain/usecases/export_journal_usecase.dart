@@ -1,23 +1,22 @@
 import 'package:fpdart/fpdart.dart';
 
 import '../../../../core/errors/failure.dart';
-import '../../../../core/local_db/models/diagnostic_local.dart';
 import '../../../journal/data/repositories/parcelle_local_repository.dart';
-import '../../../scan/data/repositories/diagnostic_local_repository.dart';
+import '../../../scan/data/repositories/session_local_repository.dart';
 import '../../data/services/export_service.dart';
 
 enum ExportFormat { csv, pdf }
 
 class ExportJournalUseCase {
   ExportJournalUseCase({
-    required DiagnosticLocalRepository diagnosticRepository,
+    required SessionLocalRepository sessionRepository,
     required ParcelleLocalRepository parcelleRepository,
     required ExportService exportService,
-  })  : _diagnosticRepository = diagnosticRepository,
+  })  : _sessionRepository = sessionRepository,
         _parcelleRepository = parcelleRepository,
         _exportService = exportService;
 
-  final DiagnosticLocalRepository _diagnosticRepository;
+  final SessionLocalRepository _sessionRepository;
   final ParcelleLocalRepository _parcelleRepository;
   final ExportService _exportService;
 
@@ -27,8 +26,8 @@ class ExportJournalUseCase {
     required ExportStrings strings,
   }) async {
     try {
-      final diagnostics = await _loadDiagnostics(parcelleId);
-      if (diagnostics.isEmpty) {
+      final resultats = await _sessionRepository.resultats(parcelleLocalId: parcelleId);
+      if (resultats.isEmpty) {
         return const Left(CacheFailure('Aucun diagnostic à exporter'));
       }
 
@@ -37,18 +36,18 @@ class ExportJournalUseCase {
         for (final parcelle in parcelles) parcelle.id: parcelle,
       };
 
-      final orderedDiagnostics = diagnostics.toList()
-        ..sort((a, b) => a.dateDiagnostic.compareTo(b.dateDiagnostic));
+      final ordonnes = resultats.toList()
+        ..sort((a, b) => a.date.compareTo(b.date));
 
       final path = switch (format) {
         ExportFormat.csv => await _exportService.exportCsv(
-            diagnostics: orderedDiagnostics,
+            resultats: ordonnes,
             parcellesById: parcellesById,
             parcelleId: parcelleId,
             strings: strings,
           ),
         ExportFormat.pdf => await _exportService.exportPdf(
-            diagnostics: orderedDiagnostics,
+            resultats: ordonnes,
             parcellesById: parcellesById,
             parcelleId: parcelleId,
             strings: strings,
@@ -59,12 +58,5 @@ class ExportJournalUseCase {
     } catch (e) {
       return Left(CacheFailure(e.toString()));
     }
-  }
-
-  Future<List<DiagnosticLocal>> _loadDiagnostics(int? parcelleId) {
-    if (parcelleId == null) {
-      return _diagnosticRepository.getAllDiagnostics();
-    }
-    return _diagnosticRepository.getDiagnosticsByParcelle(parcelleId);
   }
 }

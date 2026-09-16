@@ -5,8 +5,6 @@ import 'dart:io';
 import 'package:fpdart/fpdart.dart';
 import 'package:isar/isar.dart';
 
-import '../../../../core/ai/diagnosis_certainty.dart';
-import '../../../../core/ai/disease_catalog.dart';
 import '../../../../core/errors/failure.dart';
 import '../../../../core/local_db/isar_service.dart';
 import '../../../../core/local_db/models/parcelle_local.dart';
@@ -14,7 +12,9 @@ import '../../../../core/local_db/models/diagnostic_local.dart';
 import '../../../../core/utils/client_uuid.dart';
 import '../../../../core/utils/logger.dart';
 import '../../domain/entities/parcelle_entity.dart';
+import '../../../scan/data/repositories/session_local_repository.dart';
 import '../../domain/entities/journal_entry.dart';
+import '../../domain/entities/resultat_scan.dart';
 import '../../domain/repositories/journal_repository.dart';
 
 class ParcelleLocalRepository implements JournalRepository {
@@ -86,6 +86,13 @@ class ParcelleLocalRepository implements JournalRepository {
     double? latitude,
     double? longitude,
     String? photoPath,
+    String? ecosysteme,
+    String? region,
+    String? altitudeTranche,
+    double? altitudeMetres,
+    String? variete,
+    String? saison,
+    DateTime? dateRepiquage,
   }) async {
     final parcelle = ParcelleLocal()
       ..clientUuid = generateClientUuid()
@@ -96,6 +103,13 @@ class ParcelleLocalRepository implements JournalRepository {
       ..latitude = latitude
       ..longitude = longitude
       ..photoPath = photoPath
+      ..ecosysteme = ecosysteme
+      ..region = region
+      ..altitudeTranche = altitudeTranche
+      ..altitudeMetres = altitudeMetres
+      ..variete = variete
+      ..saison = saison
+      ..dateRepiquage = dateRepiquage
       ..createdAt = DateTime.now()
       ..isSynced = false;
 
@@ -163,14 +177,24 @@ class ParcelleLocalRepository implements JournalRepository {
     }
   }
 
-  /// Supprime une parcelle avec ses diagnostics et les photos associées
-  /// (tâche P1.9 : plus de diagnostics orphelins).
+  /// Supprime une parcelle avec ses scans et les photos associées
+  /// (tâche P1.9 : plus de diagnostics orphelins ; sessions incluses en P2.3).
   Future<void> deleteParcelleById(int id) async {
     final parcelle = await _db.parcelleLocals.get(id);
     final diagnostics = await _db.diagnosticLocals
         .filter()
         .parcelleLocalIdEqualTo(id)
         .findAll();
+
+    // Sessions de scan de la parcelle, avec leurs photos.
+    final sessionRepository = SessionLocalRepository();
+    final photosDeSessions = <String>[];
+    for (final session in await sessionRepository.historique(parcelleLocalId: id)) {
+      for (final observation in await sessionRepository.observations(session.id)) {
+        if (observation.imagePath.isNotEmpty) photosDeSessions.add(observation.imagePath);
+      }
+      await sessionRepository.supprimerSession(session.id);
+    }
 
     await _db.writeTxn(() async {
       await _db.diagnosticLocals
@@ -181,6 +205,7 @@ class ParcelleLocalRepository implements JournalRepository {
     final photoPaths = <String?>[
       parcelle?.photoPath,
       for (final diagnostic in diagnostics) diagnostic.imagePath,
+      ...photosDeSessions,
     ];
     for (final path in photoPaths.whereType<String>()) {
       await _deleteFileQuietly(path);
@@ -196,42 +221,39 @@ class ParcelleLocalRepository implements JournalRepository {
     }
   }
 
-  /// Construit le journal agricole : chaque parcelle avec son statut de santé
+  /// Construit le journal agricole : chaque parcelle avec son statut de santé,
+  /// d'après ses sessions de scan terminées (tâche P2.3).
   Future<List<JournalEntry>> getJournalAgricole() async {
     final parcelles = await getAllParcelles();
-    final allDiagnostics = await _db.diagnosticLocals
-        .where()
-        .sortByDateDiagnosticDesc()
-        .findAll();
+    final resultats = await SessionLocalRepository().resultats();
 
-    final diagMap = <int, List<DiagnosticLocal>>{};
-    for (final diag in allDiagnostics) {
-      diagMap.putIfAbsent(diag.parcelleLocalId, () => []).add(diag);
+    final parParcelle = <int, List<ResultatScan>>{};
+    for (final resultat in resultats) {
+      final parcelleId = resultat.parcelleLocalId;
+      if (parcelleId == null) continue; // scan rapide non rattaché (P2.6)
+      parParcelle.putIfAbsent(parcelleId, () => []).add(resultat);
     }
 
     final journal = <JournalEntry>[];
 
     for (final parcelle in parcelles) {
-      // Récupère les diagnostics de cette parcelle via la map
-      final diagnostics = diagMap[parcelle.id] ?? [];
+      final scans = parParcelle[parcelle.id] ?? const <ResultatScan>[];
+      final dernier = scans.isEmpty ? null : scans.first;
 
-      final nb = diagnostics.length;
-      final dernierDiag = nb > 0 ? diagnostics.first : null;
-      final derniereMaladie = dernierDiag?.maladieDetectee;
-      final statut = switch (dernierDiag) {
+      final statut = switch (dernier) {
         null => 'aucun_diagnostic',
-        final diag when DiseaseCatalog.isHealthy(diag.maladieDetectee) => 'sain',
-        // Seul un diagnostic « probable » classe la parcelle malade : une piste
+        final scan when scan.estSain => 'sain',
+        // Seul un résultat « probable » classe la parcelle malade : une piste
         // du modèle reste à confirmer (P1.2, évaluation du 2026-09-16).
-        final diag when diag.certitude == DiagnosisCertainty.probable.name => 'malade',
+        final scan when scan.estNomme && scan.estConfirme => 'malade',
         _ => 'a_confirmer',
       };
 
       journal.add(JournalEntry(
         parcelle: parcelle,
-        nbDiagnostics: nb,
-        derniereMaladie: derniereMaladie,
-        dernierDiagnostic: dernierDiag,
+        nbDiagnostics: scans.length,
+        derniereMaladie: dernier?.ficheId,
+        dernierResultat: dernier,
         statut: statut,
       ));
     }

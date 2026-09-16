@@ -8,9 +8,10 @@ import 'package:path_provider/path_provider.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
-import '../../../../core/local_db/models/diagnostic_local.dart';
 import '../../../../core/local_db/models/parcelle_local.dart';
 import '../../../scan/domain/entities/declared_severity.dart';
+import '../../../scan/domain/entities/organe.dart';
+import '../../domain/entities/resultat_scan.dart';
 
 class ExportStrings {
   const ExportStrings({
@@ -18,24 +19,27 @@ class ExportStrings {
     required this.csvPlot,
     required this.csvDisease,
     required this.csvSeverity,
-    required this.csvConfidence,
-    required this.csvRecommendations,
+    required this.csvCertainty,
+    required this.csvOrgans,
     required this.csvTreatment,
     required this.pdfGeneratedBy,
     required this.pdfTitle,
     required this.pdfAllPlots,
     required this.pdfPlotLabel,
     required this.pdfDateLabel,
+    required this.noPlot,
     required this.diseaseName,
     required this.severityLabel,
+    required this.certaintyLabel,
+    required this.organName,
   });
 
   final String csvDate;
   final String csvPlot;
   final String csvDisease;
   final String csvSeverity;
-  final String csvConfidence;
-  final String csvRecommendations;
+  final String csvCertainty;
+  final String csvOrgans;
   final String csvTreatment;
   final String pdfGeneratedBy;
   final String pdfTitle;
@@ -43,11 +47,18 @@ class ExportStrings {
   final String Function(String) pdfPlotLabel;
   final String Function(String) pdfDateLabel;
 
-  /// Nom traduit d'une étiquette du modèle.
-  final String Function(String label) diseaseName;
+  final String noPlot;
+
+  /// Nom traduit d'une fiche ; null quand l'app n'a rien nommé (ADR-006).
+  final String Function(String? label) diseaseName;
 
   /// Libellé traduit d'une gravité déclarée (code de [DeclaredSeverity]).
   final String Function(String? code) severityLabel;
+
+  /// Libellé traduit d'une certitude : probable, possible, incertain.
+  final String Function(String? code) certaintyLabel;
+
+  final String Function(Organe organe) organName;
 }
 
 class ExportService {
@@ -56,7 +67,7 @@ class ExportService {
   final DateFormat _dateFormat = DateFormat('dd/MM/yyyy HH:mm');
 
   Future<String> exportCsv({
-    required List<DiagnosticLocal> diagnostics,
+    required List<ResultatScan> resultats,
     required Map<int, ParcelleLocal> parcellesById,
     required ExportStrings strings,
     int? parcelleId,
@@ -71,19 +82,19 @@ class ExportService {
         strings.csvPlot,
         strings.csvDisease,
         strings.csvSeverity,
-        strings.csvConfidence,
-        strings.csvRecommendations,
+        strings.csvCertainty,
+        strings.csvOrgans,
         strings.csvTreatment,
       ],
-      ...diagnostics.map(
-        (diagnostic) => [
-          _dateFormat.format(diagnostic.dateDiagnostic),
-          _parcelleLabel(diagnostic.parcelleLocalId, parcellesById),
-          strings.diseaseName(diagnostic.maladieDetectee),
-          strings.severityLabel(diagnostic.niveauGravite),
-          _confidencePercent(diagnostic.confiance),
-          _normalizeText(diagnostic.recommandations),
-          '—', // Pas de champ 'traitement appliqué' dans le modèle
+      ...resultats.map(
+        (resultat) => [
+          _dateFormat.format(resultat.date),
+          _parcelleLabel(resultat.parcelleLocalId, parcellesById, strings),
+          strings.diseaseName(resultat.ficheId),
+          strings.severityLabel(resultat.graviteDeclaree),
+          strings.certaintyLabel(resultat.certitude),
+          _organes(resultat, strings),
+          '—', // L'app n'enregistre aucun traitement appliqué
         ],
       ),
     ];
@@ -100,7 +111,7 @@ class ExportService {
   }
 
   Future<String> exportPdf({
-    required List<DiagnosticLocal> diagnostics,
+    required List<ResultatScan> resultats,
     required Map<int, ParcelleLocal> parcellesById,
     required ExportStrings strings,
     int? parcelleId,
@@ -114,7 +125,7 @@ class ExportService {
     final exportDate = _dateFormat.format(DateTime.now());
     final parcelleLabel = parcelleId == null
         ? strings.pdfAllPlots
-        : _parcelleLabel(parcelleId, parcellesById);
+        : _parcelleLabel(parcelleId, parcellesById, strings);
 
     pdf.addPage(
       pw.MultiPage(
@@ -188,31 +199,28 @@ class ExportService {
                   _PdfHeaderCell(strings.csvPlot),
                   _PdfHeaderCell(strings.csvDisease),
                   _PdfHeaderCell(strings.csvSeverity),
-                  _PdfHeaderCell(strings.csvConfidence),
-                  _PdfHeaderCell(strings.csvRecommendations),
+                  _PdfHeaderCell(strings.csvCertainty),
+                  _PdfHeaderCell(strings.csvOrgans),
                   _PdfHeaderCell(strings.csvTreatment),
                 ],
               ),
-              ...diagnostics.map(
-                (diagnostic) => pw.TableRow(
+              ...resultats.map(
+                (resultat) => pw.TableRow(
                   decoration: const pw.BoxDecoration(color: PdfColors.white),
                   children: [
-                    _PdfBodyCell(_dateFormat.format(diagnostic.dateDiagnostic)),
+                    _PdfBodyCell(_dateFormat.format(resultat.date)),
                     _PdfBodyCell(
-                      _parcelleLabel(diagnostic.parcelleLocalId, parcellesById),
+                      _parcelleLabel(resultat.parcelleLocalId, parcellesById, strings),
                     ),
-                    _PdfBodyCell(strings.diseaseName(diagnostic.maladieDetectee)),
+                    _PdfBodyCell(strings.diseaseName(resultat.ficheId)),
                     _PdfBodyCell(
-                      strings.severityLabel(diagnostic.niveauGravite),
-                      backgroundColor: _severityColor(diagnostic.niveauGravite),
+                      strings.severityLabel(resultat.graviteDeclaree),
+                      backgroundColor: _severityColor(resultat.graviteDeclaree),
                       textColor: PdfColors.white,
                     ),
-                    _PdfBodyCell(
-                      _confidencePercent(diagnostic.confiance),
-                      alignment: pw.Alignment.centerRight,
-                    ),
-                    _PdfBodyCell(_normalizeText(diagnostic.recommandations)),
-                    _PdfBodyCell('—'), // Pas de champ 'traitement appliqué'
+                    _PdfBodyCell(strings.certaintyLabel(resultat.certitude)),
+                    _PdfBodyCell(_organes(resultat, strings)),
+                    _PdfBodyCell('—'), // L'app n'enregistre aucun traitement
                   ],
                 ),
               ),
@@ -242,20 +250,21 @@ class ExportService {
     return 'agri_mada_journal_${suffix}_$timestamp.$extension';
   }
 
-  String _parcelleLabel(int parcelleId, Map<int, ParcelleLocal> parcellesById) {
+  String _parcelleLabel(
+    int? parcelleId,
+    Map<int, ParcelleLocal> parcellesById,
+    ExportStrings strings,
+  ) {
+    // Un scan rapide peut n'être rattaché à aucune parcelle (tâche P2.6).
+    if (parcelleId == null) return strings.noPlot;
     final parcelle = parcellesById[parcelleId];
     return parcelle?.nomParcelle ?? 'Parcelle $parcelleId';
   }
 
-  String _confidencePercent(double? confidence) {
-    final value = confidence == null ? 0 : (confidence * 100).round();
-    return '$value';
-  }
-
-  String _normalizeText(String? value) {
-    final text = value?.trim();
-    return (text == null || text.isEmpty) ? '—' : text;
-  }
+  String _organes(ResultatScan resultat, ExportStrings strings) =>
+      resultat.organes.isEmpty
+          ? '—'
+          : resultat.organes.map(strings.organName).join(' + ');
 
   PdfColor _severityColor(String? code) =>
       switch (DeclaredSeverity.fromCode(code)) {
@@ -301,18 +310,16 @@ class _PdfBodyCell extends pw.StatelessWidget {
     this.label, {
     this.backgroundColor,
     this.textColor,
-    this.alignment,
   });
 
   final String label;
   final PdfColor? backgroundColor;
   final PdfColor? textColor;
-  final pw.Alignment? alignment;
 
   @override
   pw.Widget build(pw.Context context) {
     return pw.Container(
-      alignment: alignment ?? pw.Alignment.centerLeft,
+      alignment: pw.Alignment.centerLeft,
       color: backgroundColor,
       padding: const pw.EdgeInsets.symmetric(horizontal: 6, vertical: 8),
       child: pw.Text(
