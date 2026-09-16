@@ -77,6 +77,7 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
                   ? _UncertainResult(
                       result: result,
                       onRetake: _retake,
+                      onAskTechnician: () => _askTechnician(loc, result),
                       onBack: _leaveToHome,
                     )
                   : _buildResult(loc, result),
@@ -160,29 +161,32 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
           ),
         ),
         const SizedBox(height: AppSpacing.xl),
-        ElevatedButton.icon(
-          onPressed: _saving ? null : () => _save(loc),
-          icon: const Icon(Icons.bookmark_add_outlined),
-          label: Text(loc.commonSave),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: AppColors.primary,
-            foregroundColor: AppColors.textOnPrimary,
-            minimumSize: const Size.fromHeight(48),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-            elevation: 0,
+        // Un résultat seulement « possible » est une piste : la demande au
+        // technicien passe avant l'enregistrement (P1.2, évaluation du 2026-09-16).
+        if (isProbable) ...[
+          _PrimaryButton(
+            icon: Icons.bookmark_add_outlined,
+            label: loc.commonSave,
+            onPressed: _saving ? null : () => _save(loc),
           ),
-        ),
+        ] else ...[
+          _PrimaryButton(
+            icon: Icons.support_agent,
+            label: loc.scanAskTechnician,
+            onPressed: () => _askTechnician(loc, result),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          _SecondaryButton(
+            icon: Icons.bookmark_add_outlined,
+            label: loc.commonSave,
+            onPressed: _saving ? null : () => _save(loc),
+          ),
+        ],
         const SizedBox(height: AppSpacing.sm),
-        OutlinedButton.icon(
+        _SecondaryButton(
+          icon: Icons.camera_alt_outlined,
+          label: loc.scanRetakePhoto,
           onPressed: _retake,
-          icon: const Icon(Icons.camera_alt_outlined),
-          label: Text(loc.scanRetakePhoto),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: AppColors.primary,
-            minimumSize: const Size.fromHeight(48),
-            side: const BorderSide(color: AppColors.primary),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
-          ),
         ),
         const SizedBox(height: AppSpacing.sm),
         TextButton.icon(
@@ -257,6 +261,75 @@ class _ScanResultScreenState extends ConsumerState<ScanResultScreen> {
     ].join('\n');
     await Share.share(text);
   }
+
+  /// Envoie la photo et les pistes du modèle à un technicien, par l'application
+  /// de messagerie choisie (tâche P1.2). Remplacé par la boucle technicien
+  /// intégrée à l'app en P5.6.
+  Future<void> _askTechnician(AppLocalizations loc, DiagnosticResult result) async {
+    final candidates = result.classement
+        .map((candidate) => DiseaseCatalog.displayName(candidate.label, loc))
+        .join(', ');
+    final text = [
+      loc.scanAskTechnicianMessage,
+      loc.scanShareCertainty(result.certitude.label(loc)),
+      if (candidates.isNotEmpty) loc.scanAskTechnicianCandidates(candidates),
+      loc.scanShareDate(DateFormat('dd/MM/yyyy').format(result.createdAt)),
+    ].join('\n');
+
+    final path = result.imagePath;
+    if (path != null && File(path).existsSync()) {
+      await Share.shareXFiles([XFile(path)], text: text);
+    } else {
+      await Share.share(text);
+    }
+  }
+}
+
+class _PrimaryButton extends StatelessWidget {
+  const _PrimaryButton({required this.icon, required this.label, required this.onPressed});
+
+  final IconData icon;
+  final String label;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon),
+      label: Text(label),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: AppColors.primary,
+        foregroundColor: AppColors.textOnPrimary,
+        minimumSize: const Size.fromHeight(48),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+        elevation: 0,
+      ),
+    );
+  }
+}
+
+class _SecondaryButton extends StatelessWidget {
+  const _SecondaryButton({required this.icon, required this.label, required this.onPressed});
+
+  final IconData icon;
+  final String label;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon),
+      label: Text(label),
+      style: OutlinedButton.styleFrom(
+        foregroundColor: AppColors.primary,
+        minimumSize: const Size.fromHeight(48),
+        side: const BorderSide(color: AppColors.primary),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
+      ),
+    );
+  }
 }
 
 class _NoResult extends StatelessWidget {
@@ -293,11 +366,13 @@ class _UncertainResult extends StatelessWidget {
   const _UncertainResult({
     required this.result,
     required this.onRetake,
+    required this.onAskTechnician,
     required this.onBack,
   });
 
   final DiagnosticResult result;
   final VoidCallback onRetake;
+  final VoidCallback onAskTechnician;
   final VoidCallback onBack;
 
   @override
@@ -336,6 +411,18 @@ class _UncertainResult extends StatelessWidget {
             minimumSize: const Size.fromHeight(48),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
             elevation: 0,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        OutlinedButton.icon(
+          onPressed: onAskTechnician,
+          icon: const Icon(Icons.support_agent),
+          label: Text(loc.scanAskTechnician),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppColors.primary,
+            minimumSize: const Size.fromHeight(48),
+            side: const BorderSide(color: AppColors.primary),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(30)),
           ),
         ),
         const SizedBox(height: AppSpacing.sm),

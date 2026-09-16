@@ -188,6 +188,61 @@ void main() {
       expect(find.text('Scanning Screen'), findsOneWidget);
     });
 
+    testWidgets('résultat incertain : « Demander à un technicien » envoie le message et les pistes',
+        (tester) async {
+      MethodCall? shareCall;
+      TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
+          .setMockMethodCallHandler(shareChannel, (call) async {
+        shareCall = call;
+        return null;
+      });
+
+      await pumpScreen(tester, _RecordingScanRepository(), uncertain);
+      await tapText(tester, 'Demander à un technicien');
+
+      expect(shareCall, isNotNull);
+      final arguments = shareCall!.arguments;
+      final sharedText = arguments is Map
+          ? (arguments['text'] as String? ?? '')
+          : arguments.toString();
+      expect(sharedText, contains('identifier avec certitude'));
+      expect(sharedText, contains('Helminthosporiose (tache brune)'));
+      expect(sharedText, contains('13/05/2026'));
+    });
+
+    testWidgets('résultat possible : piste « modèle expérimental », technicien en premier',
+        (tester) async {
+      await pumpScreen(
+        tester,
+        _RecordingScanRepository(),
+        probable.copyWith(confiance: 0.82, certitude: DiagnosisCertainty.possible),
+      );
+
+      expect(find.text('Piste à confirmer'), findsOneWidget);
+      expect(find.textContaining('Modèle expérimental'), findsOneWidget);
+      expect(
+        find.ancestor(
+          of: find.text('Demander à un technicien'),
+          matching: find.byWidgetPredicate((widget) => widget is ElevatedButton),
+        ),
+        findsOneWidget,
+      );
+      expect(
+        find.ancestor(
+          of: find.text('Enregistrer'),
+          matching: find.byWidgetPredicate((widget) => widget is OutlinedButton),
+        ),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('résultat probable : pas de demande au technicien proposée',
+        (tester) async {
+      await pumpScreen(tester, _RecordingScanRepository(), probable);
+
+      expect(find.text('Demander à un technicien'), findsNothing);
+    });
+
     testWidgets('Partager envoie la maladie, la certitude et la date',
         (tester) async {
       MethodCall? shareCall;
