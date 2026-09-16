@@ -9,8 +9,10 @@ import '../features/home/presentation/screens/home_screen.dart';
 import '../features/home/presentation/screens/settings_screen.dart';
 import '../features/guides/presentation/screens/guides_screen.dart';
 import '../features/prevention/presentation/screens/prevention_screen.dart';
-import '../features/scan/presentation/screens/scanning_screen.dart';
-import '../features/scan/presentation/screens/scan_result_screen.dart';
+import '../features/scan/presentation/screens/organ_picker_screen.dart';
+import '../features/scan/presentation/screens/capture_screen.dart';
+import '../features/scan/presentation/screens/scan_questions_screen.dart';
+import '../features/scan/presentation/screens/session_result_screen.dart';
 import '../features/journal/presentation/screens/journal_screen.dart';
 import '../features/journal/presentation/screens/my_parcelles_screen.dart';
 import '../features/journal/presentation/screens/parcelle_detail_screen.dart';
@@ -27,8 +29,11 @@ abstract final class AppRoutes {
   static const String reset = '/reset';
   static const String home = '/home';
   static const String settings = '/settings';
-  static const String scanning = '/scanning';
-  static const String scanResult = '/scan-result';
+  /// Parcours de scan multi-organes (phase P2).
+  static const String scanOrgane = '/scan/organe';
+  static const String scanCapture = '/scan/capture';
+  static const String scanQuestions = '/scan/questions';
+  static const String scanSessionResult = '/scan/resultat';
   static const String journal = '/journal';
   static const String myParcelles = '/my-parcelles';
   static const String parcelleDetail = '/parcelle/:id';
@@ -56,8 +61,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           route == AppRoutes.reset;
       final isProtectedRoute = route == AppRoutes.home ||
           route == AppRoutes.settings ||
-          route == AppRoutes.scanning ||
-          route == AppRoutes.scanResult ||
+          route == AppRoutes.scanOrgane ||
+          route == AppRoutes.scanCapture ||
+          route == AppRoutes.scanQuestions ||
+          route == AppRoutes.scanSessionResult ||
           route == AppRoutes.journal ||
           route == AppRoutes.myParcelles;
       final isOnboardingConsultationMode =
@@ -160,22 +167,26 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const SettingsScreen(),
       ),
       GoRoute(
-        path: AppRoutes.scanning,
-        pageBuilder: (context, state) {
+        path: AppRoutes.scanOrgane,
+        builder: (context, state) {
           final parcelleIdParam = state.uri.queryParameters['parcelleId'];
-          final preselectedId = parcelleIdParam != null ? int.tryParse(parcelleIdParam) : null;
-          return CustomTransitionPage(
-            key: state.pageKey,
-            child: ScanningScreen(preselectedParcelleId: preselectedId),
-            transitionsBuilder: (context, animation, secondaryAnimation, child) {
-              return FadeTransition(opacity: animation, child: child);
-            },
+          return OrganPickerScreen(
+            parcelleLocalId:
+                parcelleIdParam != null ? int.tryParse(parcelleIdParam) : null,
           );
         },
       ),
       GoRoute(
-        path: AppRoutes.scanResult,
-        builder: (context, state) => const ScanResultScreen(),
+        path: AppRoutes.scanCapture,
+        builder: (context, state) => const CaptureScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.scanQuestions,
+        builder: (context, state) => const ScanQuestionsScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.scanSessionResult,
+        builder: (context, state) => const SessionResultScreen(),
       ),
       GoRoute(
         path: AppRoutes.prevention,

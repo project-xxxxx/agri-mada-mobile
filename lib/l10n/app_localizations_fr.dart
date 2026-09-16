@@ -816,10 +816,10 @@ class AppLocalizationsFr extends AppLocalizations {
   String get exportCsvSeverity => 'Gravité';
 
   @override
-  String get exportCsvConfidence => 'Confiance(%)';
+  String get exportCsvCertainty => 'Certitude';
 
   @override
-  String get exportCsvRecommendations => 'Recommandations';
+  String get exportCsvOrgans => 'Parties observées';
 
   @override
   String get exportCsvTreatment => 'Traitement appliqué';
@@ -1064,4 +1064,354 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get journalStatusToConfirm => 'À confirmer';
+
+  @override
+  String get scanOrganTitle => 'Qu\'observez-vous ?';
+
+  @override
+  String get scanOrganHelp =>
+      'Choisissez la partie de la plante que vous voulez photographier.';
+
+  @override
+  String get scanOrganModelNotice =>
+      'Seules les feuilles sont analysées par le modèle. Pour les autres parties, vos réponses sont enregistrées et transmises à un technicien.';
+
+  @override
+  String get organLeaf => 'Feuilles';
+
+  @override
+  String get organStemSheath => 'Tige et gaine';
+
+  @override
+  String get organCollar => 'Collet et base des tiges';
+
+  @override
+  String get organRoots => 'Racines';
+
+  @override
+  String get organPanicle => 'Panicule et grains';
+
+  @override
+  String get organWholePlant => 'Plante entière ou parcelle';
+
+  @override
+  String get organUnknown => 'Je ne sais pas';
+
+  @override
+  String get organUnknownHint =>
+      'L\'application vous guide : la parcelle, puis une feuille, puis le collet.';
+
+  @override
+  String get photoQualityBlurred =>
+      'Photo floue. Tenez le téléphone à deux mains, touchez l\'écran sur la plante pour faire le point, puis reprenez.';
+
+  @override
+  String get photoQualityTooDark =>
+      'Photo trop sombre. Cherchez un endroit plus éclairé ou attendez que le soleil monte.';
+
+  @override
+  String get photoQualityTooBright =>
+      'Photo trop claire. Évitez le plein soleil sur la feuille, cherchez une ombre légère.';
+
+  @override
+  String get photoQualityBacklit =>
+      'Le soleil est derrière la plante. Tournez-vous pour l\'avoir dans le dos.';
+
+  @override
+  String get photoQualityGood => 'Photo nette.';
+
+  @override
+  String get commonYes => 'Oui';
+
+  @override
+  String get commonNo => 'Non';
+
+  @override
+  String get commonDontKnow => 'Je ne sais pas';
+
+  @override
+  String get questionSinceWhen =>
+      'Depuis combien de temps voyez-vous ce problème ?';
+
+  @override
+  String get questionSinceWhenDays => 'Moins d\'une semaine';
+
+  @override
+  String get questionSinceWhenWeeks => 'Une à trois semaines';
+
+  @override
+  String get questionSinceWhenMonth => 'Plus d\'un mois';
+
+  @override
+  String get questionLeafShape =>
+      'À quoi ressemblent les taches sur les feuilles ?';
+
+  @override
+  String get questionLeafShapeBrownOval =>
+      'Taches brunes ovales, éparpillées sur la feuille';
+
+  @override
+  String get questionLeafShapeYellowEdge =>
+      'Bandes gris-vert puis jaunes, à partir du bord ou de la pointe';
+
+  @override
+  String get questionLeafShapeBlackAngular =>
+      'Petites taches noires anguleuses, un peu poudreuses';
+
+  @override
+  String get questionLeafShapeNone => 'Aucune tache visible';
+
+  @override
+  String get questionLeafExudate =>
+      'Le matin, voyez-vous des gouttes jaunes collantes sur les feuilles touchées ?';
+
+  @override
+  String get questionLeafSpread =>
+      'Comment le problème se répand-il dans la parcelle ?';
+
+  @override
+  String get questionLeafSpreadFast =>
+      'Vite, sur beaucoup de pieds en quelques jours';
+
+  @override
+  String get questionLeafSpreadSlow => 'Lentement, quelques pieds seulement';
+
+  @override
+  String get questionStem => 'Que voyez-vous sur la tige ou la gaine ?';
+
+  @override
+  String get questionStemBrownPatches => 'Taches brunes allongées sur la gaine';
+
+  @override
+  String get questionStemSoft => 'Tige molle qui se casse au ras de l\'eau';
+
+  @override
+  String get questionStemHoles => 'Trous ou galeries dans la tige';
+
+  @override
+  String get questionCollar => 'Que voyez-vous à la base des tiges ?';
+
+  @override
+  String get questionCollarChewed => 'Base rongée, plants qui se déchaussent';
+
+  @override
+  String get questionCollarRot => 'Pourriture noire au ras du sol';
+
+  @override
+  String get questionCollarRing => 'Anneau brun autour du nœud';
+
+  @override
+  String get questionRoots => 'À quoi ressemblent les racines ?';
+
+  @override
+  String get questionRootsRusty => 'Racines brun-orangé, comme rouillées';
+
+  @override
+  String get questionRootsBlack => 'Racines noires et molles';
+
+  @override
+  String get questionRootsGalls => 'Petites boules sur les racines';
+
+  @override
+  String get questionPanicle => 'Que voyez-vous sur la panicule ?';
+
+  @override
+  String get questionPanicleWhite => 'Panicule blanche et vide';
+
+  @override
+  String get questionPanicleStained => 'Grains tachés ou noircis';
+
+  @override
+  String get questionPanicleNeck => 'Cou de la panicule brun et cassant';
+
+  @override
+  String get questionWholePlant => 'Comment se présente la parcelle ?';
+
+  @override
+  String get questionWholePlantYellowPatches =>
+      'Plants jaunis et rabougris, par taches dans la parcelle';
+
+  @override
+  String get questionWholePlantDriedSpots => 'Foyers de plants desséchés';
+
+  @override
+  String get questionWholePlantEvenYellow =>
+      'Jaunissement régulier sur toute la parcelle';
+
+  @override
+  String get scanOrganNoPlotNotice =>
+      'Vous pouvez scanner sans parcelle : vous la rattacherez après.';
+
+  @override
+  String get captureHintLeaf =>
+      'Approchez-vous d\'une feuille atteinte, bien à plat, la lumière dans votre dos.';
+
+  @override
+  String get captureHintStem =>
+      'Tenez le téléphone à la verticale et cadrez la tige du bas vers le haut.';
+
+  @override
+  String get captureHintCollar =>
+      'Écartez les feuilles pour montrer la base des tiges, au ras du sol.';
+
+  @override
+  String get captureHintRoots =>
+      'Déterrez un plant, rincez la terre et posez les racines sur un fond clair.';
+
+  @override
+  String get captureHintPanicle =>
+      'Cadrez une panicule entière, du cou jusqu\'aux grains.';
+
+  @override
+  String get captureHintWholePlant =>
+      'Reculez pour montrer la parcelle et les endroits atteints.';
+
+  @override
+  String get scanCaptureTake => 'Prendre la photo';
+
+  @override
+  String get scanCaptureAnother => 'Ajouter une autre photo';
+
+  @override
+  String get scanCaptureContinue => 'Continuer';
+
+  @override
+  String scanCapturePhotos(int count, int max) {
+    return '$count photo(s) sur $max';
+  }
+
+  @override
+  String get scanCameraUnavailable =>
+      'Aperçu indisponible sur cet appareil : l\'appareil photo du téléphone s\'ouvrira.';
+
+  @override
+  String get scanQuestionsTitle => 'Quelques questions';
+
+  @override
+  String get scanQuestionsHelp =>
+      'Vos réponses partent avec les photos. Elles aident le technicien, même quand l\'application ne reconnaît rien.';
+
+  @override
+  String get scanSessionResultTitle => 'Résultat du scan';
+
+  @override
+  String get scanSessionNoName => 'L\'application ne nomme aucune maladie';
+
+  @override
+  String get scanSessionNoNameBody =>
+      'Cette partie de la plante n\'est pas analysée par le modèle. Vos photos et vos réponses sont enregistrées : montrez-les à un technicien.';
+
+  @override
+  String scanSessionPhotosSaved(int count) {
+    return '$count photo(s) enregistrée(s)';
+  }
+
+  @override
+  String get scanSessionAttachPlot => 'Rattacher à une parcelle';
+
+  @override
+  String get scanSessionAttachPlotHint =>
+      'Ce scan n\'est rattaché à aucune parcelle.';
+
+  @override
+  String get scanSessionAttached => 'Scan rattaché à la parcelle';
+
+  @override
+  String get scanSessionFinish => 'Terminer';
+
+  @override
+  String get journalUnnamedResult => 'Résultat non nommé';
+
+  @override
+  String get plotContextTitle => 'Contexte de la parcelle';
+
+  @override
+  String get plotContextOptional =>
+      'Facultatif, mais très utile au technicien.';
+
+  @override
+  String get plotEcosystemLabel => 'Écosystème';
+
+  @override
+  String get ecosystemIrrigated => 'Irrigué';
+
+  @override
+  String get ecosystemLowland => 'Bas-fond';
+
+  @override
+  String get ecosystemUpland => 'Tanety (pluvial)';
+
+  @override
+  String get plotRegionLabel => 'Région';
+
+  @override
+  String get plotAltitudeLabel => 'Altitude';
+
+  @override
+  String get altitudeUnder800 => 'Moins de 800 m';
+
+  @override
+  String get altitude800to1200 => '800 à 1200 m';
+
+  @override
+  String get altitude1200to1500 => '1200 à 1500 m';
+
+  @override
+  String get altitudeOver1500 => 'Plus de 1500 m';
+
+  @override
+  String get plotVarietyLabel => 'Variété';
+
+  @override
+  String get varietyLocalUnknown => 'Locale ou inconnue';
+
+  @override
+  String get plotSeasonLabel => 'Saison';
+
+  @override
+  String get seasonVaryAloha => 'Vary aloha (riz précoce)';
+
+  @override
+  String get seasonMain => 'Saison des pluies';
+
+  @override
+  String get seasonOffSeason => 'Contre-saison';
+
+  @override
+  String get plotTransplantDateLabel => 'Date de repiquage';
+
+  @override
+  String get plotTransplantDateHint => 'Sert à situer le stade de la culture';
+
+  @override
+  String get plotTransplantDateChoose => 'Choisir la date';
+
+  @override
+  String get plotSurfaceUnitHectare => 'hectares';
+
+  @override
+  String get plotSurfaceUnitAre => 'ares';
+
+  @override
+  String get stageRecovery => 'Reprise après repiquage';
+
+  @override
+  String get stageTillering => 'Tallage';
+
+  @override
+  String get stageStemElongation => 'Montaison';
+
+  @override
+  String get stageHeading => 'Épiaison et floraison';
+
+  @override
+  String get stageMaturity => 'Maturation';
+
+  @override
+  String get exportNoPlot => 'Sans parcelle';
+
+  @override
+  String journalPhotoCount(int count) {
+    return '$count photo(s)';
+  }
 }

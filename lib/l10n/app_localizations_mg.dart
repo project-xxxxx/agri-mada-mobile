@@ -819,10 +819,10 @@ class AppLocalizationsMg extends AppLocalizations {
   String get exportCsvSeverity => 'Hamafiny';
 
   @override
-  String get exportCsvConfidence => 'Fahamendrehana(%)';
+  String get exportCsvCertainty => 'Fahatokisana';
 
   @override
-  String get exportCsvRecommendations => 'Toro-hevitra';
+  String get exportCsvOrgans => 'Faritra nojerena';
 
   @override
   String get exportCsvTreatment => 'Fitsaboana natao';
@@ -1067,4 +1067,357 @@ class AppLocalizationsMg extends AppLocalizations {
 
   @override
   String get journalStatusToConfirm => 'Tokony hamafisina';
+
+  @override
+  String get scanOrganTitle => 'Inona no hitanao ?';
+
+  @override
+  String get scanOrganHelp =>
+      'Fidio ny faritry ny zavamaniry tianao hakana sary.';
+
+  @override
+  String get scanOrganModelNotice =>
+      'Ny ravina ihany no dinihin\'ny modely. Ho an\'ny faritra hafa, voatahiry ny valin-teninao ary alefa amin\'ny teknisianina.';
+
+  @override
+  String get organLeaf => 'Ravina';
+
+  @override
+  String get organStemSheath => 'Taho sy fonon-dravina';
+
+  @override
+  String get organCollar => 'Foto-bary';
+
+  @override
+  String get organRoots => 'Faka';
+
+  @override
+  String get organPanicle => 'Salohy sy voam-bary';
+
+  @override
+  String get organWholePlant => 'Zavamaniry manontolo na tanimbary';
+
+  @override
+  String get organUnknown => 'Tsy fantatro';
+
+  @override
+  String get organUnknownHint =>
+      'Hitarika anao ny fampiharana : ny tanimbary aloha, avy eo ny ravina, avy eo ny foto-bary.';
+
+  @override
+  String get photoQualityBlurred =>
+      'Manjavozavo ny sary. Tano roa tanana ny finday, tsindrio eo amin\'ny zavamaniry ny efijery mba hazava, dia averina alaina.';
+
+  @override
+  String get photoQualityTooDark =>
+      'Maizina loatra ny sary. Mitadiava toerana mazava kokoa na andraso hiakatra ny masoandro.';
+
+  @override
+  String get photoQualityTooBright =>
+      'Mazava loatra ny sary. Aza atao amin\'ny masoandro mivantana ny ravina, tadiavo aloka malefaka.';
+
+  @override
+  String get photoQualityBacklit =>
+      'Ao ambadiky ny zavamaniry ny masoandro. Mitodiha mba ho ao ambadikao izy.';
+
+  @override
+  String get photoQualityGood => 'Mazava tsara ny sary.';
+
+  @override
+  String get commonYes => 'Eny';
+
+  @override
+  String get commonNo => 'Tsia';
+
+  @override
+  String get commonDontKnow => 'Tsy fantatro';
+
+  @override
+  String get questionSinceWhen => 'Efa hafiriana no ahitanao ity olana ity ?';
+
+  @override
+  String get questionSinceWhenDays => 'Latsaky ny herinandro';
+
+  @override
+  String get questionSinceWhenWeeks => 'Iray ka hatramin\'ny telo herinandro';
+
+  @override
+  String get questionSinceWhenMonth => 'Mihoatra ny iray volana';
+
+  @override
+  String get questionLeafShape =>
+      'Manao ahoana ny pentina eo amin\'ny ravina ?';
+
+  @override
+  String get questionLeafShapeBrownOval =>
+      'Pentina volontany boribory kely, miparitaka eo amin\'ny ravina';
+
+  @override
+  String get questionLeafShapeYellowEdge =>
+      'Vandana volon-davenona avy eo mavo, manomboka eo amin\'ny sisiny na ny tendrony';
+
+  @override
+  String get questionLeafShapeBlackAngular =>
+      'Pentina mainty kely misy zoro, toy ny vovoka';
+
+  @override
+  String get questionLeafShapeNone => 'Tsy misy pentina hita';
+
+  @override
+  String get questionLeafExudate =>
+      'Amin\'ny maraina, mahita ranon-javatra mavo miraikitra eo amin\'ny ravina voa ve ianao ?';
+
+  @override
+  String get questionLeafSpread =>
+      'Ahoana no fielezan\'ny olana eo amin\'ny tanimbary ?';
+
+  @override
+  String get questionLeafSpreadFast =>
+      'Haingana, mahazo vary maro anatin\'ny andro vitsy';
+
+  @override
+  String get questionLeafSpreadSlow => 'Miadana, vary vitsy monja';
+
+  @override
+  String get questionStem =>
+      'Inona no hitanao eo amin\'ny taho na ny fonon-dravina ?';
+
+  @override
+  String get questionStemBrownPatches =>
+      'Pentina volontany lava eo amin\'ny fonon-dravina';
+
+  @override
+  String get questionStemSoft => 'Taho malemy izay tapaka eo ambonin\'ny rano';
+
+  @override
+  String get questionStemHoles => 'Lavaka na lalana anaty taho';
+
+  @override
+  String get questionCollar => 'Inona no hitanao eo amin\'ny fototry ny taho ?';
+
+  @override
+  String get questionCollarChewed =>
+      'Fototra voakiky, miala amin\'ny tany ny vary';
+
+  @override
+  String get questionCollarRot => 'Fahalovana mainty eo amin\'ny tany';
+
+  @override
+  String get questionCollarRing =>
+      'Faribolana volontany manodidina ny fatoran\'ny taho';
+
+  @override
+  String get questionRoots => 'Manao ahoana ny faka ?';
+
+  @override
+  String get questionRootsRusty => 'Faka volontany mena, toy ny harafesina';
+
+  @override
+  String get questionRootsBlack => 'Faka mainty sy malemy';
+
+  @override
+  String get questionRootsGalls => 'Baolina kely eo amin\'ny faka';
+
+  @override
+  String get questionPanicle => 'Inona no hitanao eo amin\'ny salohy ?';
+
+  @override
+  String get questionPanicleWhite => 'Salohy fotsy sy tsy misy voa';
+
+  @override
+  String get questionPanicleStained => 'Voam-bary misy pentina na mainty';
+
+  @override
+  String get questionPanicleNeck => 'Vozon-tsalohy volontany sy mora tapaka';
+
+  @override
+  String get questionWholePlant => 'Manao ahoana ny tanimbary ?';
+
+  @override
+  String get questionWholePlantYellowPatches =>
+      'Vary mavo sy kely, misy toerana ihany no voa';
+
+  @override
+  String get questionWholePlantDriedSpots => 'Faritra misy vary maina';
+
+  @override
+  String get questionWholePlantEvenYellow =>
+      'Mavo mitovy ny tanimbary manontolo';
+
+  @override
+  String get scanOrganNoPlotNotice =>
+      'Azonao atao ny maka sary na tsy misy tanimbary aza : afaka ampifandraisinao aoriana izany.';
+
+  @override
+  String get captureHintLeaf =>
+      'Manatòna ravina voa, ataovy mandry tsara, ary ataovy ao ambadikao ny hazavana.';
+
+  @override
+  String get captureHintStem =>
+      'Tano mitsangana ny finday ary alaivo ny taho manomboka ambany mankany ambony.';
+
+  @override
+  String get captureHintCollar =>
+      'Saraho ny ravina mba hisehoan\'ny fototry ny taho, eo amin\'ny tany.';
+
+  @override
+  String get captureHintRoots =>
+      'Hongoay ny vary iray, sasao ny tany, dia apetraho amin\'ny fotra mazava ny faka.';
+
+  @override
+  String get captureHintPanicle =>
+      'Alaivo manontolo ny salohy, manomboka amin\'ny vozony ka hatramin\'ny voa.';
+
+  @override
+  String get captureHintWholePlant =>
+      'Mihemora mba hisehoan\'ny tanimbary sy ny toerana voa.';
+
+  @override
+  String get scanCaptureTake => 'Maka sary';
+
+  @override
+  String get scanCaptureAnother => 'Manampy sary hafa';
+
+  @override
+  String get scanCaptureContinue => 'Manohy';
+
+  @override
+  String scanCapturePhotos(int count, int max) {
+    return 'Sary $count amin\'ny $max';
+  }
+
+  @override
+  String get scanCameraUnavailable =>
+      'Tsy misy topi-maso eto amin\'ity finday ity : hisokatra ny fakan-tsarin\'ny finday.';
+
+  @override
+  String get scanQuestionsTitle => 'Fanontaniana vitsivitsy';
+
+  @override
+  String get scanQuestionsHelp =>
+      'Miaraka amin\'ny sary ny valin-teninao. Manampy ny teknisianina izy, na dia tsy mahafantatra aza ny fampiharana.';
+
+  @override
+  String get scanSessionResultTitle => 'Valin\'ny sary';
+
+  @override
+  String get scanSessionNoName => 'Tsy manonona aretina ny fampiharana';
+
+  @override
+  String get scanSessionNoNameBody =>
+      'Tsy dinihin\'ny modely ity faritry ny zavamaniry ity. Voatahiry ny sary sy ny valin-teninao : asehoy teknisianina izany.';
+
+  @override
+  String scanSessionPhotosSaved(int count) {
+    return 'Sary $count voatahiry';
+  }
+
+  @override
+  String get scanSessionAttachPlot => 'Ampifandraiso amin\'ny tanimbary';
+
+  @override
+  String get scanSessionAttachPlotHint =>
+      'Tsy mifandray amin\'ny tanimbary ity sary ity.';
+
+  @override
+  String get scanSessionAttached => 'Voarohy amin\'ny tanimbary ny sary';
+
+  @override
+  String get scanSessionFinish => 'Vita';
+
+  @override
+  String get journalUnnamedResult => 'Vokatra tsy voatonona';
+
+  @override
+  String get plotContextTitle => 'Mombamomba ny tanimbary';
+
+  @override
+  String get plotContextOptional =>
+      'Tsy voatery, fa tena manampy ny teknisianina.';
+
+  @override
+  String get plotEcosystemLabel => 'Karazana tanimbary';
+
+  @override
+  String get ecosystemIrrigated => 'Tondrahan-drano';
+
+  @override
+  String get ecosystemLowland => 'Horaka';
+
+  @override
+  String get ecosystemUpland => 'Tanety (an-orana)';
+
+  @override
+  String get plotRegionLabel => 'Faritra';
+
+  @override
+  String get plotAltitudeLabel => 'Haavo';
+
+  @override
+  String get altitudeUnder800 => 'Latsaky ny 800 m';
+
+  @override
+  String get altitude800to1200 => '800 ka hatramin\'ny 1200 m';
+
+  @override
+  String get altitude1200to1500 => '1200 ka hatramin\'ny 1500 m';
+
+  @override
+  String get altitudeOver1500 => 'Mihoatra ny 1500 m';
+
+  @override
+  String get plotVarietyLabel => 'Karazam-bary';
+
+  @override
+  String get varietyLocalUnknown => 'An-toerana na tsy fantatra';
+
+  @override
+  String get plotSeasonLabel => 'Vanim-potoana';
+
+  @override
+  String get seasonVaryAloha => 'Vary aloha';
+
+  @override
+  String get seasonMain => 'Vary fahavaratra';
+
+  @override
+  String get seasonOffSeason => 'Vary jeby';
+
+  @override
+  String get plotTransplantDateLabel => 'Datin\'ny fanetsana';
+
+  @override
+  String get plotTransplantDateHint => 'Manampy hamantatra ny dingan\'ny voly';
+
+  @override
+  String get plotTransplantDateChoose => 'Misafidy daty';
+
+  @override
+  String get plotSurfaceUnitHectare => 'hekitara';
+
+  @override
+  String get plotSurfaceUnitAre => 'ara';
+
+  @override
+  String get stageRecovery => 'Vao voaketsa';
+
+  @override
+  String get stageTillering => 'Fanalefahana';
+
+  @override
+  String get stageStemElongation => 'Fitomboan\'ny taho';
+
+  @override
+  String get stageHeading => 'Fipoiran\'ny salohy sy famony';
+
+  @override
+  String get stageMaturity => 'Fahamasahana';
+
+  @override
+  String get exportNoPlot => 'Tsy misy tanimbary';
+
+  @override
+  String journalPhotoCount(int count) {
+    return 'Sary $count';
+  }
 }

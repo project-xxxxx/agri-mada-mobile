@@ -16,7 +16,7 @@ class MainLayout extends ConsumerWidget {
     return Scaffold(
       drawer: const AppMenuDrawer(),
       body: child,
-      floatingActionButton: _PulsatingScanFab(onTap: () => context.go(AppRoutes.scanning)),
+      floatingActionButton: _PulsatingScanFab(onTap: () => context.go(AppRoutes.scanOrgane)),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       bottomNavigationBar: const _AppBottomNav(),
     );

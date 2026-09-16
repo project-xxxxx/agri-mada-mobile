@@ -1580,17 +1580,17 @@ abstract class AppLocalizations {
   /// **'Gravité'**
   String get exportCsvSeverity;
 
-  /// En-tête confiance CSV
+  /// No description provided for @exportCsvCertainty.
   ///
   /// In fr, this message translates to:
-  /// **'Confiance(%)'**
-  String get exportCsvConfidence;
+  /// **'Certitude'**
+  String get exportCsvCertainty;
 
-  /// En-tête reco CSV
+  /// No description provided for @exportCsvOrgans.
   ///
   /// In fr, this message translates to:
-  /// **'Recommandations'**
-  String get exportCsvRecommendations;
+  /// **'Parties observées'**
+  String get exportCsvOrgans;
 
   /// En-tête traitement CSV
   ///
@@ -2017,6 +2017,636 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'À confirmer'**
   String get journalStatusToConfirm;
+
+  /// No description provided for @scanOrganTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Qu\'observez-vous ?'**
+  String get scanOrganTitle;
+
+  /// No description provided for @scanOrganHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisissez la partie de la plante que vous voulez photographier.'**
+  String get scanOrganHelp;
+
+  /// No description provided for @scanOrganModelNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Seules les feuilles sont analysées par le modèle. Pour les autres parties, vos réponses sont enregistrées et transmises à un technicien.'**
+  String get scanOrganModelNotice;
+
+  /// No description provided for @organLeaf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Feuilles'**
+  String get organLeaf;
+
+  /// No description provided for @organStemSheath.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tige et gaine'**
+  String get organStemSheath;
+
+  /// No description provided for @organCollar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Collet et base des tiges'**
+  String get organCollar;
+
+  /// No description provided for @organRoots.
+  ///
+  /// In fr, this message translates to:
+  /// **'Racines'**
+  String get organRoots;
+
+  /// No description provided for @organPanicle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Panicule et grains'**
+  String get organPanicle;
+
+  /// No description provided for @organWholePlant.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plante entière ou parcelle'**
+  String get organWholePlant;
+
+  /// No description provided for @organUnknown.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je ne sais pas'**
+  String get organUnknown;
+
+  /// No description provided for @organUnknownHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'application vous guide : la parcelle, puis une feuille, puis le collet.'**
+  String get organUnknownHint;
+
+  /// No description provided for @photoQualityBlurred.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo floue. Tenez le téléphone à deux mains, touchez l\'écran sur la plante pour faire le point, puis reprenez.'**
+  String get photoQualityBlurred;
+
+  /// No description provided for @photoQualityTooDark.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo trop sombre. Cherchez un endroit plus éclairé ou attendez que le soleil monte.'**
+  String get photoQualityTooDark;
+
+  /// No description provided for @photoQualityTooBright.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo trop claire. Évitez le plein soleil sur la feuille, cherchez une ombre légère.'**
+  String get photoQualityTooBright;
+
+  /// No description provided for @photoQualityBacklit.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le soleil est derrière la plante. Tournez-vous pour l\'avoir dans le dos.'**
+  String get photoQualityBacklit;
+
+  /// No description provided for @photoQualityGood.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo nette.'**
+  String get photoQualityGood;
+
+  /// No description provided for @commonYes.
+  ///
+  /// In fr, this message translates to:
+  /// **'Oui'**
+  String get commonYes;
+
+  /// No description provided for @commonNo.
+  ///
+  /// In fr, this message translates to:
+  /// **'Non'**
+  String get commonNo;
+
+  /// No description provided for @commonDontKnow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Je ne sais pas'**
+  String get commonDontKnow;
+
+  /// No description provided for @questionSinceWhen.
+  ///
+  /// In fr, this message translates to:
+  /// **'Depuis combien de temps voyez-vous ce problème ?'**
+  String get questionSinceWhen;
+
+  /// No description provided for @questionSinceWhenDays.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moins d\'une semaine'**
+  String get questionSinceWhenDays;
+
+  /// No description provided for @questionSinceWhenWeeks.
+  ///
+  /// In fr, this message translates to:
+  /// **'Une à trois semaines'**
+  String get questionSinceWhenWeeks;
+
+  /// No description provided for @questionSinceWhenMonth.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus d\'un mois'**
+  String get questionSinceWhenMonth;
+
+  /// No description provided for @questionLeafShape.
+  ///
+  /// In fr, this message translates to:
+  /// **'À quoi ressemblent les taches sur les feuilles ?'**
+  String get questionLeafShape;
+
+  /// No description provided for @questionLeafShapeBrownOval.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taches brunes ovales, éparpillées sur la feuille'**
+  String get questionLeafShapeBrownOval;
+
+  /// No description provided for @questionLeafShapeYellowEdge.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bandes gris-vert puis jaunes, à partir du bord ou de la pointe'**
+  String get questionLeafShapeYellowEdge;
+
+  /// No description provided for @questionLeafShapeBlackAngular.
+  ///
+  /// In fr, this message translates to:
+  /// **'Petites taches noires anguleuses, un peu poudreuses'**
+  String get questionLeafShapeBlackAngular;
+
+  /// No description provided for @questionLeafShapeNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucune tache visible'**
+  String get questionLeafShapeNone;
+
+  /// No description provided for @questionLeafExudate.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le matin, voyez-vous des gouttes jaunes collantes sur les feuilles touchées ?'**
+  String get questionLeafExudate;
+
+  /// No description provided for @questionLeafSpread.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comment le problème se répand-il dans la parcelle ?'**
+  String get questionLeafSpread;
+
+  /// No description provided for @questionLeafSpreadFast.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vite, sur beaucoup de pieds en quelques jours'**
+  String get questionLeafSpreadFast;
+
+  /// No description provided for @questionLeafSpreadSlow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Lentement, quelques pieds seulement'**
+  String get questionLeafSpreadSlow;
+
+  /// No description provided for @questionStem.
+  ///
+  /// In fr, this message translates to:
+  /// **'Que voyez-vous sur la tige ou la gaine ?'**
+  String get questionStem;
+
+  /// No description provided for @questionStemBrownPatches.
+  ///
+  /// In fr, this message translates to:
+  /// **'Taches brunes allongées sur la gaine'**
+  String get questionStemBrownPatches;
+
+  /// No description provided for @questionStemSoft.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tige molle qui se casse au ras de l\'eau'**
+  String get questionStemSoft;
+
+  /// No description provided for @questionStemHoles.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trous ou galeries dans la tige'**
+  String get questionStemHoles;
+
+  /// No description provided for @questionCollar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Que voyez-vous à la base des tiges ?'**
+  String get questionCollar;
+
+  /// No description provided for @questionCollarChewed.
+  ///
+  /// In fr, this message translates to:
+  /// **'Base rongée, plants qui se déchaussent'**
+  String get questionCollarChewed;
+
+  /// No description provided for @questionCollarRot.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pourriture noire au ras du sol'**
+  String get questionCollarRot;
+
+  /// No description provided for @questionCollarRing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Anneau brun autour du nœud'**
+  String get questionCollarRing;
+
+  /// No description provided for @questionRoots.
+  ///
+  /// In fr, this message translates to:
+  /// **'À quoi ressemblent les racines ?'**
+  String get questionRoots;
+
+  /// No description provided for @questionRootsRusty.
+  ///
+  /// In fr, this message translates to:
+  /// **'Racines brun-orangé, comme rouillées'**
+  String get questionRootsRusty;
+
+  /// No description provided for @questionRootsBlack.
+  ///
+  /// In fr, this message translates to:
+  /// **'Racines noires et molles'**
+  String get questionRootsBlack;
+
+  /// No description provided for @questionRootsGalls.
+  ///
+  /// In fr, this message translates to:
+  /// **'Petites boules sur les racines'**
+  String get questionRootsGalls;
+
+  /// No description provided for @questionPanicle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Que voyez-vous sur la panicule ?'**
+  String get questionPanicle;
+
+  /// No description provided for @questionPanicleWhite.
+  ///
+  /// In fr, this message translates to:
+  /// **'Panicule blanche et vide'**
+  String get questionPanicleWhite;
+
+  /// No description provided for @questionPanicleStained.
+  ///
+  /// In fr, this message translates to:
+  /// **'Grains tachés ou noircis'**
+  String get questionPanicleStained;
+
+  /// No description provided for @questionPanicleNeck.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cou de la panicule brun et cassant'**
+  String get questionPanicleNeck;
+
+  /// No description provided for @questionWholePlant.
+  ///
+  /// In fr, this message translates to:
+  /// **'Comment se présente la parcelle ?'**
+  String get questionWholePlant;
+
+  /// No description provided for @questionWholePlantYellowPatches.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plants jaunis et rabougris, par taches dans la parcelle'**
+  String get questionWholePlantYellowPatches;
+
+  /// No description provided for @questionWholePlantDriedSpots.
+  ///
+  /// In fr, this message translates to:
+  /// **'Foyers de plants desséchés'**
+  String get questionWholePlantDriedSpots;
+
+  /// No description provided for @questionWholePlantEvenYellow.
+  ///
+  /// In fr, this message translates to:
+  /// **'Jaunissement régulier sur toute la parcelle'**
+  String get questionWholePlantEvenYellow;
+
+  /// No description provided for @scanOrganNoPlotNotice.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous pouvez scanner sans parcelle : vous la rattacherez après.'**
+  String get scanOrganNoPlotNotice;
+
+  /// No description provided for @captureHintLeaf.
+  ///
+  /// In fr, this message translates to:
+  /// **'Approchez-vous d\'une feuille atteinte, bien à plat, la lumière dans votre dos.'**
+  String get captureHintLeaf;
+
+  /// No description provided for @captureHintStem.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tenez le téléphone à la verticale et cadrez la tige du bas vers le haut.'**
+  String get captureHintStem;
+
+  /// No description provided for @captureHintCollar.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écartez les feuilles pour montrer la base des tiges, au ras du sol.'**
+  String get captureHintCollar;
+
+  /// No description provided for @captureHintRoots.
+  ///
+  /// In fr, this message translates to:
+  /// **'Déterrez un plant, rincez la terre et posez les racines sur un fond clair.'**
+  String get captureHintRoots;
+
+  /// No description provided for @captureHintPanicle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cadrez une panicule entière, du cou jusqu\'aux grains.'**
+  String get captureHintPanicle;
+
+  /// No description provided for @captureHintWholePlant.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reculez pour montrer la parcelle et les endroits atteints.'**
+  String get captureHintWholePlant;
+
+  /// No description provided for @scanCaptureTake.
+  ///
+  /// In fr, this message translates to:
+  /// **'Prendre la photo'**
+  String get scanCaptureTake;
+
+  /// No description provided for @scanCaptureAnother.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ajouter une autre photo'**
+  String get scanCaptureAnother;
+
+  /// No description provided for @scanCaptureContinue.
+  ///
+  /// In fr, this message translates to:
+  /// **'Continuer'**
+  String get scanCaptureContinue;
+
+  /// No description provided for @scanCapturePhotos.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} photo(s) sur {max}'**
+  String scanCapturePhotos(int count, int max);
+
+  /// No description provided for @scanCameraUnavailable.
+  ///
+  /// In fr, this message translates to:
+  /// **'Aperçu indisponible sur cet appareil : l\'appareil photo du téléphone s\'ouvrira.'**
+  String get scanCameraUnavailable;
+
+  /// No description provided for @scanQuestionsTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Quelques questions'**
+  String get scanQuestionsTitle;
+
+  /// No description provided for @scanQuestionsHelp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos réponses partent avec les photos. Elles aident le technicien, même quand l\'application ne reconnaît rien.'**
+  String get scanQuestionsHelp;
+
+  /// No description provided for @scanSessionResultTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Résultat du scan'**
+  String get scanSessionResultTitle;
+
+  /// No description provided for @scanSessionNoName.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'application ne nomme aucune maladie'**
+  String get scanSessionNoName;
+
+  /// No description provided for @scanSessionNoNameBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'Cette partie de la plante n\'est pas analysée par le modèle. Vos photos et vos réponses sont enregistrées : montrez-les à un technicien.'**
+  String get scanSessionNoNameBody;
+
+  /// No description provided for @scanSessionPhotosSaved.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} photo(s) enregistrée(s)'**
+  String scanSessionPhotosSaved(int count);
+
+  /// No description provided for @scanSessionAttachPlot.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rattacher à une parcelle'**
+  String get scanSessionAttachPlot;
+
+  /// No description provided for @scanSessionAttachPlotHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce scan n\'est rattaché à aucune parcelle.'**
+  String get scanSessionAttachPlotHint;
+
+  /// No description provided for @scanSessionAttached.
+  ///
+  /// In fr, this message translates to:
+  /// **'Scan rattaché à la parcelle'**
+  String get scanSessionAttached;
+
+  /// No description provided for @scanSessionFinish.
+  ///
+  /// In fr, this message translates to:
+  /// **'Terminer'**
+  String get scanSessionFinish;
+
+  /// No description provided for @journalUnnamedResult.
+  ///
+  /// In fr, this message translates to:
+  /// **'Résultat non nommé'**
+  String get journalUnnamedResult;
+
+  /// No description provided for @plotContextTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contexte de la parcelle'**
+  String get plotContextTitle;
+
+  /// No description provided for @plotContextOptional.
+  ///
+  /// In fr, this message translates to:
+  /// **'Facultatif, mais très utile au technicien.'**
+  String get plotContextOptional;
+
+  /// No description provided for @plotEcosystemLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Écosystème'**
+  String get plotEcosystemLabel;
+
+  /// No description provided for @ecosystemIrrigated.
+  ///
+  /// In fr, this message translates to:
+  /// **'Irrigué'**
+  String get ecosystemIrrigated;
+
+  /// No description provided for @ecosystemLowland.
+  ///
+  /// In fr, this message translates to:
+  /// **'Bas-fond'**
+  String get ecosystemLowland;
+
+  /// No description provided for @ecosystemUpland.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tanety (pluvial)'**
+  String get ecosystemUpland;
+
+  /// No description provided for @plotRegionLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Région'**
+  String get plotRegionLabel;
+
+  /// No description provided for @plotAltitudeLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Altitude'**
+  String get plotAltitudeLabel;
+
+  /// No description provided for @altitudeUnder800.
+  ///
+  /// In fr, this message translates to:
+  /// **'Moins de 800 m'**
+  String get altitudeUnder800;
+
+  /// No description provided for @altitude800to1200.
+  ///
+  /// In fr, this message translates to:
+  /// **'800 à 1200 m'**
+  String get altitude800to1200;
+
+  /// No description provided for @altitude1200to1500.
+  ///
+  /// In fr, this message translates to:
+  /// **'1200 à 1500 m'**
+  String get altitude1200to1500;
+
+  /// No description provided for @altitudeOver1500.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus de 1500 m'**
+  String get altitudeOver1500;
+
+  /// No description provided for @plotVarietyLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Variété'**
+  String get plotVarietyLabel;
+
+  /// No description provided for @varietyLocalUnknown.
+  ///
+  /// In fr, this message translates to:
+  /// **'Locale ou inconnue'**
+  String get varietyLocalUnknown;
+
+  /// No description provided for @plotSeasonLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saison'**
+  String get plotSeasonLabel;
+
+  /// No description provided for @seasonVaryAloha.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vary aloha (riz précoce)'**
+  String get seasonVaryAloha;
+
+  /// No description provided for @seasonMain.
+  ///
+  /// In fr, this message translates to:
+  /// **'Saison des pluies'**
+  String get seasonMain;
+
+  /// No description provided for @seasonOffSeason.
+  ///
+  /// In fr, this message translates to:
+  /// **'Contre-saison'**
+  String get seasonOffSeason;
+
+  /// No description provided for @plotTransplantDateLabel.
+  ///
+  /// In fr, this message translates to:
+  /// **'Date de repiquage'**
+  String get plotTransplantDateLabel;
+
+  /// No description provided for @plotTransplantDateHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sert à situer le stade de la culture'**
+  String get plotTransplantDateHint;
+
+  /// No description provided for @plotTransplantDateChoose.
+  ///
+  /// In fr, this message translates to:
+  /// **'Choisir la date'**
+  String get plotTransplantDateChoose;
+
+  /// No description provided for @plotSurfaceUnitHectare.
+  ///
+  /// In fr, this message translates to:
+  /// **'hectares'**
+  String get plotSurfaceUnitHectare;
+
+  /// No description provided for @plotSurfaceUnitAre.
+  ///
+  /// In fr, this message translates to:
+  /// **'ares'**
+  String get plotSurfaceUnitAre;
+
+  /// No description provided for @stageRecovery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Reprise après repiquage'**
+  String get stageRecovery;
+
+  /// No description provided for @stageTillering.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tallage'**
+  String get stageTillering;
+
+  /// No description provided for @stageStemElongation.
+  ///
+  /// In fr, this message translates to:
+  /// **'Montaison'**
+  String get stageStemElongation;
+
+  /// No description provided for @stageHeading.
+  ///
+  /// In fr, this message translates to:
+  /// **'Épiaison et floraison'**
+  String get stageHeading;
+
+  /// No description provided for @stageMaturity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Maturation'**
+  String get stageMaturity;
+
+  /// No description provided for @exportNoPlot.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans parcelle'**
+  String get exportNoPlot;
+
+  /// No description provided for @journalPhotoCount.
+  ///
+  /// In fr, this message translates to:
+  /// **'{count} photo(s)'**
+  String journalPhotoCount(int count);
 }
 
 class _AppLocalizationsDelegate
