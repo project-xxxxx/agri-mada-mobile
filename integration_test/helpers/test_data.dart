@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:agri_mada/core/ai/diagnosis_certainty.dart';
-import 'package:agri_mada/features/scan/domain/entities/diagnostic_result.dart';
+import 'package:agri_mada/core/ai/tflite_service.dart';
 import 'package:agri_mada/core/local_db/models/diagnostic_local.dart';
 import 'package:agri_mada/core/local_db/models/parcelle_local.dart';
 import 'package:isar/isar.dart';
@@ -13,12 +13,11 @@ const mockRecommendations = <String>[
   'Éviter que le riz manque d\'eau',
 ];
 
-final mockTfliteResult = DiagnosticResult(
+const mockTfliteResult = TFLiteInferenceResult(
   maladieDetectee: mockDiseaseName,
   confiance: 0.91,
-  createdAt: DateTime(2026, 1, 2),
   certitude: DiagnosisCertainty.probable,
-  classement: const [
+  classement: [
     ScoredLabel(mockDiseaseName, 0.91),
     ScoredLabel('Leaf smut', 0.05),
   ],

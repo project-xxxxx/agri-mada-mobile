@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:agri_mada/app/app.dart';
-import 'package:agri_mada/features/scan/domain/entities/diagnostic_result.dart';
+import 'package:agri_mada/core/ai/tflite_service.dart';
 import 'package:agri_mada/core/providers/tflite_provider.dart';
 import 'package:agri_mada/core/local_db/isar_service.dart';
 import 'package:agri_mada/core/local_db/models/diagnostic_local.dart';
@@ -145,7 +145,7 @@ Future<void> pumpApp(
   required bool loggedIn,
   required bool onboardingDone,
   bool isTfliteReady = true,
-  DiagnosticResult? tfliteResult,
+  TFLiteInferenceResult? tfliteResult,
   MockTFLiteService? tfliteService,
   MockSessionService? sessionService,
   TestImagePickerPlatform? imagePickerPlatform,
