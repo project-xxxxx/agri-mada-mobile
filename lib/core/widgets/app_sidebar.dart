@@ -87,6 +87,13 @@ class AppMenuDrawer extends ConsumerWidget {
                   ),
                   const _MenuDivider(),
                   _MenuItem(
+                    icon: Icons.forum_outlined,
+                    title: loc.drawerAgentTitle,
+                    subtitle: loc.drawerAgentSubtitle,
+                    onTap: () => _navigate(context, AppRoutes.conseiller),
+                  ),
+                  const _MenuDivider(),
+                  _MenuItem(
                     icon: Icons.settings_outlined,
                     title: loc.drawerSettingsTitle,
                     subtitle: loc.drawerSettingsSubtitle,

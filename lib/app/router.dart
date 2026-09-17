@@ -7,6 +7,7 @@ import '../features/auth/presentation/screens/register_screen.dart';
 import '../features/auth/presentation/screens/reset_password_screen.dart';
 import '../features/home/presentation/screens/home_screen.dart';
 import '../features/home/presentation/screens/settings_screen.dart';
+import '../features/agent/presentation/screens/agent_screen.dart';
 import '../features/guides/presentation/screens/guides_screen.dart';
 import '../features/prevention/presentation/screens/prevention_screen.dart';
 import '../features/scan/presentation/screens/organ_picker_screen.dart';
@@ -40,6 +41,8 @@ abstract final class AppRoutes {
   static const String prevention = '/prevention';
   static const String guides = '/guides';
   static const String onboarding = '/onboarding';
+  /// Conseiller : agent du serveur relié aux fiches et aux scans (ADR-012).
+  static const String conseiller = '/conseiller';
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -66,7 +69,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           route == AppRoutes.scanQuestions ||
           route == AppRoutes.scanSessionResult ||
           route == AppRoutes.journal ||
-          route == AppRoutes.myParcelles;
+          route == AppRoutes.myParcelles ||
+          route == AppRoutes.conseiller;
       final isOnboardingConsultationMode =
           state.uri.queryParameters['mode'] == 'help';
 
@@ -195,6 +199,10 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.guides,
         builder: (context, state) => const GuidesScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.conseiller,
+        builder: (context, state) => const AgentScreen(),
       ),
       GoRoute(
         path: AppRoutes.onboarding,

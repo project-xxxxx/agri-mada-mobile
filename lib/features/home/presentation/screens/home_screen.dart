@@ -96,15 +96,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen>
                     _buildAnimatedItem(const _HomeHeader(), 0),
                     const SizedBox(height: AppSpacing.lg),
                     _buildAnimatedItem(const _SummaryCard(), 1),
+                    const SizedBox(height: AppSpacing.md),
+                    _buildAnimatedItem(const _ConseillerCard(), 2),
                     const SizedBox(height: AppSpacing.lg),
                     _buildAnimatedItem(
                         Text(
                           loc.homeServicesTitle,
                           style: AppTypography.headlineMedium,
                         ),
-                        2),
+                        3),
                     const SizedBox(height: AppSpacing.md),
-                    _buildAnimatedItem(const _ServicesGrid(), 3),
+                    _buildAnimatedItem(const _ServicesGrid(), 4),
                     const SizedBox(height: 100),
                   ],
                 ),
@@ -417,6 +419,47 @@ class _SummaryCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Accès au conseiller (ADR-012) : pleine largeur, pour ne pas déséquilibrer la grille.
+class _ConseillerCard extends StatelessWidget {
+  const _ConseillerCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    return Material(
+      color: AppColors.primaryLight,
+      borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+        onTap: () => context.go(AppRoutes.conseiller),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.cardPadding),
+          child: Row(
+            children: [
+              const Icon(Icons.forum_outlined, color: AppColors.primary, size: 36),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      loc.agentHomeCardTitle,
+                      style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(loc.agentHomeCardDescription, style: AppTypography.caption),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: AppColors.primary),
+            ],
+          ),
+        ),
       ),
     );
   }

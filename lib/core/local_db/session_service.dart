@@ -91,6 +91,24 @@ class SessionService {
     return value == 'true';
   }
 
+  // --- Accord pour le conseiller (ADR-012) ---
+
+  /// Par compte : un même téléphone sert parfois à plusieurs agriculteurs.
+  Future<String> _cleAccordConseiller() async =>
+      'agent_consent_${await getUserId() ?? 'anonyme'}';
+
+  Future<bool> isAgentConsentGiven() async =>
+      await _storage.read(key: await _cleAccordConseiller()) == 'true';
+
+  Future<void> setAgentConsent(bool accepte) async {
+    final cle = await _cleAccordConseiller();
+    if (accepte) {
+      await _storage.write(key: cle, value: 'true');
+    } else {
+      await _storage.delete(key: cle);
+    }
+  }
+
   Future<void> setOnboardingDone(bool done) {
     return _storage.write(
       key: _keyOnboardingDone,
