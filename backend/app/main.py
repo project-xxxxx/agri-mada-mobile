@@ -26,6 +26,8 @@ from app.models.user import User  # noqa: F401
 from app.models.parcelle import Parcelle  # noqa: F401
 from app.models.diagnostic import Diagnostic  # noqa: F401
 from app.models.refresh_token import RefreshToken  # noqa: F401
+from app.models.usage_conseil import UsageConseil  # noqa: F401
+from app.models.trace_agent import TraceAgent  # noqa: F401
 
 
 # --- Création de l'application FastAPI ---
@@ -37,7 +39,11 @@ app = FastAPI(
         "## Fonctionnalités\n"
         "- **Authentification** : Inscription et connexion des agriculteurs (JWT et jeton de rafraîchissement)\n"
         "- **Synchronisation** : Réception idempotente des parcelles et diagnostics créés hors-ligne\n"
-        "- **Journal Agricole** : Résumé de l'état de santé des parcelles\n\n"
+        "- **Journal Agricole** : Résumé de l'état de santé des parcelles\n"
+        "- **Conseil** : Réponses tirées des fiches de connaissance, sans produit ni dose "
+        "(nécessite une connexion et GEMINI_API_KEY)\n"
+        "- **Agent de conseil** : Relie fiches, parcelles et scans derrière des garde-fous "
+        "(ADR-012)\n\n"
         "## Architecture\n"
         "L'application mobile Flutter fonctionne 100% hors-ligne avec TensorFlow Lite "
         "et Isar Database. Ce backend sert uniquement de plateforme de centralisation "

@@ -14,6 +14,8 @@ from app.models.diagnostic_session import (  # noqa: F401
 )
 from app.models.parcelle import Parcelle  # noqa: F401
 from app.models.refresh_token import RefreshToken  # noqa: F401
+from app.models.trace_agent import TraceAgent  # noqa: F401
+from app.models.usage_conseil import UsageConseil  # noqa: F401
 from app.models.user import User  # noqa: F401
 
 config = context.config

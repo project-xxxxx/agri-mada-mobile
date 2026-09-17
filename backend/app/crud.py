@@ -3,8 +3,11 @@ Fonctions CRUD - Opérations de base de données.
 Create, Read, Update, Delete pour User, Parcelle, Diagnostic et RefreshToken.
 """
 
-from datetime import timedelta
+import json
+from datetime import date, datetime, timedelta
 from typing import List, Optional, Tuple
+from sqlalchemy import delete, select, update
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from app.core.config import settings
@@ -19,6 +22,8 @@ from app.models.parcelle import Parcelle
 from app.models.diagnostic import Diagnostic
 from app.models.diagnostic_session import DiagnosticSession, Observation
 from app.models.refresh_token import RefreshToken, utcnow_naive
+from app.models.trace_agent import TraceAgent
+from app.models.usage_conseil import UsageConseil
 
 # Étiquettes du modèle qui désignent une plante saine.
 _HEALTHY_LABELS = {"healthy", "normal"}
@@ -521,3 +526,117 @@ def _ajouter_observations(session: DiagnosticSession, observations_data: list) -
         ajoutees += 1
 
     return ajoutees
+
+
+# ==========================================
+# QUOTA DU CONSEIL (tâche P5.4)
+# ==========================================
+
+def consommer_quota_conseil(
+    db: Session, user_id: int, jour: date, limite: int
+) -> Optional[int]:
+    """
+    Réserve une question dans le quota du jour et renvoie le nombre de questions
+    restantes, ou None si le quota est épuisé.
+
+    L'incrément est conditionnel en une seule requête : deux questions
+    simultanées ne peuvent pas dépasser la limite ensemble.
+    """
+    filtre = (UsageConseil.user_id == user_id, UsageConseil.jour == jour)
+    for _ in range(2):
+        incrementee = db.execute(
+            update(UsageConseil)
+            .where(*filtre, UsageConseil.nb_questions < limite)
+            .values(nb_questions=UsageConseil.nb_questions + 1)
+        )
+        if incrementee.rowcount == 1:
+            db.commit()
+            consommees = db.execute(select(UsageConseil.nb_questions).where(*filtre)).scalar_one()
+            return limite - consommees
+
+        if limite <= 0 or db.execute(select(UsageConseil.id).where(*filtre)).first():
+            db.rollback()
+            return None
+
+        db.add(UsageConseil(user_id=user_id, jour=jour, nb_questions=1))
+        try:
+            db.commit()
+            return limite - 1
+        except IntegrityError:
+            # Une autre requête vient de créer la ligne du jour : on repasse par l'incrément.
+            db.rollback()
+    return None
+
+
+def rendre_quota_conseil(db: Session, user_id: int, jour: date) -> None:
+    """Rend une question du quota quand le fournisseur n'a pas pu répondre."""
+    db.execute(
+        update(UsageConseil)
+        .where(
+            UsageConseil.user_id == user_id,
+            UsageConseil.jour == jour,
+            UsageConseil.nb_questions > 0,
+        )
+        .values(nb_questions=UsageConseil.nb_questions - 1)
+    )
+    db.commit()
+
+
+# ==========================================
+# TRACES DE L'AGENT (ADR-012)
+# ==========================================
+
+def enregistrer_trace_agent(
+    db: Session,
+    *,
+    user_id: int,
+    conversation_id: Optional[str],
+    langue: str,
+    question: str,
+    reponse: str,
+    issue: str,
+    outils: list,
+    garde_fous: list,
+    fiches: list,
+    sessions: list,
+    orienter_technicien: bool,
+    jetons_entree: int,
+    jetons_sortie: int,
+    duree_ms: int,
+    modele: Optional[str],
+) -> None:
+    db.add(
+        TraceAgent(
+            user_id=user_id,
+            conversation_id=conversation_id,
+            cree_le=utcnow_naive(),
+            langue=langue,
+            question=question,
+            reponse=reponse,
+            issue=issue,
+            outils=json.dumps(outils, ensure_ascii=False),
+            garde_fous=json.dumps(garde_fous, ensure_ascii=False),
+            fiches=json.dumps(fiches, ensure_ascii=False),
+            sessions=json.dumps(sessions),
+            orienter_technicien=orienter_technicien,
+            jetons_entree=jetons_entree,
+            jetons_sortie=jetons_sortie,
+            duree_ms=duree_ms,
+            modele=modele,
+        )
+    )
+    db.commit()
+
+
+def purger_traces_agent(db: Session, avant: datetime) -> int:
+    """Supprime les traces plus anciennes que la durée de conservation."""
+    resultat = db.execute(delete(TraceAgent).where(TraceAgent.cree_le < avant))
+    db.commit()
+    return resultat.rowcount or 0
+
+
+def supprimer_traces_agent(db: Session, user_id: int) -> int:
+    """Droit à l'effacement : toutes les traces du compte."""
+    resultat = db.execute(delete(TraceAgent).where(TraceAgent.user_id == user_id))
+    db.commit()
+    return resultat.rowcount or 0
