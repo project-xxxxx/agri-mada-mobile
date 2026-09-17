@@ -10,3 +10,11 @@ Pillow>=10.0
 imagehash>=4.3
 # Validation des fiches de connaissance (P5.1)
 jsonschema>=4.20
+# Entraînement (P4) et évaluation (eval_off_topic.py, train_feuille.py) :
+# épinglées sur la version de ml/.venv plutôt qu'un simple minimum, car le
+# comportement numérique change sensiblement d'une version à l'autre (calcul
+# de features en cache, calibration par température) et ces deux paquets
+# manquaient jusqu'ici de ce fichier alors qu'ils sont requis dès l'extraction
+# de features — pas seulement des optionnels comme kaggle/py7zr ci-dessus.
+tensorflow==2.21.0
+numpy==2.5.3
