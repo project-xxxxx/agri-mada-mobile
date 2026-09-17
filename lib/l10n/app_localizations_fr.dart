@@ -914,6 +914,226 @@ class AppLocalizationsFr extends AppLocalizations {
   String get guidesHealthySigns => 'Signes d\'une plante saine';
 
   @override
+  String get guidesKnowledgeSectionTitle => 'Guide complet';
+
+  @override
+  String get guidesKnowledgeSectionSubtitle =>
+      'Toutes les classes connues, y compris celles que l\'application ne détecte pas encore';
+
+  @override
+  String get guidesDraftBadge => 'Brouillon, non validé par un agronome';
+
+  @override
+  String get guidesSearchHint =>
+      'Rechercher une maladie (français ou malgache)…';
+
+  @override
+  String get guidesNoResults => 'Aucun résultat';
+
+  @override
+  String get guidesPreventionTitle => 'Prévention';
+
+  @override
+  String get guidesConfusionTitle => 'Peut se confondre avec';
+
+  @override
+  String get guidesSourcesTitle => 'Sources';
+
+  @override
+  String get guidesConditionsTitle => 'Conditions favorables';
+
+  @override
+  String get guidesLoadError => 'Le guide complet n\'a pas pu être ouvert';
+
+  @override
+  String get drawerAgentTitle => 'Conseiller';
+
+  @override
+  String get drawerAgentSubtitle => 'Poser une question';
+
+  @override
+  String get agentTitle => 'Conseiller AgriMada';
+
+  @override
+  String get agentSubtitle => 'Réponses tirées des fiches et de vos scans';
+
+  @override
+  String get agentHomeCardTitle => 'Une question sur votre riz ?';
+
+  @override
+  String get agentHomeCardDescription =>
+      'Le conseiller répond à partir des fiches AgriMada et de vos derniers scans (connexion nécessaire).';
+
+  @override
+  String get agentConsentTitle => 'Avant de commencer';
+
+  @override
+  String get agentConsentAccept => 'J\'accepte';
+
+  @override
+  String get agentConsentDecline => 'Non merci';
+
+  @override
+  String get agentDisclaimer =>
+      'Conseils automatiques tirés de fiches pas encore validées par un agronome. Le conseiller ne pose aucun diagnostic et ne recommande aucun produit : confirmez toujours avec un technicien agricole.';
+
+  @override
+  String get agentEmptyTitle => 'Posez votre question';
+
+  @override
+  String get agentSuggestionScan => 'Que dit mon dernier scan ?';
+
+  @override
+  String get agentSuggestionPrevention => 'Comment prévenir la pyriculariose ?';
+
+  @override
+  String get agentSuggestionSymptoms =>
+      'Mes feuilles jaunissent depuis la pointe, qu\'est-ce que c\'est ?';
+
+  @override
+  String get agentInputHint => 'Votre question…';
+
+  @override
+  String get agentSend => 'Envoyer';
+
+  @override
+  String get agentThinking => 'Le conseiller consulte les fiches…';
+
+  @override
+  String get agentNewConversation => 'Nouvelle conversation';
+
+  @override
+  String get agentDeleteHistory => 'Effacer mes échanges';
+
+  @override
+  String get agentDeleteHistoryConfirm =>
+      'Effacer toutes vos questions et réponses conservées sur le serveur ?';
+
+  @override
+  String get agentConfirmDelete => 'Effacer';
+
+  @override
+  String get agentWithdrawConsent => 'Retirer mon accord';
+
+  @override
+  String get agentOffline =>
+      'Pas de connexion : le conseiller a besoin d\'internet. Le guide des fiches reste disponible hors ligne.';
+
+  @override
+  String get agentFichesTitle => 'Fiches citées';
+
+  @override
+  String get agentAskTechnician => 'Demander à un technicien';
+
+  @override
+  String get agentTechnicianShareIntro =>
+      'Question posée au conseiller AgriMada, à vérifier :';
+
+  @override
+  String get agentUrgentTitle => 'Urgence';
+
+  @override
+  String get agentWarningAutomatic =>
+      'Réponse automatique : confirmez avec un technicien agricole avant d\'agir.';
+
+  @override
+  String get agentWarningDraft =>
+      'Tirée de fiches en brouillon, pas encore validées par un agronome.';
+
+  @override
+  String get agentWarningExperimental =>
+      'Les pistes de scan viennent d\'un modèle expérimental.';
+
+  @override
+  String get agentWarningMalagasy =>
+      'Malgache produit automatiquement, pas encore relu par un locuteur natif.';
+
+  @override
+  String get agentReasonScanToConfirm => 'Piste de scan à confirmer';
+
+  @override
+  String get agentReasonReport =>
+      'Maladie qui se propage ou sans remède : à signaler vite';
+
+  @override
+  String get agentReasonSevere => 'Plus d\'un tiers de la parcelle touché';
+
+  @override
+  String get agentReasonUnnamedScan => 'Scan sans maladie nommée';
+
+  @override
+  String get agentReasonOutOfScope => 'Question hors des fiches';
+
+  @override
+  String get agentReasonTreatment =>
+      'Seul un technicien peut conseiller un traitement';
+
+  @override
+  String get agentErrorOffline =>
+      'Impossible de joindre le serveur. Vérifiez votre connexion.';
+
+  @override
+  String get agentErrorQuota =>
+      'Vous avez posé toutes vos questions pour aujourd\'hui. Revenez demain.';
+
+  @override
+  String get agentErrorUnavailable =>
+      'Le conseiller est momentanément indisponible. Réessayez plus tard.';
+
+  @override
+  String get agentErrorSession => 'Votre session a expiré : reconnectez-vous.';
+
+  @override
+  String get agentErrorConsent =>
+      'Votre accord est nécessaire pour utiliser le conseiller.';
+
+  @override
+  String get agentErrorHistoryReset =>
+      'La conversation a été recommencée : renvoyez votre question.';
+
+  @override
+  String get agentErrorGeneric => 'Une erreur est survenue. Réessayez.';
+
+  @override
+  String agentConsentBody(int days) {
+    return 'Vos questions et les réponses sont conservées $days jours pour améliorer le service, puis effacées. Elles sont traitées par Google (Gemini). N\'écrivez ni nom, ni numéro de téléphone, ni adresse. Vous pouvez effacer vos échanges à tout moment.';
+  }
+
+  @override
+  String agentQuotaRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count questions restantes aujourd\'hui',
+      one: '1 question restante aujourd\'hui',
+      zero: 'Plus de question disponible aujourd\'hui',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String agentDeleteHistoryDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count échanges effacés',
+      one: '1 échange effacé',
+      zero: 'Aucun échange à effacer',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String agentShareQuestion(String question) {
+    return 'Question : $question';
+  }
+
+  @override
+  String agentShareAnswer(String answer) {
+    return 'Réponse du conseiller : $answer';
+  }
+
+  @override
   String get journalHistorySubtitle => 'Historique des analyses';
 
   @override

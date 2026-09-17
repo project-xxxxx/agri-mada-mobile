@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router.dart';
@@ -7,17 +8,21 @@ import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/ai/disease_catalog.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../knowledge/domain/fiche_search.dart';
+import '../../../knowledge/presentation/providers/fiches_provider.dart';
+import '../../../knowledge/presentation/widgets/fiche_card.dart';
 
-/// Guide des maladies reconnues par le modèle (tâches P1.1 et P1.5).
+/// Guide des maladies reconnues par le modèle (tâches P1.1 et P1.5), suivi du
+/// guide complet tiré des fiches de connaissance (tâche P5.3, ADR-010).
 ///
 /// Remplace l'ancienne page « Solutions agricoles », qui recommandait
 /// fongicides, insecticides et engrais sans source. Les fiches viennent du
 /// catalogue des maladies : aucun produit ni dosage.
-class GuidesScreen extends StatelessWidget {
+class GuidesScreen extends ConsumerWidget {
   const GuidesScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final loc = AppLocalizations.of(context);
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
@@ -77,8 +82,93 @@ class GuidesScreen extends StatelessWidget {
             _GuideCard(info: info),
             const SizedBox(height: AppSpacing.sm),
           ],
+          const SizedBox(height: AppSpacing.lg),
+          Text(
+            loc.guidesKnowledgeSectionTitle,
+            style: AppTypography.titleLarge.copyWith(color: AppColors.textPrimary),
+          ),
+          Text(
+            loc.guidesKnowledgeSectionSubtitle,
+            style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          const _GuideComplet(),
         ],
       ),
+    );
+  }
+}
+
+class _GuideComplet extends ConsumerStatefulWidget {
+  const _GuideComplet();
+
+  @override
+  ConsumerState<_GuideComplet> createState() => _GuideCompletState();
+}
+
+class _GuideCompletState extends ConsumerState<_GuideComplet> {
+  final _controleur = TextEditingController();
+
+  @override
+  void dispose() {
+    _controleur.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final fichesAsync = ref.watch(fichesProvider);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextField(
+          controller: _controleur,
+          decoration: InputDecoration(
+            hintText: loc.guidesSearchHint,
+            prefixIcon: const Icon(Icons.search),
+            filled: true,
+            fillColor: AppColors.cardBackground,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+              borderSide: const BorderSide(color: AppColors.divider),
+            ),
+          ),
+          onChanged: (_) => setState(() {}),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        fichesAsync.when(
+          loading: () => const Padding(
+            padding: EdgeInsets.symmetric(vertical: AppSpacing.lg),
+            child: Center(child: CircularProgressIndicator()),
+          ),
+          error: (_, __) => Padding(
+            padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+            child: Text(
+              loc.guidesLoadError,
+              style: AppTypography.bodySmall.copyWith(color: AppColors.severityHigh),
+            ),
+          ),
+          data: (fiches) {
+            final resultats = rechercherFiches(fiches, _controleur.text);
+            if (resultats.isEmpty) {
+              return Padding(
+                padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+                child: Text(loc.guidesNoResults, style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary)),
+              );
+            }
+            return Column(
+              children: [
+                for (final fiche in resultats) ...[
+                  FicheCard(fiche: fiche),
+                  const SizedBox(height: AppSpacing.sm),
+                ],
+              ],
+            );
+          },
+        ),
+      ],
     );
   }
 }

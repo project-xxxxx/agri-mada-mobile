@@ -1742,6 +1742,360 @@ abstract class AppLocalizations {
   /// **'Signes d\'une plante saine'**
   String get guidesHealthySigns;
 
+  /// Titre de la section de recherche parmi toutes les fiches
+  ///
+  /// In fr, this message translates to:
+  /// **'Guide complet'**
+  String get guidesKnowledgeSectionTitle;
+
+  /// Sous-titre de la section guide complet
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes les classes connues, y compris celles que l\'application ne détecte pas encore'**
+  String get guidesKnowledgeSectionSubtitle;
+
+  /// Bandeau affiché sur une fiche non validée (ADR-010)
+  ///
+  /// In fr, this message translates to:
+  /// **'Brouillon, non validé par un agronome'**
+  String get guidesDraftBadge;
+
+  /// Texte d'aide du champ de recherche des fiches
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher une maladie (français ou malgache)…'**
+  String get guidesSearchHint;
+
+  /// Message quand la recherche ne trouve aucune fiche
+  ///
+  /// In fr, this message translates to:
+  /// **'Aucun résultat'**
+  String get guidesNoResults;
+
+  /// Section prévention d'une fiche
+  ///
+  /// In fr, this message translates to:
+  /// **'Prévention'**
+  String get guidesPreventionTitle;
+
+  /// Section confusions possibles d'une fiche
+  ///
+  /// In fr, this message translates to:
+  /// **'Peut se confondre avec'**
+  String get guidesConfusionTitle;
+
+  /// Section sources d'une fiche
+  ///
+  /// In fr, this message translates to:
+  /// **'Sources'**
+  String get guidesSourcesTitle;
+
+  /// Section conditions favorables d'une fiche
+  ///
+  /// In fr, this message translates to:
+  /// **'Conditions favorables'**
+  String get guidesConditionsTitle;
+
+  /// Message affiché quand les fiches embarquées ne se chargent pas
+  ///
+  /// In fr, this message translates to:
+  /// **'Le guide complet n\'a pas pu être ouvert'**
+  String get guidesLoadError;
+
+  /// Titre du conseiller dans le drawer
+  ///
+  /// In fr, this message translates to:
+  /// **'Conseiller'**
+  String get drawerAgentTitle;
+
+  /// Sous-titre du conseiller dans le drawer
+  ///
+  /// In fr, this message translates to:
+  /// **'Poser une question'**
+  String get drawerAgentSubtitle;
+
+  /// Titre de l'écran du conseiller (ADR-012)
+  ///
+  /// In fr, this message translates to:
+  /// **'Conseiller AgriMada'**
+  String get agentTitle;
+
+  /// Sous-titre de l'écran du conseiller
+  ///
+  /// In fr, this message translates to:
+  /// **'Réponses tirées des fiches et de vos scans'**
+  String get agentSubtitle;
+
+  /// Titre de la carte d'accès au conseiller sur l'accueil
+  ///
+  /// In fr, this message translates to:
+  /// **'Une question sur votre riz ?'**
+  String get agentHomeCardTitle;
+
+  /// Description de la carte d'accès au conseiller
+  ///
+  /// In fr, this message translates to:
+  /// **'Le conseiller répond à partir des fiches AgriMada et de vos derniers scans (connexion nécessaire).'**
+  String get agentHomeCardDescription;
+
+  /// Titre de la demande d'accord
+  ///
+  /// In fr, this message translates to:
+  /// **'Avant de commencer'**
+  String get agentConsentTitle;
+
+  /// Bouton d'acceptation de la conservation des échanges
+  ///
+  /// In fr, this message translates to:
+  /// **'J\'accepte'**
+  String get agentConsentAccept;
+
+  /// Bouton de refus de la conservation des échanges
+  ///
+  /// In fr, this message translates to:
+  /// **'Non merci'**
+  String get agentConsentDecline;
+
+  /// Bandeau permanent de l'écran du conseiller
+  ///
+  /// In fr, this message translates to:
+  /// **'Conseils automatiques tirés de fiches pas encore validées par un agronome. Le conseiller ne pose aucun diagnostic et ne recommande aucun produit : confirmez toujours avec un technicien agricole.'**
+  String get agentDisclaimer;
+
+  /// Titre quand la conversation est vide
+  ///
+  /// In fr, this message translates to:
+  /// **'Posez votre question'**
+  String get agentEmptyTitle;
+
+  /// Suggestion de question
+  ///
+  /// In fr, this message translates to:
+  /// **'Que dit mon dernier scan ?'**
+  String get agentSuggestionScan;
+
+  /// Suggestion de question
+  ///
+  /// In fr, this message translates to:
+  /// **'Comment prévenir la pyriculariose ?'**
+  String get agentSuggestionPrevention;
+
+  /// Suggestion de question
+  ///
+  /// In fr, this message translates to:
+  /// **'Mes feuilles jaunissent depuis la pointe, qu\'est-ce que c\'est ?'**
+  String get agentSuggestionSymptoms;
+
+  /// Texte d'aide du champ de saisie
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre question…'**
+  String get agentInputHint;
+
+  /// Infobulle du bouton d'envoi
+  ///
+  /// In fr, this message translates to:
+  /// **'Envoyer'**
+  String get agentSend;
+
+  /// Indication pendant la réponse
+  ///
+  /// In fr, this message translates to:
+  /// **'Le conseiller consulte les fiches…'**
+  String get agentThinking;
+
+  /// Action pour recommencer la conversation
+  ///
+  /// In fr, this message translates to:
+  /// **'Nouvelle conversation'**
+  String get agentNewConversation;
+
+  /// Action d'effacement des échanges conservés
+  ///
+  /// In fr, this message translates to:
+  /// **'Effacer mes échanges'**
+  String get agentDeleteHistory;
+
+  /// Confirmation de l'effacement
+  ///
+  /// In fr, this message translates to:
+  /// **'Effacer toutes vos questions et réponses conservées sur le serveur ?'**
+  String get agentDeleteHistoryConfirm;
+
+  /// Bouton de confirmation de l'effacement
+  ///
+  /// In fr, this message translates to:
+  /// **'Effacer'**
+  String get agentConfirmDelete;
+
+  /// Action de retrait de l'accord (efface aussi les échanges)
+  ///
+  /// In fr, this message translates to:
+  /// **'Retirer mon accord'**
+  String get agentWithdrawConsent;
+
+  /// Bandeau hors ligne
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas de connexion : le conseiller a besoin d\'internet. Le guide des fiches reste disponible hors ligne.'**
+  String get agentOffline;
+
+  /// Titre de la liste des fiches citées
+  ///
+  /// In fr, this message translates to:
+  /// **'Fiches citées'**
+  String get agentFichesTitle;
+
+  /// Bouton de partage vers un technicien
+  ///
+  /// In fr, this message translates to:
+  /// **'Demander à un technicien'**
+  String get agentAskTechnician;
+
+  /// Début du message partagé au technicien
+  ///
+  /// In fr, this message translates to:
+  /// **'Question posée au conseiller AgriMada, à vérifier :'**
+  String get agentTechnicianShareIntro;
+
+  /// Titre d'une réponse d'urgence de santé
+  ///
+  /// In fr, this message translates to:
+  /// **'Urgence'**
+  String get agentUrgentTitle;
+
+  /// Avertissement reponse_automatique
+  ///
+  /// In fr, this message translates to:
+  /// **'Réponse automatique : confirmez avec un technicien agricole avant d\'agir.'**
+  String get agentWarningAutomatic;
+
+  /// Avertissement fiches_brouillon
+  ///
+  /// In fr, this message translates to:
+  /// **'Tirée de fiches en brouillon, pas encore validées par un agronome.'**
+  String get agentWarningDraft;
+
+  /// Avertissement modele_experimental
+  ///
+  /// In fr, this message translates to:
+  /// **'Les pistes de scan viennent d\'un modèle expérimental.'**
+  String get agentWarningExperimental;
+
+  /// Avertissement malgache_non_relu
+  ///
+  /// In fr, this message translates to:
+  /// **'Malgache produit automatiquement, pas encore relu par un locuteur natif.'**
+  String get agentWarningMalagasy;
+
+  /// Motif d'orientation piste_a_confirmer
+  ///
+  /// In fr, this message translates to:
+  /// **'Piste de scan à confirmer'**
+  String get agentReasonScanToConfirm;
+
+  /// Motif d'orientation maladie_a_signaler
+  ///
+  /// In fr, this message translates to:
+  /// **'Maladie qui se propage ou sans remède : à signaler vite'**
+  String get agentReasonReport;
+
+  /// Motif d'orientation gravite_elevee
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus d\'un tiers de la parcelle touché'**
+  String get agentReasonSevere;
+
+  /// Motif d'orientation scan_sans_nom
+  ///
+  /// In fr, this message translates to:
+  /// **'Scan sans maladie nommée'**
+  String get agentReasonUnnamedScan;
+
+  /// Motif d'orientation hors_fiches
+  ///
+  /// In fr, this message translates to:
+  /// **'Question hors des fiches'**
+  String get agentReasonOutOfScope;
+
+  /// Motif d'orientation demande_traitement
+  ///
+  /// In fr, this message translates to:
+  /// **'Seul un technicien peut conseiller un traitement'**
+  String get agentReasonTreatment;
+
+  /// Erreur réseau
+  ///
+  /// In fr, this message translates to:
+  /// **'Impossible de joindre le serveur. Vérifiez votre connexion.'**
+  String get agentErrorOffline;
+
+  /// Erreur quota atteint
+  ///
+  /// In fr, this message translates to:
+  /// **'Vous avez posé toutes vos questions pour aujourd\'hui. Revenez demain.'**
+  String get agentErrorQuota;
+
+  /// Erreur service indisponible
+  ///
+  /// In fr, this message translates to:
+  /// **'Le conseiller est momentanément indisponible. Réessayez plus tard.'**
+  String get agentErrorUnavailable;
+
+  /// Erreur session expirée
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre session a expiré : reconnectez-vous.'**
+  String get agentErrorSession;
+
+  /// Erreur accord manquant
+  ///
+  /// In fr, this message translates to:
+  /// **'Votre accord est nécessaire pour utiliser le conseiller.'**
+  String get agentErrorConsent;
+
+  /// Erreur historique refusé
+  ///
+  /// In fr, this message translates to:
+  /// **'La conversation a été recommencée : renvoyez votre question.'**
+  String get agentErrorHistoryReset;
+
+  /// Erreur inconnue
+  ///
+  /// In fr, this message translates to:
+  /// **'Une erreur est survenue. Réessayez.'**
+  String get agentErrorGeneric;
+
+  /// Texte de la demande d'accord
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos questions et les réponses sont conservées {days} jours pour améliorer le service, puis effacées. Elles sont traitées par Google (Gemini). N\'écrivez ni nom, ni numéro de téléphone, ni adresse. Vous pouvez effacer vos échanges à tout moment.'**
+  String agentConsentBody(int days);
+
+  /// Questions restantes
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Plus de question disponible aujourd\'hui} =1{1 question restante aujourd\'hui} other{{count} questions restantes aujourd\'hui}}'**
+  String agentQuotaRemaining(int count);
+
+  /// Résultat de l'effacement
+  ///
+  /// In fr, this message translates to:
+  /// **'{count, plural, =0{Aucun échange à effacer} =1{1 échange effacé} other{{count} échanges effacés}}'**
+  String agentDeleteHistoryDone(int count);
+
+  /// Question dans le message au technicien
+  ///
+  /// In fr, this message translates to:
+  /// **'Question : {question}'**
+  String agentShareQuestion(String question);
+
+  /// Réponse dans le message au technicien
+  ///
+  /// In fr, this message translates to:
+  /// **'Réponse du conseiller : {answer}'**
+  String agentShareAnswer(String answer);
+
   /// No description provided for @journalHistorySubtitle.
   ///
   /// In fr, this message translates to:

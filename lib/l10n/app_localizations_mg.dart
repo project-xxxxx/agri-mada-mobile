@@ -917,6 +917,229 @@ class AppLocalizationsMg extends AppLocalizations {
   String get guidesHealthySigns => 'Famantarana ny vary salama';
 
   @override
+  String get guidesKnowledgeSectionTitle => 'Torolalana feno';
+
+  @override
+  String get guidesKnowledgeSectionSubtitle =>
+      'Ny sokajy aretina rehetra fantatra, na dia ireo mbola tsy takan\'ny rindranasa aza';
+
+  @override
+  String get guidesDraftBadge =>
+      'Volavolan-kevitra, mbola tsy nohamarinin\'ny teknisianina';
+
+  @override
+  String get guidesSearchHint => 'Karohy ny aretina (frantsay na malagasy)…';
+
+  @override
+  String get guidesNoResults => 'Tsy nahitana valiny';
+
+  @override
+  String get guidesPreventionTitle => 'Fisorohana';
+
+  @override
+  String get guidesConfusionTitle => 'Mety hoblorina amin\'ny';
+
+  @override
+  String get guidesSourcesTitle => 'Loharano';
+
+  @override
+  String get guidesConditionsTitle => 'Toe-javatra mahamora';
+
+  @override
+  String get guidesLoadError => 'Tsy afaka nosokafana ny torolalana feno';
+
+  @override
+  String get drawerAgentTitle => 'Mpanolotsaina';
+
+  @override
+  String get drawerAgentSubtitle => 'Mametraka fanontaniana';
+
+  @override
+  String get agentTitle => 'Mpanolotsaina AgriMada';
+
+  @override
+  String get agentSubtitle => 'Valiny avy amin\'ny fiche sy ny sary nalainao';
+
+  @override
+  String get agentHomeCardTitle => 'Manana fanontaniana momba ny varinao ?';
+
+  @override
+  String get agentHomeCardDescription =>
+      'Mamaly araka ny fiche AgriMada sy ny sary nalainao farany ny mpanolotsaina (mila aterineto).';
+
+  @override
+  String get agentConsentTitle => 'Alohan\'ny hanombohana';
+
+  @override
+  String get agentConsentAccept => 'Manaiky aho';
+
+  @override
+  String get agentConsentDecline => 'Tsia, misaotra';
+
+  @override
+  String get agentDisclaimer =>
+      'Torohevitra novokarin\'ny milina avy amin\'ny fiche mbola tsy nohamarinin\'ny agronoma. Tsy manao fitiliana ary tsy manoro vokatra ny mpanolotsaina : hamarino amin\'ny teknisiana foana.';
+
+  @override
+  String get agentEmptyTitle => 'Apetraho ny fanontanianao';
+
+  @override
+  String get agentSuggestionScan => 'Inona no lazain\'ny sary nalaiko farany ?';
+
+  @override
+  String get agentSuggestionPrevention =>
+      'Ahoana no hisorohana ny menalavitra ?';
+
+  @override
+  String get agentSuggestionSymptoms =>
+      'Mavo manomboka amin\'ny tendrony ny ravina, inona izany ?';
+
+  @override
+  String get agentInputHint => 'Ny fanontanianao…';
+
+  @override
+  String get agentSend => 'Alefa';
+
+  @override
+  String get agentThinking => 'Mijery ny fiche ny mpanolotsaina…';
+
+  @override
+  String get agentNewConversation => 'Resaka vaovao';
+
+  @override
+  String get agentDeleteHistory => 'Fafao ny resako';
+
+  @override
+  String get agentDeleteHistoryConfirm =>
+      'Hofafana daholo ve ny fanontaniana sy valiny voatahiry ao amin\'ny mpizara ?';
+
+  @override
+  String get agentConfirmDelete => 'Fafao';
+
+  @override
+  String get agentWithdrawConsent => 'Esory ny fanekeko';
+
+  @override
+  String get agentOffline =>
+      'Tsy misy aterineto : mila aterineto ny mpanolotsaina. Mbola azo jerena tsy misy aterineto ny torolalana.';
+
+  @override
+  String get agentFichesTitle => 'Fiche voatonona';
+
+  @override
+  String get agentAskTechnician => 'Hanontany teknisiana';
+
+  @override
+  String get agentTechnicianShareIntro =>
+      'Fanontaniana napetraka tamin\'ny mpanolotsaina AgriMada, tokony hohamarinina :';
+
+  @override
+  String get agentUrgentTitle => 'Maika';
+
+  @override
+  String get agentWarningAutomatic =>
+      'Valiny novokarin\'ny milina : hamarino amin\'ny teknisiana alohan\'ny hanaovana zavatra.';
+
+  @override
+  String get agentWarningDraft =>
+      'Avy amin\'ny fiche mbola volavolan-kevitra, tsy mbola nohamarinin\'ny agronoma.';
+
+  @override
+  String get agentWarningExperimental =>
+      'Avy amin\'ny milina mbola andrana ireo soso-kevitra avy amin\'ny sary.';
+
+  @override
+  String get agentWarningMalagasy =>
+      'Teny malagasy novokarin\'ny milina, mbola tsy novakian\'ny olona miteny malagasy.';
+
+  @override
+  String get agentReasonScanToConfirm =>
+      'Soso-kevitra avy amin\'ny sary tokony hohamarinina';
+
+  @override
+  String get agentReasonReport =>
+      'Aretina mifindra na tsy misy fanafody : ambarao haingana';
+
+  @override
+  String get agentReasonSevere =>
+      'Mihoatra ny ampahatelon\'ny tanimbary no voa';
+
+  @override
+  String get agentReasonUnnamedScan => 'Sary tsy nahitana anaran\'aretina';
+
+  @override
+  String get agentReasonOutOfScope => 'Fanontaniana tsy ao amin\'ny fiche';
+
+  @override
+  String get agentReasonTreatment =>
+      'Teknisiana ihany no afaka manoro fitsaboana';
+
+  @override
+  String get agentErrorOffline =>
+      'Tsy afaka mifandray amin\'ny mpizara. Hamarino ny aterineto.';
+
+  @override
+  String get agentErrorQuota =>
+      'Efa lany ny fanontanianao androany. Miverena rahampitso.';
+
+  @override
+  String get agentErrorUnavailable =>
+      'Tsy azo ampiasaina vetivety ny mpanolotsaina. Andramo indray any aoriana.';
+
+  @override
+  String get agentErrorSession => 'Tapitra ny fidiranao : midira indray.';
+
+  @override
+  String get agentErrorConsent =>
+      'Ilaina ny fanekenao hampiasana ny mpanolotsaina.';
+
+  @override
+  String get agentErrorHistoryReset =>
+      'Natomboka indray ny resaka : alefaso indray ny fanontanianao.';
+
+  @override
+  String get agentErrorGeneric => 'Nisy olana. Andramo indray.';
+
+  @override
+  String agentConsentBody(int days) {
+    return 'Tehirizina $days andro ny fanontanianao sy ny valiny mba hanatsarana ny tolotra, dia fafana avy eo. Google (Gemini) no mikirakira azy ireo. Aza manoratra anarana, laharana finday na adiresy. Azonao fafana amin\'ny fotoana rehetra ny resakao.';
+  }
+
+  @override
+  String agentQuotaRemaining(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Fanontaniana $count sisa androany',
+      one: 'Fanontaniana 1 sisa androany',
+      zero: 'Tsy misy fanontaniana intsony androany',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String agentDeleteHistoryDone(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Resaka $count voafafa',
+      one: 'Resaka 1 voafafa',
+      zero: 'Tsy misy resaka hofafana',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String agentShareQuestion(String question) {
+    return 'Fanontaniana : $question';
+  }
+
+  @override
+  String agentShareAnswer(String answer) {
+    return 'Valin\'ny mpanolotsaina : $answer';
+  }
+
+  @override
   String get journalHistorySubtitle => 'Tantaran\'ny fanadihadiana';
 
   @override
