@@ -74,6 +74,8 @@
   "@homeHelpSemantics": { "description": "Libellé d'accessibilité du bouton d'aide" },
   "homeSummaryTitle": "Résumé de votre exploitation",
   "@homeSummaryTitle": { "description": "Titre carte résumé" },
+  "homeIspmLogoSemantics": "Logo de l'ISPM",
+  "@homeIspmLogoSemantics": { "description": "Libellé d'accessibilité du logo ISPM sur l'accueil" },
   "homeSystemReady": "Analyse photo prête",
   "@homeSystemReady": { "description": "Statut quand le modèle embarqué est chargé" },
   "homeSystemAiUnavailable": "Analyse photo indisponible",

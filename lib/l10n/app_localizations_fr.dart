@@ -116,6 +116,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get homeSummaryTitle => 'Résumé de votre exploitation';
 
   @override
+  String get homeIspmLogoSemantics => 'Logo de l\'ISPM';
+
+  @override
   String get homeSystemReady => 'Analyse photo prête';
 
   @override

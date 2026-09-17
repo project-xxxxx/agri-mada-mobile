@@ -302,6 +302,12 @@ abstract class AppLocalizations {
   /// **'Résumé de votre exploitation'**
   String get homeSummaryTitle;
 
+  /// Libellé d'accessibilité du logo ISPM sur l'accueil
+  ///
+  /// In fr, this message translates to:
+  /// **'Logo de l\'ISPM'**
+  String get homeIspmLogoSemantics;
+
   /// Statut quand le modèle embarqué est chargé
   ///
   /// In fr, this message translates to:

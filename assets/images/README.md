@@ -1,6 +1,7 @@
 # Images de l'application
 
-Aucune illustration PNG n'est encore livrée : les écrans (démarrage, accueil,
+Seul `logo_ispm.png` (logo de l'institut, 384 px, fond transparent) est livré ;
+il est affiché dans la carte résumé de l'accueil. Les autres écrans (démarrage,
 connexion, inscription, bienvenue) affichent des icônes Material à la place.
 
 Pour ajouter une illustration validée :

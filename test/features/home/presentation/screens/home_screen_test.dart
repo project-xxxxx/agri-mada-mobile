@@ -247,6 +247,17 @@ void main() {
       expect(find.text('Analyse photo prête'), findsNothing);
     });
 
+    testWidgets('logo ISPM affiché dans la carte résumé', (tester) async {
+      await pumpHome(tester);
+
+      expect(
+        find.image(const AssetImage('assets/images/logo_ispm.png')),
+        findsOneWidget,
+      );
+      expect(find.bySemanticsLabel("Logo de l'ISPM"), findsOneWidget);
+      expect(find.byIcon(Icons.grass), findsNothing);
+    });
+
     testWidgets('statut IA prêt quand le modèle est chargé', (tester) async {
       await pumpHome(
         tester,

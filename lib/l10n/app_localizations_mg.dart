@@ -117,6 +117,9 @@ class AppLocalizationsMg extends AppLocalizations {
   String get homeSummaryTitle => 'Topi-maso ny toeram-pamokaranao';
 
   @override
+  String get homeIspmLogoSemantics => 'Logon\'ny ISPM';
+
+  @override
   String get homeSystemReady => 'Vonona ny fanadihadiana sary';
 
   @override

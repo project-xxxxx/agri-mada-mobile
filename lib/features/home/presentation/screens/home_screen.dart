@@ -415,7 +415,16 @@ class _SummaryCard extends StatelessWidget {
               width: 128,
               height: double.infinity,
               color: AppColors.primaryLight,
-              child: const Icon(Icons.grass, color: AppColors.primary, size: 48),
+              padding: const EdgeInsets.all(AppSpacing.sm),
+              child: Semantics(
+                image: true,
+                label: loc.homeIspmLogoSemantics,
+                child: Image.asset(
+                  'assets/images/logo_ispm.png',
+                  fit: BoxFit.contain,
+                  excludeFromSemantics: true,
+                ),
+              ),
             ),
           ),
         ],
