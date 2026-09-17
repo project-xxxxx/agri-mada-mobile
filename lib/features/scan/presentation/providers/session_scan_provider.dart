@@ -12,6 +12,7 @@ import '../../../../core/ai/diagnosis_certainty.dart';
 import '../../../../core/ai/diagnosis_fusion.dart';
 import '../../../../core/ai/image_quality.dart';
 import '../../../../core/ai/photo_check_service.dart';
+import '../../../../core/ai/tflite_service.dart';
 import '../../../../core/providers/tflite_provider.dart';
 import '../../../../core/utils/logger.dart';
 import '../../data/repositories/session_local_repository.dart';
@@ -36,12 +37,14 @@ class PhotoObservee {
     required this.chemin,
     required this.qualite,
     this.scores = const <ScoredLabel>[],
+    this.vegetationRatio,
   });
 
   final Organe organe;
   final String chemin;
   final ImageQualityReport qualite;
   final List<ScoredLabel> scores;
+  final double? vegetationRatio;
 }
 
 enum EtapeScan { choixOrgane, capture, questions, resultat }
@@ -176,7 +179,8 @@ class ScanSessionNotifier extends StateNotifier<ScanSessionState> {
       return false;
     }
 
-    final scores = await _analyser(photo, organe);
+    final analyse = await _analyser(photo, organe);
+    final scores = analyse?.classement ?? const <ScoredLabel>[];
     await _repository.ajouterObservation(
       sessionId: sessionId,
       organe: organe,
@@ -195,6 +199,7 @@ class ScanSessionNotifier extends StateNotifier<ScanSessionState> {
           chemin: photo.path,
           qualite: rapport,
           scores: scores,
+          vegetationRatio: analyse?.vegetationRatio,
         ),
       ],
     );
@@ -281,7 +286,8 @@ class ScanSessionNotifier extends StateNotifier<ScanSessionState> {
       for (final organe in _organesObserves())
         ObservationEvidence(
           organe: organe,
-          scores: _meilleursScores(organe),
+          scores: _meilleurePhoto(organe)?.scores ?? const <ScoredLabel>[],
+          vegetationRatio: _meilleurePhoto(organe)?.vegetationRatio,
           indices: ScanQuestionnaire.indices(organe, state.reponsesDe(organe)),
         ),
     ];
@@ -308,26 +314,27 @@ class ScanSessionNotifier extends StateNotifier<ScanSessionState> {
     return organes;
   }
 
-  /// Une seule entrée de modèle par organe : la photo la plus nette.
-  List<ScoredLabel> _meilleursScores(Organe organe) {
+  /// Une seule entrée de modèle par organe : la photo analysée la plus nette.
+  PhotoObservee? _meilleurePhoto(Organe organe) {
     final photos = state.photosDe(organe).where((p) => p.scores.isNotEmpty).toList();
-    if (photos.isEmpty) return const [];
+    if (photos.isEmpty) return null;
     photos.sort((a, b) => b.qualite.nettete.compareTo(a.qualite.nettete));
-    return photos.first.scores;
+    return photos.first;
   }
 
-  Future<List<ScoredLabel>> _analyser(File photo, Organe organe) async {
-    if (!organe.usesModel) return const [];
+  /// Résultat complet du modèle (scores et part de végétation), null pour un
+  /// organe sans modèle ou si l'analyse échoue.
+  Future<TFLiteInferenceResult?> _analyser(File photo, Organe organe) async {
+    if (!organe.usesModel) return null;
 
     final tflite = _ref.read(tfliteServiceProvider);
-    if (!tflite.isReady) return const [];
+    if (!tflite.isReady) return null;
 
     try {
-      final resultat = await tflite.analyzeImage(photo);
-      return resultat.classement;
+      return await tflite.analyzeImage(photo);
     } catch (e, st) {
       AppLogger.error('Analyse de la photo impossible', error: e, stackTrace: st);
-      return const [];
+      return null;
     }
   }
 }

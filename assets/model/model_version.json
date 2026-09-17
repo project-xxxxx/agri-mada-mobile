@@ -1,10 +1,20 @@
 {
-  "version": "1.0.0",
-  "date": "2026-05-07",
-  "modele_sha256": "ffa8f840561225bd8200c8ab2abe5a1f5aea446a4c491b8c9fd1d9d4331e2afa",
+  "version": "2.0.0",
+  "date": "2026-09-17",
+  "modele_sha256": "1d5e80c99df51f4679f6a9e21eea466239532c4e199b7338caffd432a3daf5c2",
   "maladies_supportees": [
-    "Bacterial leaf blight",
-    "Brown spot",
-    "Leaf smut"
+    "blb",
+    "bls",
+    "carence_azote",
+    "carence_phosphore",
+    "carence_potassium",
+    "cercosporiose",
+    "degats_hispa",
+    "echaudure",
+    "feuille_saine",
+    "helminthosporiose",
+    "mildiou",
+    "pas_riz",
+    "pyriculariose_feuille"
   ]
 }

@@ -1,21 +1,45 @@
-"""Évalue le modèle embarqué sur des photos hors sujet (tâche P1.2).
+"""Évalue un modèle sur des photos hors sujet (tâche P1.2).
 
 Critère du plan : sur 50 photos hors sujet (sol, mains, maïs, herbes…), aucune
 n'est affichée comme « probable ». Le script reproduit exactement le calcul de
 l'app :
   - prétraitement de lib/core/ai/tflite_service.dart (224 × 224, plus proche
-    voisin, pixels RGB divisés par 255) ;
+    voisin, pixels RGB divisés par 255, [0,1]) ;
   - seuils lus dans lib/core/ai/diagnosis_certainty.dart.
+
+Par défaut évalue le modèle embarqué (assets/model/), mais `--model`/`--labels`
+permettent de pointer vers n'importe quel modèle candidat, par ex. :
+
+    ml/.venv/Scripts/python ml/scripts/eval_off_topic.py \
+        --model ml/models/feuille_v2/model.tflite --labels ml/models/feuille_v2/labels.txt
+
+Ce contrat d'entrée ([0,1], pas de pixels bruts) n'est valide que si le modèle
+a été exporté en conséquence — voir la note en tête de ml/scripts/train_feuille.py
+(Rescaling embarqué dans le graphe, calé sur ce que l'app envoie réellement).
+
+Depuis ADR-014, le modèle embarqué est feuille_v2, entraîné sur Paddy Doctor et
+Mendeley hx6f852hw4 : la contre-épreuve sur le riz ci-dessous réutilise donc ses
+images d'entraînement et n'est plus valable pour lui (vocabulaire différent en
+plus, voir l'avertissement). Seul le groupe « hors_sujet » reste une mesure
+honnête ; pour le riz, utiliser ml/scripts/comparer_integration.py, qui évalue
+sur la validation jamais vue.
 
 Contre-épreuve sur des feuilles de riz réelles (Paddy Doctor, Mendeley
 hx6f852hw4), lues directement dans les archives : un seuil qui écarterait tout
-le hors-sujet mais aussi toutes les vraies maladies ne servirait à rien.
+le hors-sujet mais aussi toutes les vraies maladies ne servirait à rien. Les
+indicateurs qui en dépendent (« riz_probable_faux », « maladies_bon_nom_pct »)
+supposent que les labels du modèle évalué recoupent le vocabulaire anglais de
+RICE_SETS (« Bacterial leaf blight », « Brown spot ») : c'est le cas du modèle
+embarqué, PAS de ml/models/feuille_v2 (taxonomie interne, ex. « blb », « bls »).
+Le script avertit explicitement plutôt que de laisser ces indicateurs mentir
+en silence pour un autre vocabulaire.
 
     ml/.venv/Scripts/python ml/scripts/eval_off_topic.py
 """
 
 from __future__ import annotations
 
+import argparse
 import csv
 import io
 import json
@@ -30,8 +54,8 @@ from PIL import Image, ImageOps
 import tensorflow as tf
 
 ROOT = Path(__file__).resolve().parents[2]
-MODEL = ROOT / "assets" / "model" / "agrimada_model.tflite"
-LABELS = ROOT / "assets" / "model" / "labels.txt"
+DEFAULT_MODEL = ROOT / "assets" / "model" / "agrimada_model.tflite"
+DEFAULT_LABELS = ROOT / "assets" / "model" / "labels.txt"
 THRESHOLDS_SOURCE = ROOT / "lib" / "core" / "ai" / "diagnosis_certainty.dart"
 OFF_TOPIC_MANIFEST = ROOT / "ml" / "data" / "eval" / "hors_sujet.csv"
 REPORTS = ROOT / "ml" / "reports"
@@ -105,9 +129,9 @@ def vegetation_ratio(data: bytes) -> float:
 
 
 class Model:
-    def __init__(self) -> None:
-        self.labels = [l.strip() for l in LABELS.read_text(encoding="utf-8").splitlines() if l.strip()]
-        self.interpreter = tf.lite.Interpreter(model_path=str(MODEL))
+    def __init__(self, model_path: Path, labels_path: Path) -> None:
+        self.labels = [l.strip() for l in labels_path.read_text(encoding="utf-8").splitlines() if l.strip()]
+        self.interpreter = tf.lite.Interpreter(model_path=str(model_path))
         self.interpreter.allocate_tensors()
         self.input = self.interpreter.get_input_details()[0]
         self.output = self.interpreter.get_output_details()[0]
@@ -190,8 +214,24 @@ def sweep(results: list[dict], base: Thresholds) -> list[dict]:
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    parser.add_argument("--model", type=Path, default=DEFAULT_MODEL, help="modèle .tflite à évaluer (défaut : modèle embarqué dans l'app)")
+    parser.add_argument("--labels", type=Path, default=DEFAULT_LABELS, help="labels.txt associé")
+    args = parser.parse_args()
+
     thresholds = read_app_thresholds()
-    model = Model()
+    model = Model(args.model, args.labels)
+
+    vocabulaire_rice_sets = {expected for *_, expected in RICE_SETS if expected}
+    labels_couvrent_rice_sets = bool(vocabulaire_rice_sets & set(model.labels))
+    if not labels_couvrent_rice_sets:
+        print(
+            f"[AVERTISSEMENT] les labels de {args.labels.name} ne recoupent pas le vocabulaire anglais de "
+            f"RICE_SETS ({sorted(vocabulaire_rice_sets)}) : « riz_probable_faux » et « maladies_bon_nom_pct » "
+            "ci-dessous ne sont PAS fiables pour ce modèle (aucune prédiction ne pourra jamais matcher "
+            "« attendu »). Seuls les indicateurs sur le groupe « hors_sujet » restent valides.\n"
+        )
+
     samples = off_topic_samples() + rice_samples()
     results = []
     for sample in samples:
@@ -213,13 +253,16 @@ def main() -> None:
     stamp = date.today().isoformat()
     payload = {
         "date": stamp,
+        "modele": args.model.relative_to(ROOT).as_posix() if args.model.is_relative_to(ROOT) else str(args.model),
+        "labels_hors_vocabulaire_rice_sets": not labels_couvrent_rice_sets,
         "seuils_app": thresholds.__dict__,
         "entree_modele": {"dtype": str(model.input["dtype"]), "forme": model.input["shape"].tolist()},
         "resume": summary,
         "hors_sujet_affiches_probable": off_topic_probable,
         "balayage_seuils": table,
     }
-    out = REPORTS / f"eval_hors_sujet_{stamp}.json"
+    suffixe = "" if args.model == DEFAULT_MODEL else f"_{args.model.parent.name}"
+    out = REPORTS / f"eval_hors_sujet_{stamp}{suffixe}.json"
     out.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
 
     print(json.dumps({"seuils_app": thresholds.__dict__, "resume": summary}, ensure_ascii=False, indent=2))

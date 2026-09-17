@@ -2,10 +2,9 @@
 // Charge le modèle .tflite depuis les assets et effectue l'inférence
 // directement sur le processeur du téléphone, sans connexion internet.
 //
-// Labels du modèle (labels.txt) :
-//   0 → Bacterial leaf blight
-//   1 → Brown spot
-//   2 → Leaf smut
+// Étiquettes : assets/model/labels.txt, ids de ml/taxonomy_v1.yaml depuis le
+// modèle feuille_v2 (ADR-014), dont pas_riz (rejet) et feuille_saine. Le
+// modèle attend des pixels en [0, 1] : c'est ce que produit _prepareImage.
 
 import 'dart:io';
 
@@ -47,11 +46,16 @@ class TFLiteInferenceResult {
   final List<ScoredLabel> classement;
   final DiagnosisCertainty certitude;
 
+  /// Part de pixels végétaux de la photo (image_checks.dart), transmise à la
+  /// fusion pour que le contrôle d'ADR-006 s'applique aussi aux sessions.
+  final double? vegetationRatio;
+
   const TFLiteInferenceResult({
     required this.maladieDetectee,
     required this.confiance,
     this.classement = const [],
     this.certitude = DiagnosisCertainty.incertain,
+    this.vegetationRatio,
   });
 }
 
@@ -240,6 +244,7 @@ class TFLiteService {
       confiance: best.score,
       classement: ranked,
       certitude: certaintyOf(ranked, vegetationRatio: prepared.vegetationRatio),
+      vegetationRatio: prepared.vegetationRatio,
     );
   }
 

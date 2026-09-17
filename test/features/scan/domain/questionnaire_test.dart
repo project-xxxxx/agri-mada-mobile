@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/widgets.dart';
 import 'package:flutter_test/flutter_test.dart';
 
@@ -51,6 +53,27 @@ void main() {
     }
   });
 
+  // ADR-014 : un indice dans un autre vocabulaire que le modèle embarqué crée un
+  // candidat parallèle (« Brown spot » à côté de « helminthosporiose ») au lieu
+  // de renforcer le bon. Le catalogue garde les anciennes étiquettes pour les
+  // sessions enregistrées : le test précédent ne suffit donc pas.
+  test('les indices sont exprimés dans le vocabulaire du modèle embarqué', () {
+    final etiquettesModele = File('assets/model/labels.txt')
+        .readAsLinesSync()
+        .map((line) => line.trim())
+        .where((line) => line.isNotEmpty)
+        .toSet();
+    for (final organe in Organe.values) {
+      for (final question in ScanQuestionnaire.pour(organe)) {
+        for (final option in question.options) {
+          for (final label in option.indices.keys) {
+            expect(etiquettesModele, contains(label), reason: '${question.id}/${option.id}');
+          }
+        }
+      }
+    }
+  });
+
   test('seul un organe analysé par le modèle apporte des indices', () {
     for (final organe in Organe.values.where((o) => !o.usesModel)) {
       final indices = ScanQuestionnaire.pour(organe)
@@ -69,8 +92,8 @@ void main() {
         'feuille_exsudat': 'oui',
       });
 
-      expect(indices['Bacterial leaf blight'], closeTo(0.9 + 0.7, 1e-9));
-      expect(indices['Brown spot'], closeTo(-0.5, 1e-9));
+      expect(indices['blb'], closeTo(0.9 + 0.7, 1e-9));
+      expect(indices['helminthosporiose'], closeTo(-0.5, 1e-9));
     });
 
     test('ignore les questions sans réponse et les réponses inconnues', () {

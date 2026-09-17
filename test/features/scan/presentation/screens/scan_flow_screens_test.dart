@@ -124,15 +124,17 @@ void main() {
     tflite = _MockTFLiteService();
     when(() => tflite.isReady).thenReturn(true);
     when(() => tflite.analyzeImage(any())).thenAnswer(
+      // Vocabulaire du modèle embarqué (ids de taxonomie, ADR-014).
       (_) async => const TFLiteInferenceResult(
-        maladieDetectee: 'Brown spot',
+        maladieDetectee: 'helminthosporiose',
         confiance: 0.64,
         classement: [
-          ScoredLabel('Brown spot', 0.64),
-          ScoredLabel('Leaf smut', 0.21),
-          ScoredLabel('Bacterial leaf blight', 0.15),
+          ScoredLabel('helminthosporiose', 0.64),
+          ScoredLabel('pyriculariose_feuille', 0.21),
+          ScoredLabel('blb', 0.15),
         ],
         certitude: DiagnosisCertainty.possible,
+        vegetationRatio: 0.6,
       ),
     );
   });
@@ -287,6 +289,37 @@ void main() {
     expect(find.text('Helminthosporiose (tache brune)'), findsOneWidget);
     expect(find.text('Piste à confirmer'), findsOneWidget);
 
+    await tester.scrollUntilVisible(find.text('Demander à un technicien'), 300);
+    expect(find.text('Demander à un technicien'), findsOneWidget);
+  });
+
+  testWidgets('une photo que le modèle ne reconnaît pas comme du riz ne nomme aucune maladie (ADR-014)',
+      (tester) async {
+    when(() => tflite.analyzeImage(any())).thenAnswer(
+      (_) async => const TFLiteInferenceResult(
+        maladieDetectee: 'pas_riz',
+        confiance: 0.96,
+        classement: [ScoredLabel('pas_riz', 0.96), ScoredLabel('helminthosporiose', 0.03)],
+        vegetationRatio: 0.35,
+      ),
+    );
+    await pumpParcours(tester);
+    await tester.tap(find.text('Feuilles · Ravina'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Prendre la photo'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Continuer'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Taches brunes ovales, éparpillées sur la feuille'));
+    await tester.pumpAndSettle();
+
+    await validerLesQuestions(tester);
+
+    expect(find.text("L'application ne reconnaît pas cette photo"), findsOneWidget);
+    expect(find.textContaining("Ce n'est peut-être pas du riz"), findsOneWidget);
+    expect(find.text('Helminthosporiose (tache brune)'), findsNothing);
+    expect(find.text("Ce n'est pas du riz"), findsNothing, reason: 'le rejet ne s\'affiche jamais comme un nom');
+    expect(find.text('Piste à confirmer'), findsNothing);
     await tester.scrollUntilVisible(find.text('Demander à un technicien'), 300);
     expect(find.text('Demander à un technicien'), findsOneWidget);
   });

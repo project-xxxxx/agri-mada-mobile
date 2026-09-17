@@ -506,6 +506,66 @@ abstract class AppLocalizations {
   /// **'Plante saine'**
   String get diseaseHealthy;
 
+  /// Classe bls du modèle (ADR-014), terme de la fiche FOFIFA
+  ///
+  /// In fr, this message translates to:
+  /// **'Strie bactérienne (BLS)'**
+  String get diseaseBacterialLeafStreak;
+
+  /// Classe pyriculariose_feuille du modèle (ADR-014)
+  ///
+  /// In fr, this message translates to:
+  /// **'Pyriculariose'**
+  String get diseaseBlast;
+
+  /// Classe cercosporiose du modèle (ADR-014)
+  ///
+  /// In fr, this message translates to:
+  /// **'Cercosporiose'**
+  String get diseaseNarrowBrownLeafSpot;
+
+  /// Classe echaudure du modèle (ADR-014)
+  ///
+  /// In fr, this message translates to:
+  /// **'Échaudure des feuilles'**
+  String get diseaseLeafScald;
+
+  /// Classe mildiou du modèle (ADR-014)
+  ///
+  /// In fr, this message translates to:
+  /// **'Mildiou'**
+  String get diseaseDownyMildew;
+
+  /// Classe degats_hispa du modèle (ADR-014)
+  ///
+  /// In fr, this message translates to:
+  /// **'Dégâts d\'hispa (pou du riz)'**
+  String get diseaseHispaDamage;
+
+  /// Classe carence_azote du modèle (ADR-014)
+  ///
+  /// In fr, this message translates to:
+  /// **'Carence en azote'**
+  String get diseaseNitrogenDeficiency;
+
+  /// Classe carence_phosphore du modèle (ADR-014)
+  ///
+  /// In fr, this message translates to:
+  /// **'Carence en phosphore'**
+  String get diseasePhosphorusDeficiency;
+
+  /// Classe carence_potassium du modèle (ADR-014)
+  ///
+  /// In fr, this message translates to:
+  /// **'Carence en potassium'**
+  String get diseasePotassiumDeficiency;
+
+  /// Classe de rejet pas_riz du modèle, jamais affichée comme maladie (ADR-014)
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce n\'est pas du riz'**
+  String get diseaseNotRice;
+
   /// Titre partage diagnostic
   ///
   /// In fr, this message translates to:
@@ -2785,6 +2845,12 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'Cette partie de la plante n\'est pas analysée par le modèle. Vos photos et vos réponses sont enregistrées : montrez-les à un technicien.'**
   String get scanSessionNoNameBody;
+
+  /// Session dont la photo a été analysée mais rien retenu : rejet pas_riz, trop peu de végétation ou résultat incertain (ADR-014)
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce n\'est peut-être pas du riz, ou la photo est floue ou mal éclairée. Aucune maladie n\'est retenue. Vos photos et vos réponses sont enregistrées : montrez-les à un technicien.'**
+  String get scanSessionNotRecognizedBody;
 
   /// No description provided for @scanSessionPhotosSaved.
   ///

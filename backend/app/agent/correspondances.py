@@ -13,7 +13,26 @@ import re
 import unicodedata
 
 # Clés en minuscules. Une étiquette absente de cette table est traitée comme sans fiche.
+# Deux vocabulaires (ADR-014) : ids de taxonomie du modèle feuille_v2 embarqué,
+# et étiquettes anglaises de l'ancien modèle, encore présentes dans les
+# sessions déjà synchronisées.
 FICHE_PAR_ETIQUETTE: dict[str, str | None] = {
+    "blb": "blb",
+    "bls": "bls",
+    "helminthosporiose": "helminthosporiose",
+    # La fiche regroupe feuille, collet et panicule (ADR-009).
+    "pyriculariose_feuille": "pyriculariose",
+    "cercosporiose": "cercosporiose",
+    "echaudure": "echaudure",
+    "mildiou": "mildiou",
+    "degats_hispa": "degats_hispa",
+    "carence_azote": "carence_azote",
+    "carence_phosphore": "carence_phosphore",
+    "carence_potassium": "carence_potassium",
+    "feuille_saine": None,
+    # Rejet de la porte : jamais une maladie (l'app ne l'enregistre pas comme résultat).
+    "pas_riz": None,
+    # Ancien modèle.
     "bacterial leaf blight": "blb",
     "brown spot": "helminthosporiose",
     # Charbon foliaire (Entyloma oryzae) : ni classe de taxonomie ni fiche.
@@ -23,6 +42,19 @@ FICHE_PAR_ETIQUETTE: dict[str, str | None] = {
 }
 
 NOM_PAR_ETIQUETTE: dict[str, dict[str, str]] = {
+    "blb": {"fr": "flétrissement bactérien", "mg": "malazo ravina vokatry ny bakteria"},
+    "bls": {"fr": "strie bactérienne", "mg": "tsipika amin'ny ravina afitsoky ny bakteria"},
+    "helminthosporiose": {"fr": "helminthosporiose (tache brune)", "mg": "helminthosporiose"},
+    "pyriculariose_feuille": {"fr": "pyriculariose", "mg": "menalavitra"},
+    "cercosporiose": {"fr": "cercosporiose", "mg": "cercosporiose"},
+    "echaudure": {"fr": "échaudure des feuilles", "mg": "échaudure"},
+    "mildiou": {"fr": "mildiou", "mg": "mildiou"},
+    "degats_hispa": {"fr": "dégâts d'hispa", "mg": "haom-bary"},
+    "carence_azote": {"fr": "carence en azote", "mg": "tsy fahampian'ny azota"},
+    "carence_phosphore": {"fr": "carence en phosphore", "mg": "tsy fahampian'ny fosfôra"},
+    "carence_potassium": {"fr": "carence en potassium", "mg": "tsy fahampian'ny potasioma"},
+    "feuille_saine": {"fr": "plante saine", "mg": "vary salama"},
+    "pas_riz": {"fr": "pas du riz", "mg": "tsy vary"},
     "bacterial leaf blight": {"fr": "flétrissement bactérien", "mg": "malazo ravina vokatry ny bakteria"},
     "brown spot": {"fr": "helminthosporiose (tache brune)", "mg": "helminthosporiose"},
     "leaf smut": {"fr": "charbon foliaire", "mg": "charbon foliaire"},

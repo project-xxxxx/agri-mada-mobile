@@ -1,3 +1,13 @@
-Bacterial leaf blight
-Brown spot
-Leaf smut
+blb
+bls
+carence_azote
+carence_phosphore
+carence_potassium
+cercosporiose
+degats_hispa
+echaudure
+feuille_saine
+helminthosporiose
+mildiou
+pas_riz
+pyriculariose_feuille

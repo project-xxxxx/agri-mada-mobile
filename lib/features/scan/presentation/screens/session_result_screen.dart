@@ -67,7 +67,7 @@ class _SessionResultScreenState extends ConsumerState<SessionResultScreen> {
                 if (fusion.nommable && fusion.classement.isNotEmpty)
                   ..._resultatNomme(loc, etat, fusion.classement.first.label)
                 else
-                  _CarteNonNomme(loc: loc),
+                  _CarteNonNomme(loc: loc, analyseParModele: fusion.analyseParModele),
                 const SizedBox(height: AppSpacing.md),
                 Text(
                   loc.scanSessionPhotosSaved(etat.photos.length),
@@ -147,27 +147,29 @@ class _SessionResultScreenState extends ConsumerState<SessionResultScreen> {
           style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
         ),
       ],
-      const SizedBox(height: AppSpacing.lg),
-      Text(loc.scanSeverityQuestion,
-          style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
-      const SizedBox(height: AppSpacing.sm),
-      Wrap(
-        spacing: AppSpacing.sm,
-        runSpacing: AppSpacing.sm,
-        children: [
-          for (final gravite in DeclaredSeverity.values)
-            ChoiceChip(
-              label: Text(gravite.label(loc)),
-              selected: _gravite == gravite,
-              onSelected: (choisie) {
-                setState(() => _gravite = choisie ? gravite : null);
-                if (choisie) {
-                  ref.read(scanSessionProvider.notifier).declarerGravite(gravite.code);
-                }
-              },
-            ),
-        ],
-      ),
+      if (info == null || !info.isHealthy) ...[
+        const SizedBox(height: AppSpacing.lg),
+        Text(loc.scanSeverityQuestion,
+            style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600)),
+        const SizedBox(height: AppSpacing.sm),
+        Wrap(
+          spacing: AppSpacing.sm,
+          runSpacing: AppSpacing.sm,
+          children: [
+            for (final gravite in DeclaredSeverity.values)
+              ChoiceChip(
+                label: Text(gravite.label(loc)),
+                selected: _gravite == gravite,
+                onSelected: (choisie) {
+                  setState(() => _gravite = choisie ? gravite : null);
+                  if (choisie) {
+                    ref.read(scanSessionProvider.notifier).declarerGravite(gravite.code);
+                  }
+                },
+              ),
+          ],
+        ),
+      ],
       if (info != null && info.advice.isNotEmpty) ...[
         const SizedBox(height: AppSpacing.lg),
         Text(loc.scanAdviceTitle,
@@ -312,9 +314,14 @@ class _SessionResultScreenState extends ConsumerState<SessionResultScreen> {
 }
 
 class _CarteNonNomme extends StatelessWidget {
-  const _CarteNonNomme({required this.loc});
+  const _CarteNonNomme({required this.loc, required this.analyseParModele});
 
   final AppLocalizations loc;
+
+  /// true : le modèle a vu une photo mais n'a rien reconnu de sûr (pas du riz,
+  /// trop peu de végétation, résultat incertain). false : aucune photo d'un
+  /// organe analysé par le modèle.
+  final bool analyseParModele;
 
   @override
   Widget build(BuildContext context) {
@@ -334,7 +341,7 @@ class _CarteNonNomme extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
-                  loc.scanSessionNoName,
+                  analyseParModele ? loc.scanUncertainTitle : loc.scanSessionNoName,
                   style: AppTypography.bodyMedium.copyWith(
                     fontWeight: FontWeight.w600,
                     color: AppColors.severityMedium,
@@ -344,7 +351,14 @@ class _CarteNonNomme extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.xs),
-          Text(loc.scanSessionNoNameBody, style: AppTypography.bodySmall),
+          Text(
+            analyseParModele ? loc.scanSessionNotRecognizedBody : loc.scanSessionNoNameBody,
+            style: AppTypography.bodySmall,
+          ),
+          if (analyseParModele) ...[
+            const SizedBox(height: AppSpacing.xs),
+            Text(loc.scanRetakeTips, style: AppTypography.caption.copyWith(color: AppColors.textSecondary)),
+          ],
         ],
       ),
     );

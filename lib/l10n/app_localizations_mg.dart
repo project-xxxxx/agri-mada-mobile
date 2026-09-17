@@ -229,6 +229,37 @@ class AppLocalizationsMg extends AppLocalizations {
   String get diseaseHealthy => 'Zavamaniry salama';
 
   @override
+  String get diseaseBacterialLeafStreak =>
+      'Tsipika amin\'ny ravina afitsoky ny bakteria (BLS)';
+
+  @override
+  String get diseaseBlast => 'Menalavitra (pyriculariose)';
+
+  @override
+  String get diseaseNarrowBrownLeafSpot => 'Cercosporiose';
+
+  @override
+  String get diseaseLeafScald => 'Échaudure (aretin\'ny ravina)';
+
+  @override
+  String get diseaseDownyMildew => 'Mildiou';
+
+  @override
+  String get diseaseHispaDamage => 'Haom-bary';
+
+  @override
+  String get diseaseNitrogenDeficiency => 'Tsy fahampian\'ny azota (N)';
+
+  @override
+  String get diseasePhosphorusDeficiency => 'Tsy fahampian\'ny fosfôra (P)';
+
+  @override
+  String get diseasePotassiumDeficiency => 'Tsy fahampian\'ny potasioma (K)';
+
+  @override
+  String get diseaseNotRice => 'Tsy vary';
+
+  @override
   String get scanShareTitle => 'Diagnostika AgriMada';
 
   @override
@@ -1529,6 +1560,10 @@ class AppLocalizationsMg extends AppLocalizations {
   @override
   String get scanSessionNoNameBody =>
       'Tsy dinihin\'ny modely ity faritry ny zavamaniry ity. Voatahiry ny sary sy ny valin-teninao : asehoy teknisianina izany.';
+
+  @override
+  String get scanSessionNotRecognizedBody =>
+      'Mety tsy vary izy, na manjavozavo na tsy ampy hazavana ny sary. Tsy misy aretina voatazona. Voatahiry ny sary sy ny valin-teninao : asehoy teknisianina izany.';
 
   @override
   String scanSessionPhotosSaved(int count) {

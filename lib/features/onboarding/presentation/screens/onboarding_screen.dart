@@ -315,7 +315,7 @@ class _ModelStatusCard extends StatelessWidget {
             const SizedBox(height: AppSpacing.xs),
             Text(
               loc.modelSupportedDiseases(
-                info.maladiesSupportees
+                DiseaseCatalog.problemesReconnus(info.maladiesSupportees)
                     .map((label) => DiseaseCatalog.displayName(label, loc))
                     .join(', '),
               ),

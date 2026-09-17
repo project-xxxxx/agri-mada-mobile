@@ -9,6 +9,13 @@
 // Les libellés reprennent les symptômes des fiches du guide, eux-mêmes tirés de
 // la fiche FOFIFA des maladies bactériennes et des jeux de référence. Les poids
 // sont provisoires et seront recalibrés en P4.
+//
+// Les indices sont exprimés dans le vocabulaire du modèle embarqué (ids de
+// ml/taxonomy_v1.yaml depuis ADR-014) : une clé absente des étiquettes du
+// modèle créerait un candidat parallèle au lieu de renforcer le bon. Le
+// charbon foliaire de l'ancien modèle n'a pas d'équivalent : son indice est
+// retiré, la question reste pour le technicien. Aucun indice n'a été inventé
+// pour les nouvelles classes (pyriculariose, hispa, carences…).
 
 import '../../../core/ai/disease_catalog.dart' show LocalizedText;
 import '../../../l10n/app_localizations.dart';
@@ -86,40 +93,36 @@ abstract final class ScanQuestionnaire {
             id: 'brunes_ovales',
             label: (loc) => loc.questionLeafShapeBrownOval,
             indices: const {
-              'Brown spot': 0.8,
-              'Bacterial leaf blight': -0.4,
-              'Leaf smut': -0.3,
-              'healthy': -0.6,
+              'helminthosporiose': 0.8,
+              'blb': -0.4,
+              'feuille_saine': -0.6,
             },
           ),
           ScanAnswerOption(
             id: 'bandes_bord',
             label: (loc) => loc.questionLeafShapeYellowEdge,
             indices: const {
-              'Bacterial leaf blight': 0.9,
-              'Brown spot': -0.5,
-              'Leaf smut': -0.4,
-              'healthy': -0.6,
+              'blb': 0.9,
+              'helminthosporiose': -0.5,
+              'feuille_saine': -0.6,
             },
           ),
           ScanAnswerOption(
             id: 'noires_anguleuses',
             label: (loc) => loc.questionLeafShapeBlackAngular,
             indices: const {
-              'Leaf smut': 0.9,
-              'Brown spot': -0.3,
-              'Bacterial leaf blight': -0.4,
-              'healthy': -0.6,
+              'helminthosporiose': -0.3,
+              'blb': -0.4,
+              'feuille_saine': -0.6,
             },
           ),
           ScanAnswerOption(
             id: 'aucune',
             label: (loc) => loc.questionLeafShapeNone,
             indices: const {
-              'healthy': 0.7,
-              'Bacterial leaf blight': -0.4,
-              'Brown spot': -0.4,
-              'Leaf smut': -0.4,
+              'feuille_saine': 0.7,
+              'blb': -0.4,
+              'helminthosporiose': -0.4,
             },
           ),
           _jeNeSaisPas,
@@ -132,12 +135,12 @@ abstract final class ScanQuestionnaire {
           const ScanAnswerOption(
             id: 'oui',
             label: _yes,
-            indices: {'Bacterial leaf blight': 0.7, 'healthy': -0.4},
+            indices: {'blb': 0.7, 'feuille_saine': -0.4},
           ),
           const ScanAnswerOption(
             id: 'non',
             label: _no,
-            indices: {'Bacterial leaf blight': -0.3},
+            indices: {'blb': -0.3},
           ),
           _jeNeSaisPas,
         ],
@@ -149,12 +152,12 @@ abstract final class ScanQuestionnaire {
           ScanAnswerOption(
             id: 'rapide',
             label: (loc) => loc.questionLeafSpreadFast,
-            indices: const {'Bacterial leaf blight': 0.4, 'healthy': -0.3},
+            indices: const {'blb': 0.4, 'feuille_saine': -0.3},
           ),
           ScanAnswerOption(
             id: 'lente',
             label: (loc) => loc.questionLeafSpreadSlow,
-            indices: const {'Brown spot': 0.3},
+            indices: const {'helminthosporiose': 0.3},
           ),
           _jeNeSaisPas,
         ],

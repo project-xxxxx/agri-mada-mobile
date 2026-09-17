@@ -54,6 +54,10 @@ abstract final class CertaintyThresholds {
   static const double minVegetationRatio = 0.10;
 }
 
+/// Classe de rejet du modèle feuille : la photo n'est pas du riz (porte, P4.2).
+/// Jamais affichée comme une maladie.
+const String etiquettePasRiz = 'pas_riz';
+
 /// Classe les scores du plus élevé au plus faible et garde les [k] premiers.
 List<ScoredLabel> rankScores(
   List<double> scores,

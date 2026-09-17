@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:flutter/widgets.dart';
@@ -54,12 +55,33 @@ void main() {
     });
   }
 
+  // P1.5, étendu par ADR-014 : chaque problème que le modèle peut nommer se
+  // consulte dans le guide, soit dans les fiches de l'ancien modèle, soit dans
+  // le guide complet (assets/knowledge/fiches.json, P5.3).
   test('chaque classe du modèle a une fiche dans le guide', () {
     final guideLabels = DiseaseCatalog.guides.map((info) => info.label).toSet();
+    final fichesConnaissance = (jsonDecode(File('assets/knowledge/fiches.json').readAsStringSync()) as List)
+        .map((fiche) => (fiche as Map<String, dynamic>)['id'] as String)
+        .toSet();
     for (final label in labels) {
       final info = DiseaseCatalog.of(label)!;
-      final expected = info.isHealthy ? 'healthy' : info.label;
-      expect(guideLabels, contains(expected), reason: label);
+      if (info.isRejection) continue;
+      if (info.isHealthy) {
+        expect(guideLabels, contains('healthy'), reason: label);
+        continue;
+      }
+      expect(
+        guideLabels.contains(info.label) || fichesConnaissance.contains(info.ficheId),
+        isTrue,
+        reason: '$label : ni fiche du guide, ni fiche de connaissance (ficheId ${info.ficheId})',
+      );
     }
+  });
+
+  test('le rejet pas_riz et l\'état sain ne sont jamais annoncés comme des maladies reconnues', () {
+    final reconnus = DiseaseCatalog.problemesReconnus(labels);
+    expect(reconnus, isNot(contains('pas_riz')));
+    expect(reconnus, isNot(contains('feuille_saine')));
+    expect(reconnus, contains('pyriculariose_feuille'));
   });
 }

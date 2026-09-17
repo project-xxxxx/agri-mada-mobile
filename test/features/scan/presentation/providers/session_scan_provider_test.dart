@@ -59,11 +59,13 @@ void main() {
     tflite = _MockTFLiteService();
     when(() => tflite.isReady).thenReturn(true);
     when(() => tflite.analyzeImage(any())).thenAnswer(
+      // Vocabulaire du modèle embarqué (ids de taxonomie, ADR-014).
       (_) async => const TFLiteInferenceResult(
-        maladieDetectee: 'Brown spot',
+        maladieDetectee: 'helminthosporiose',
         confiance: 0.62,
-        classement: [ScoredLabel('Brown spot', 0.62), ScoredLabel('Leaf smut', 0.38)],
+        classement: [ScoredLabel('helminthosporiose', 0.62), ScoredLabel('blb', 0.38)],
         certitude: DiagnosisCertainty.possible,
+        vegetationRatio: 0.6,
       ),
     );
   });
@@ -122,10 +124,11 @@ void main() {
     final etat = container.read(scanSessionProvider);
 
     expect(acceptee, isTrue);
-    expect(etat.photos.single.scores.first.label, 'Brown spot');
+    expect(etat.photos.single.scores.first.label, 'helminthosporiose');
+    expect(etat.photos.single.vegetationRatio, 0.6);
     final observations = await repository.observations(etat.sessionId!);
     expect(observations, hasLength(1));
-    expect(decoderClassement(observations.single.topK).first.label, 'Brown spot');
+    expect(decoderClassement(observations.single.topK).first.label, 'helminthosporiose');
     expect(observations.single.qualiteNettete, _photoNette.nettete);
   });
 
@@ -176,15 +179,57 @@ void main() {
     final etat = container.read(scanSessionProvider);
     expect(etat.etape, EtapeScan.resultat);
     expect(etat.fusion!.nommable, isTrue);
-    expect(etat.fusion!.classement.first.label, 'Bacterial leaf blight',
-        reason: 'les réponses désignent le flétrissement bactérien');
+    expect(etat.fusion!.classement.first.label, 'blb',
+        reason: 'le modèle penche pour la tache brune, les réponses désignent le flétrissement bactérien');
 
     final session = await repository.session(etat.sessionId!);
-    expect(session!.resultatFicheId, 'Bacterial leaf blight');
+    expect(session!.resultatFicheId, 'blb');
     expect(session.graviteDeclaree, 'moins_tiers');
 
     final observation = (await repository.observations(etat.sessionId!)).single;
     expect(decoderReponses(observation.reponses)['feuille_exsudat'], 'oui');
+  });
+
+  group('garde-fous ADR-006 rétablis pour les sessions (ADR-014)', () {
+    Future<ScanSessionState> scannerUneFeuille(TFLiteInferenceResult resultat) async {
+      when(() => tflite.analyzeImage(any())).thenAnswer((_) async => resultat);
+      final container = conteneur();
+      final notifier = container.read(scanSessionProvider.notifier);
+      await notifier.demarrer(organe: Organe.feuille);
+      await notifier.ajouterPhoto(File('feuille.jpg'));
+      notifier.passerAuxQuestions();
+      notifier.repondre('feuille_taches', 'bandes_bord');
+      await notifier.validerQuestions();
+      return container.read(scanSessionProvider);
+    }
+
+    test('une photo que le modèle classe pas_riz ne nomme aucune maladie, même avec des réponses', () async {
+      final etat = await scannerUneFeuille(const TFLiteInferenceResult(
+        maladieDetectee: 'pas_riz',
+        confiance: 0.97,
+        classement: [ScoredLabel('pas_riz', 0.97), ScoredLabel('blb', 0.02)],
+        vegetationRatio: 0.4,
+      ));
+
+      expect(etat.fusion!.nommable, isFalse);
+      expect(etat.fusion!.analyseParModele, isTrue, reason: 'message « non reconnue », pas « non analysée »');
+      expect(etat.fusion!.classement.map((c) => c.label), isNot(contains('pas_riz')));
+      final session = (await repository.session(etat.sessionId!))!;
+      expect(session.resultatFicheId, isNull);
+      expect(session.certitude, 'incertain', reason: 'sinon l\'agent backend nommerait la piste des réponses');
+    });
+
+    test('une photo avec trop peu de végétation ne nomme aucune maladie', () async {
+      final etat = await scannerUneFeuille(const TFLiteInferenceResult(
+        maladieDetectee: 'blb',
+        confiance: 0.9,
+        classement: [ScoredLabel('blb', 0.9), ScoredLabel('helminthosporiose', 0.1)],
+        vegetationRatio: 0.03,
+      ));
+
+      expect(etat.fusion!.nommable, isFalse);
+      expect((await repository.session(etat.sessionId!))!.resultatFicheId, isNull);
+    });
   });
 
   test('« Je ne sais pas » enchaîne les trois organes de la séquence guidée (P2.1)', () async {

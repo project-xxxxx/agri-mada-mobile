@@ -81,6 +81,77 @@ void main() {
       expect(fusion.certitude, isNot(DiagnosisCertainty.probable));
     });
 
+    group('garde-fous ADR-006 rétablis pour les sessions (ADR-014)', () {
+      test('pas_riz en tête : rien de nommé, mais la photo compte comme analysée', () {
+        final fusion = fuseObservations([
+          _feuille(const [ScoredLabel('pas_riz', 0.9), ScoredLabel('blb', 0.1)]),
+        ]);
+
+        expect(fusion.nommable, isFalse);
+        expect(fusion.analyseParModele, isTrue);
+        expect(fusion.classement, isEmpty);
+      });
+
+      test('pas_riz en tête : les réponses seules ne suffisent pas à nommer', () {
+        final fusion = fuseObservations([
+          _feuille(const [ScoredLabel('pas_riz', 0.9), ScoredLabel('blb', 0.1)], indices: const {'blb': 5.0}),
+        ]);
+
+        expect(fusion.nommable, isFalse);
+        expect(fusion.certitude, DiagnosisCertainty.incertain,
+            reason: 'enregistrée telle quelle et lue par l\'agent backend');
+        expect(fusion.classement.map((c) => c.label), isNot(contains('pas_riz')));
+      });
+
+      test('pas_riz derrière une maladie n\'est jamais un candidat', () {
+        final fusion = fuseObservations([
+          _feuille(const [ScoredLabel('blb', 0.7), ScoredLabel('pas_riz', 0.2), ScoredLabel('bls', 0.1)]),
+        ]);
+
+        expect(fusion.classement.map((c) => c.label), isNot(contains('pas_riz')));
+        expect(fusion.classement.first.label, 'blb');
+      });
+
+      test('moins de 10 % de végétation : rien de nommé', () {
+        final fusion = fuseObservations([
+          const ObservationEvidence(
+            organe: Organe.feuille,
+            scores: [ScoredLabel('blb', 0.95), ScoredLabel('bls', 0.05)],
+            vegetationRatio: CertaintyThresholds.minVegetationRatio - 0.01,
+          ),
+        ]);
+
+        expect(fusion.nommable, isFalse);
+        expect(fusion.analyseParModele, isTrue);
+      });
+
+      test('assez de végétation : le contrôle ne bloque rien', () {
+        final fusion = fuseObservations([
+          const ObservationEvidence(
+            organe: Organe.feuille,
+            scores: [ScoredLabel('blb', 0.95), ScoredLabel('bls', 0.05)],
+            vegetationRatio: 0.5,
+          ),
+        ]);
+
+        expect(fusion.nommable, isTrue);
+      });
+
+      test('un résultat incertain ne nomme rien', () {
+        final fusion = fuseObservations([
+          _feuille(const [
+            ScoredLabel('blb', 0.34),
+            ScoredLabel('bls', 0.33),
+            ScoredLabel('helminthosporiose', 0.33),
+          ]),
+        ]);
+
+        expect(fusion.certitude, DiagnosisCertainty.incertain);
+        expect(fusion.nommable, isFalse);
+        expect(fusion.analyseParModele, isTrue);
+      });
+    });
+
     test('le classement est limité aux trois premiers candidats', () {
       final fusion = fuseObservations([
         _feuille(const [

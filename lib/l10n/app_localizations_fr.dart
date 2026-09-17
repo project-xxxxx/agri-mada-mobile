@@ -226,6 +226,36 @@ class AppLocalizationsFr extends AppLocalizations {
   String get diseaseHealthy => 'Plante saine';
 
   @override
+  String get diseaseBacterialLeafStreak => 'Strie bactérienne (BLS)';
+
+  @override
+  String get diseaseBlast => 'Pyriculariose';
+
+  @override
+  String get diseaseNarrowBrownLeafSpot => 'Cercosporiose';
+
+  @override
+  String get diseaseLeafScald => 'Échaudure des feuilles';
+
+  @override
+  String get diseaseDownyMildew => 'Mildiou';
+
+  @override
+  String get diseaseHispaDamage => 'Dégâts d\'hispa (pou du riz)';
+
+  @override
+  String get diseaseNitrogenDeficiency => 'Carence en azote';
+
+  @override
+  String get diseasePhosphorusDeficiency => 'Carence en phosphore';
+
+  @override
+  String get diseasePotassiumDeficiency => 'Carence en potassium';
+
+  @override
+  String get diseaseNotRice => 'Ce n\'est pas du riz';
+
+  @override
   String get scanShareTitle => 'Diagnostic AgriMada';
 
   @override
@@ -1520,6 +1550,10 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get scanSessionNoNameBody =>
       'Cette partie de la plante n\'est pas analysée par le modèle. Vos photos et vos réponses sont enregistrées : montrez-les à un technicien.';
+
+  @override
+  String get scanSessionNotRecognizedBody =>
+      'Ce n\'est peut-être pas du riz, ou la photo est floue ou mal éclairée. Aucune maladie n\'est retenue. Vos photos et vos réponses sont enregistrées : montrez-les à un technicien.';
 
   @override
   String scanSessionPhotosSaved(int count) {

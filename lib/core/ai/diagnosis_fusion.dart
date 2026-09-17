@@ -9,11 +9,15 @@
 // Les pondérations sont provisoires : elles seront recalibrées en P4 sur des
 // diagnostics validés par des techniciens.
 //
-// Deux garde-fous repris de l'ADR-006 :
+// Garde-fous repris de l'ADR-006 (rétablis pour les sessions en ADR-014) :
 //   - une session sans observation analysée par un modèle ne nomme aucune
 //     maladie : elle part au technicien ;
 //   - une session qui ne repose que sur des réponses n'atteint jamais
-//     « probable ».
+//     « probable » ;
+//   - une photo que le modèle rejette (moins de 10 % de végétation, ou classe
+//     pas_riz en tête) n'apporte aucun score ;
+//   - un résultat « incertain » ne nomme aucune maladie et n'est pas
+//     enregistré comme tel.
 
 import 'dart:math' as math;
 
@@ -26,17 +30,31 @@ class ObservationEvidence {
     required this.organe,
     this.scores = const <ScoredLabel>[],
     this.indices = const <String, double>{},
+    this.vegetationRatio,
   });
 
   final Organe organe;
 
-  /// Sortie du modèle pour cette photo ; vide pour un organe sans modèle.
+  /// Sortie du modèle pour cette photo, triée par score décroissant ; vide
+  /// pour un organe sans modèle.
   final List<ScoredLabel> scores;
 
   /// Indices du questionnaire : étiquette de fiche → poids (positif = pour).
   final Map<String, double> indices;
 
+  /// Part de pixels végétaux de la photo analysée ; null si non mesurée.
+  final double? vegetationRatio;
+
   bool get analyseeParModele => organe.usesModel && scores.isNotEmpty;
+
+  /// Le modèle a vu la photo mais ne l'a pas reconnue comme du riz exploitable.
+  bool get rejeteeParModele =>
+      analyseeParModele &&
+      ((vegetationRatio != null &&
+              vegetationRatio! < CertaintyThresholds.minVegetationRatio) ||
+          scores.first.label == etiquettePasRiz);
+
+  bool get apporteDesScores => analyseeParModele && !rejeteeParModele;
 }
 
 class FusedDiagnosis {
@@ -44,15 +62,21 @@ class FusedDiagnosis {
     required this.classement,
     required this.certitude,
     required this.nommable,
+    this.analyseParModele = false,
   });
 
   /// Jusqu'à trois candidats, du plus au moins probable.
   final List<ScoredLabel> classement;
   final DiagnosisCertainty certitude;
 
-  /// false quand aucune observation n'a été analysée par un modèle : l'app
-  /// n'affiche alors aucun nom de maladie et propose le technicien.
+  /// true seulement quand une photo acceptée par le modèle appuie le résultat
+  /// et que la certitude n'est pas « incertain ». Sinon l'app n'affiche aucun
+  /// nom de maladie et propose le technicien.
   final bool nommable;
+
+  /// true quand au moins une photo est passée par le modèle, même rejetée :
+  /// l'app dit alors « non reconnue » plutôt que « partie non analysée ».
+  final bool analyseParModele;
 
   static const FusedDiagnosis aucun = FusedDiagnosis(
     classement: <ScoredLabel>[],
@@ -76,21 +100,33 @@ FusedDiagnosis fuseObservations(
   Map<String, double> contexte = const <String, double>{},
   int k = 3,
 }) {
+  final avecModele = observations.any((observation) => observation.analyseeParModele);
+  final avecScores = observations.any((observation) => observation.apporteDesScores);
+
   final candidats = <String>{
     for (final observation in observations) ...[
-      for (final score in observation.scores) score.label,
+      if (observation.apporteDesScores)
+        for (final score in observation.scores)
+          if (score.label != etiquettePasRiz) score.label,
       ...observation.indices.keys,
     ],
     ...contexte.keys,
   };
-  if (candidats.isEmpty) return FusedDiagnosis.aucun;
+  if (candidats.isEmpty) {
+    return FusedDiagnosis(
+      classement: const <ScoredLabel>[],
+      certitude: DiagnosisCertainty.incertain,
+      nommable: false,
+      analyseParModele: avecModele,
+    );
+  }
 
   final logScores = <String, double>{
     for (final candidat in candidats) candidat: contexte[candidat] ?? 0,
   };
 
   for (final observation in observations) {
-    if (observation.scores.isNotEmpty) {
+    if (observation.apporteDesScores) {
       final parLabel = <String, double>{
         for (final score in observation.scores) score.label: score.score,
       };
@@ -107,12 +143,18 @@ FusedDiagnosis fuseObservations(
 
   final classement = _softmax(logScores)..sort((a, b) => b.score.compareTo(a.score));
   final top = classement.take(k).toList();
-  final avecModele = observations.any((observation) => observation.analyseeParModele);
+  // Photos vues par le modèle mais toutes rejetées : la certitude enregistrée
+  // doit le dire, sinon les réponses seules donneraient « possible » et
+  // l'agent backend (qui lit certitude et top_k) nommerait ce que l'app tait.
+  final certitude = avecModele && !avecScores
+      ? DiagnosisCertainty.incertain
+      : _certitude(top, avecScores);
 
   return FusedDiagnosis(
     classement: top,
-    certitude: _certitude(top, avecModele),
-    nommable: avecModele,
+    certitude: certitude,
+    nommable: avecScores && certitude != DiagnosisCertainty.incertain,
+    analyseParModele: avecModele,
   );
 }
 
