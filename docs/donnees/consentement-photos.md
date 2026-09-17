@@ -2,10 +2,14 @@
 
 Tâche P0.4 du plan de correction. Texte utilisé par les collecteurs (techniciens, étudiants ISPM) avant de photographier les plants d'un agriculteur. Il est lu à voix haute ; l'agriculteur peut aussi le lire lui-même.
 
-> **Statut : PROJET, version 0.1**
+> **Statut : PROJET, version 0.1 — non utilisé pour l'instant**
 > - La version malgache est à relire et valider par un locuteur natif du milieu agricole avant tout usage.
 > - Le cadre juridique est à vérifier par l'ISPM : loi malgache sur la protection des données personnelles (loi n° 2014-038) et, le cas échéant, déclaration auprès de l'autorité compétente.
 > - Les champs entre crochets sont à compléter.
+> - ADR-008 (2026-09-16) : le mode de collecte de l'app qui devait utiliser ce
+>   texte (tâche P3.3) n'est pas construit — l'équipe s'appuie sur les jeux
+>   publics déjà rassemblés. Ce document reste la référence si une collecte
+>   terrain est décidée plus tard.
 
 ## Règles pour le collecteur
 

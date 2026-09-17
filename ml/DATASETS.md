@@ -73,16 +73,46 @@ Récupérés par le même script dans `knowledge/sources/`, pour la base de fich
 | `fofifa` | 37 fiches techniques riz du site FOFIFA : bactérioses (FR et MG), maladies et insectes de l'Alaotra, *voana* et Metarhizium, bonnes pratiques, calendriers MIRR, P-dipping, fiches variétales | documents publics, citer FOFIFA |
 | `references_scientifiques` | IRD (toxicité ferreuse dans les rizières), mémoire CIRAD (pyriculariose du riz pluvial au Vakinankaratra), IRRI (diagnostic des maladies courantes du riz) | libre accès, citer la source |
 
+## Correspondance avec la taxonomie et manifeste (P3.2, P3.6)
+
+- `ml/label_map.yaml` : correspondance entre chaque étiquette brute des jeux publics
+  (`ml/data/raw/inventory.csv`) et un id de `ml/taxonomy_v1.yaml`.
+  `python ml/scripts/apply_label_map.py` vérifie qu'aucune classe brute n'est
+  oubliée et écrit `ml/data/raw/label_map_report.csv` (non versionné).
+- `ml/data/manifest.csv` (versionné) : manifeste unique de traçabilité — id, sha256,
+  source, licence, organe, classe, site, date, annotateur, split — produit par
+  `python ml/scripts/build_manifest.py`. Granularité par image pour les fichiers déjà
+  extraits (ex. `dhan_shomadhan`, `hors_sujet`, `negatifs_v1`), par archive pour les
+  jeux publics pas encore décompressés (l'extraction réelle est laissée à P4.1).
+- `ml/data/dedup.py` : dédoublonnage par empreinte perceptuelle sur un dossier déjà
+  extrait (`python ml/data/dedup.py <dossier> --seuil 4`), écrit
+  `ml/data/eval/doublons.csv`. Pas encore lancé sur l'ensemble des jeux publics
+  (nécessite de tout décompresser d'abord, ~8,4 Go) : reste à faire en P4.1.
+- **DVC non initialisé.** `ml/data/manifest.csv` est pour l'instant versionné par git
+  seul, ce qui suffit tant qu'aucun bucket d'images (S3/MinIO) n'existe. À revoir
+  quand le mode collecte (P3.3) alimentera vraiment des photos côté serveur.
+
+## Photos négatives pour la porte (P3.7)
+
+`ml/scripts/fetch_negatives.py` généralise `fetch_off_topic.py` (P1.2) à 14
+catégories et un quota par catégorie réglable (`--per-category`, défaut 200,
+donc ≥ 2 000 photos visées). Sources : Wikimedia Commons uniquement pour
+l'instant (licence filtrée par regex, doublons évités par SHA-256) — Open
+Images et iNaturalist, mentionnés dans le plan, ne sont **pas** implémentés
+(voir ADR-008). Le script a été vérifié avec un quota de 1 photo par catégorie
+(14 photos, license et mots-clés riz correctement filtrés), puis ce lot
+d'essai a été supprimé : la collecte réelle (`--per-category 200`) reste à
+lancer par l'équipe, comme `fetch_public_data.py`.
+
 ## Classes sans données publiques
 
-Aucun jeu public trouvé pour : racines de riz (toutes classes), RYMV malgache (*mavoratsy*), dégâts de *voana*, toxicité ferreuse, pourriture de la gaine, stérilité due au froid, dégâts de punaises. Ces classes dépendent entièrement de la collecte locale (P3.3 à P3.5).
+Aucun jeu public trouvé pour : racines de riz (toutes classes), RYMV malgache (*mavoratsy*), dégâts de *voana*, toxicité ferreuse, pourriture de la gaine, stérilité due au froid, dégâts de punaises. Décision d'équipe (ADR-008) : pas de mode de collecte terrain dans l'app pour l'instant — ces classes restent non couvertes par un modèle tant qu'une collecte n'est pas décidée autrement. L'app doit dire explicitement qu'elle ne les reconnaît pas plutôt que deviner (voir le tableau des risques du plan de correction).
 
 ## Données locales
 
 | id | Origine | Consentement | Statut |
 |---|---|---|---|
-| `collecte_mg_v1` | Mode collecte de l'app (P3.3), sites Vakinankaratra, Alaotra, Marovoay, côte Est | formulaire `docs/donnees/consentement-photos.md`, version enregistrée avec chaque photo | à venir |
-| `negatifs_v1` | Photos locales et images sous licence ouverte (Open Images, iNaturalist) | sans objet pour les images publiques | à venir |
+| `negatifs_v1` | `ml/scripts/fetch_negatives.py`, Wikimedia Commons sous licence libre | sans objet (images publiques, pas de photo d'agriculteur) | script vérifié (14 photos d'essai), collecte réelle à lancer |
 
 ## Journal des décisions
 

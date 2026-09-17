@@ -56,4 +56,12 @@ GoogleService-Info.plist
 ml/data/raw/
 ml/data/interim/
 ml/.venv/
+ml/models/*/saved_model/
+ml/models/*/cache/
+ml/models/*/tete.keras
+__pycache__/
+*.pyc
 knowledge/sources/
+
+# Sauvegarde intermédiaire d'une évaluation RAG interrompue
+ml/reports/eval_rag_en_cours.jsonl
