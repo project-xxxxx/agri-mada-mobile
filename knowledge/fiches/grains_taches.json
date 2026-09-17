@@ -1,0 +1,51 @@
+{
+  "id": "grains_taches",
+  "noms": {
+    "fr": "Grains tachés",
+    "mg": "Pentipentina amin'ny voam-bary",
+    "sci": "Bipolaris oryzae et autres",
+    "autres_noms_mg": []
+  },
+  "organes": {
+    "panicule_grains": [
+      "grains tachés, décolorés"
+    ]
+  },
+  "confusions": [],
+  "conditions": {
+    "ecosystemes": [],
+    "altitude_m": [],
+    "facteurs": [
+      "pluies à maturité",
+      "parcelles non drainées",
+      "stockage au-dessus de 14 % d'humidité"
+    ]
+  },
+  "prevention": [
+    "récolte et séchage rapides après maturité",
+    "amélioration du drainage",
+    "avis d'un technicien avant tout traitement"
+  ],
+  "lutte_chimique": {
+    "statut": "a_completer_liste_DPV",
+    "produits": []
+  },
+  "sources": [
+    {
+      "titre": "Ireo aretim-bary mirongatra noho ny fiovaovan'ny toetr'andro, AF RICE Alaotra, 2017",
+      "url": "https://www.fofifa.mg/wp-content/uploads/2020/07/IREO-ARETIM-2.pdf"
+    },
+    {
+      "titre": "Reconnaissance et gestion intégrée des principales maladies du riz (cours L2, école professionnelle supérieure agricole)",
+      "fichier": "knowledge/sources/cours/Pathologie riz.pdf"
+    }
+  ],
+  "taxonomy_ids": [
+    "grains_taches"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}

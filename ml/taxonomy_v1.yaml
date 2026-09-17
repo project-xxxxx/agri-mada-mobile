@@ -164,6 +164,11 @@ problemes:
       nom_mg: null
       presence_madagascar: sans_objet
       priorite: moyenne
+      sources: [cours_epsa_pathologie_riz]
+      notes: >-
+        Chlorose et réduction de la taille des feuilles, symptômes commençant sur
+        les feuilles âgées puis se généralisant (cours EPSA, p. 48). Fiche de
+        conseil : knowledge/fiches/carence_azote.json (brouillon).
       jeux_publics: [nutrient_deficiency_rice]
     - id: carence_potassium
       nature: abiotique
@@ -171,6 +176,11 @@ problemes:
       nom_mg: null
       presence_madagascar: sans_objet
       priorite: basse
+      sources: [cours_epsa_pathologie_riz]
+      notes: >-
+        Chlorose sur feuilles âgées et entre les nervures puis brunissement,
+        nécrose de l'apex et des bords, recroquevillement (cours EPSA, p. 49).
+        Fiche de conseil : knowledge/fiches/carence_potassium.json (brouillon).
       jeux_publics: [nutrient_deficiency_rice]
     - id: carence_phosphore
       nature: abiotique
@@ -178,8 +188,13 @@ problemes:
       nom_mg: null
       presence_madagascar: sans_objet
       priorite: moyenne
-      sources: [fofifa_p_dipping]
-      notes: sols pauvres en phosphore des rizières malgaches, ciblés par la technique FOFIFA du P-dipping
+      sources: [fofifa_p_dipping, cours_epsa_pathologie_riz]
+      notes: >-
+        Sols pauvres en phosphore des rizières malgaches, ciblés par la technique
+        FOFIFA du P-dipping. Symptômes sous ~400 ppm de phosphore dans la solution
+        du sol : réduction de croissance, chute des bourgeons terminaux puis des
+        feuilles (cours EPSA, p. 48). Fiche de conseil :
+        knowledge/fiches/carence_phosphore.json (brouillon).
       jeux_publics: [nutrient_deficiency_rice]
     - id: mildiou
       nature: maladie

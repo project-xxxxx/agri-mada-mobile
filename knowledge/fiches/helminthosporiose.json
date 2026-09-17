@@ -1,0 +1,63 @@
+{
+  "id": "helminthosporiose",
+  "noms": {
+    "fr": "Helminthosporiose (tache brune)",
+    "mg": "Helminthosporiose",
+    "sci": "Bipolaris oryzae",
+    "autres_noms_mg": []
+  },
+  "organes": {
+    "feuille": [
+      "petites taches ovales brunes, pouvant se rejoindre sur les feuilles âgées"
+    ],
+    "panicule_grains": [
+      "attaque aussi les grains (voir aussi grains_taches, complexe de champignons)"
+    ]
+  },
+  "confusions": [
+    {
+      "fiche": "pyriculariose",
+      "question": {
+        "fr": "Les taches sont-elles petites et ovales (pas en losange) et sans centre gris net ?",
+        "mg": null
+      }
+    }
+  ],
+  "conditions": {
+    "ecosystemes": [],
+    "altitude_m": [],
+    "facteurs": [
+      "sol pauvre",
+      "stress hydrique"
+    ]
+  },
+  "prevention": [
+    "fertilisation équilibrée (pas seulement l'azote)",
+    "semences saines",
+    "résidus de récolte retirés ou enfouis",
+    "outils nettoyés entre parcelles",
+    "avis d'un technicien avant tout traitement"
+  ],
+  "lutte_chimique": {
+    "statut": "a_completer_liste_DPV",
+    "produits": []
+  },
+  "sources": [
+    {
+      "titre": "Ireo aretim-bary mirongatra noho ny fiovaovan'ny toetr'andro, AF RICE Alaotra, 2017",
+      "url": "https://www.fofifa.mg/wp-content/uploads/2020/07/IREO-ARETIM-2.pdf"
+    },
+    {
+      "titre": "Reconnaissance et gestion intégrée des principales maladies du riz (cours L2, école professionnelle supérieure agricole)",
+      "fichier": "knowledge/sources/cours/Pathologie riz.pdf"
+    }
+  ],
+  "taxonomy_ids": [
+    "helminthosporiose"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}

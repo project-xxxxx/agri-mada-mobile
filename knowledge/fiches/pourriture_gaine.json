@@ -1,0 +1,55 @@
+{
+  "id": "pourriture_gaine",
+  "noms": {
+    "fr": "Pourriture de la gaine",
+    "mg": "Fahalovan'ny tahom-bary",
+    "sci": "Sarocladium oryzae (probable, à confirmer par le laboratoire)",
+    "autres_noms_mg": []
+  },
+  "organes": {
+    "tige_gaine": [
+      "gaine de la dernière feuille brunie ou pourrie",
+      "panicule qui sort mal de la gaine"
+    ]
+  },
+  "confusions": [],
+  "conditions": {
+    "ecosystemes": [],
+    "altitude_m": [],
+    "facteurs": [
+      "se voit au début de la montaison"
+    ]
+  },
+  "prevention": [
+    "semences saines",
+    "résidus de récolte retirés ou enfouis",
+    "outils nettoyés entre parcelles",
+    "avis d'un technicien avant tout traitement"
+  ],
+  "lutte_chimique": {
+    "statut": "a_completer_liste_DPV",
+    "produits": []
+  },
+  "sources": [
+    {
+      "titre": "Ireo aretim-bary mirongatra noho ny fiovaovan'ny toetr'andro, AF RICE Alaotra, 2017",
+      "url": "https://www.fofifa.mg/wp-content/uploads/2020/07/IREO-ARETIM-2.pdf"
+    },
+    {
+      "titre": "Variétés de riz pluvial pour les Hautes Terres de 1300 à 1800 m",
+      "url": "https://www.fofifa.mg/wp-content/uploads/2020/05/catalogue-vari%C3%A9tal-RPA-2009.pdf"
+    },
+    {
+      "titre": "Importance des maladies de riz et proposition de lutte (Halitiana Rafalimanana, contexte malgache)",
+      "fichier": "knowledge/sources/cours/Maladies de riz.pdf"
+    }
+  ],
+  "taxonomy_ids": [
+    "pourriture_gaine"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}

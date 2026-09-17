@@ -1,0 +1,82 @@
+{
+  "id": "pyriculariose",
+  "noms": {
+    "fr": "Pyriculariose",
+    "mg": "Menalavitra",
+    "sci": "Magnaporthe oryzae",
+    "autres_noms_mg": []
+  },
+  "organes": {
+    "feuille": [
+      "lésions en losange, centre gris, bord brun"
+    ],
+    "collet": [
+      "collet ou nœud noirci qui casse"
+    ],
+    "panicule_grains": [
+      "cou de la panicule brun-noir",
+      "panicule blanche ou vide qui se casse"
+    ]
+  },
+  "confusions": [
+    {
+      "fiche": "helminthosporiose",
+      "question": {
+        "fr": "Les taches ont-elles un centre gris clair et une forme en losange ?",
+        "mg": null
+      }
+    }
+  ],
+  "conditions": {
+    "ecosystemes": [
+      "tanety_pluvial",
+      "irrigue"
+    ],
+    "altitude_m": [
+      1000,
+      1800
+    ],
+    "facteurs": [
+      "forte humidité (> 90 %)",
+      "nuits fraîches (20-25°C)",
+      "excès d'azote",
+      "variété sensible"
+    ]
+  },
+  "prevention": [
+    "variété recommandée par FOFIFA pour la zone",
+    "apport d'azote fractionné plutôt qu'en une fois",
+    "semences saines",
+    "résidus de récolte retirés ou enfouis",
+    "outils nettoyés entre parcelles",
+    "avis d'un technicien avant tout traitement"
+  ],
+  "lutte_chimique": {
+    "statut": "a_completer_liste_DPV",
+    "produits": []
+  },
+  "sources": [
+    {
+      "titre": "Ireo aretim-bary mirongatra noho ny fiovaovan'ny toetr'andro, AF RICE Alaotra, 2017",
+      "url": "https://www.fofifa.mg/wp-content/uploads/2020/07/IREO-ARETIM-2.pdf"
+    },
+    {
+      "titre": "Lutte intégrée contre la pyriculariose du riz pluvial à Madagascar",
+      "url": "https://agritrop.cirad.fr/569130/"
+    },
+    {
+      "titre": "Importance des maladies de riz et proposition de lutte (Halitiana Rafalimanana, contexte malgache)",
+      "fichier": "knowledge/sources/cours/Maladies de riz.pdf"
+    }
+  ],
+  "taxonomy_ids": [
+    "pyriculariose_feuille",
+    "pyriculariose_noeud_collet",
+    "pyriculariose_cou"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}

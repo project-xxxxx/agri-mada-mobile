@@ -2,6 +2,7 @@
 # - Flutter : analyse statique (avertissements bloquants) et tests unitaires/widgets.
 #   Les tests d'intégration (integration_test/, Patrol) demandent un appareil et ne tournent pas ici.
 # - Backend FastAPI : pytest.
+# - Fiches de connaissance : schéma + garde-fou brouillon (P5.1).
 name: CI
 
 on:
@@ -68,3 +69,20 @@ jobs:
 
       - name: Tests
         run: pytest -q
+
+  fiches:
+    name: Fiches de connaissance — schéma et bundle embarqué (P5.1, P5.3)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Dépendances
+        run: pip install "jsonschema>=4.20"
+
+      - name: Validation
+        run: python ml/scripts/validate_fiches.py

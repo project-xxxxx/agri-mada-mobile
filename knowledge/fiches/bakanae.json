@@ -1,0 +1,37 @@
+{
+  "id": "bakanae",
+  "noms": {
+    "fr": "Bakanae (plantules allongées et pâles)",
+    "mg": null,
+    "sci": "Fusarium fujikuroi",
+    "autres_noms_mg": []
+  },
+  "organes": {
+    "plante_entiere": [
+      "plantules anormalement longues et pâles"
+    ]
+  },
+  "confusions": [],
+  "conditions": {
+    "ecosystemes": [],
+    "altitude_m": [],
+    "facteurs": []
+  },
+  "prevention": [
+    "semences saines, traitement des semences avant pépinière",
+    "avis d'un technicien avant tout traitement"
+  ],
+  "lutte_chimique": {
+    "statut": "a_completer_liste_DPV",
+    "produits": []
+  },
+  "sources": [],
+  "taxonomy_ids": [
+    "bakanae"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}

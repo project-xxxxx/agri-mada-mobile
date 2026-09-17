@@ -1,0 +1,37 @@
+{
+  "id": "racines_rongees",
+  "noms": {
+    "fr": "Racines rongées",
+    "mg": null,
+    "sci": null,
+    "autres_noms_mg": []
+  },
+  "organes": {
+    "racines": [
+      "système racinaire réduit ou rongé — ravageur à identifier avec l'agronome"
+    ]
+  },
+  "confusions": [],
+  "conditions": {
+    "ecosystemes": [],
+    "altitude_m": [],
+    "facteurs": []
+  },
+  "prevention": [
+    "photographier aussi le collet pour croiser avec voana ou les foreurs",
+    "avis d'un technicien avant tout traitement"
+  ],
+  "lutte_chimique": {
+    "statut": "a_completer_liste_DPV",
+    "produits": []
+  },
+  "sources": [],
+  "taxonomy_ids": [
+    "racines_rongees"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}

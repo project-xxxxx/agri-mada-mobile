@@ -1,0 +1,47 @@
+{
+  "id": "galles_nematodes",
+  "noms": {
+    "fr": "Galles de nématodes",
+    "mg": null,
+    "sci": "Meloidogyne graminicola",
+    "autres_noms_mg": []
+  },
+  "organes": {
+    "racines": [
+      "galles en crochet ou renflements au bout des racines"
+    ]
+  },
+  "confusions": [],
+  "conditions": {
+    "ecosystemes": [],
+    "altitude_m": [],
+    "facteurs": []
+  },
+  "prevention": [
+    "rotation culturale",
+    "assainissement des pépinières",
+    "avis d'un technicien avant tout traitement"
+  ],
+  "lutte_chimique": {
+    "statut": "a_completer_liste_DPV",
+    "produits": []
+  },
+  "sources": [
+    {
+      "titre": "First report of the root-knot nematode (Meloidogyne graminicola) in Madagascar rice fields",
+      "url": "https://link.springer.com/article/10.1007/s13314-016-0222-5"
+    },
+    {
+      "titre": "Reconnaissance et gestion intégrée des principales maladies du riz (cours L2, école professionnelle supérieure agricole)",
+      "fichier": "knowledge/sources/cours/Pathologie riz.pdf"
+    }
+  ],
+  "taxonomy_ids": [
+    "galles_nematodes"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}
