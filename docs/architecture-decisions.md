@@ -526,3 +526,135 @@ Chaque décision structurante du projet AgriMada est consignée ici : contexte, 
     conservation des traces ; l'historique signé garde l'agent sans état.
   - Traces sans texte : proposé, écarté par l'équipe au profit de
     l'amélioration des fiches à partir des vraies questions.
+
+---
+
+## ADR-013 — Architecture à trois étages réduite aux données disponibles (2026-09-17)
+
+**Statut :** adopté comme premier essai (tâche P4.2) ; aucun modèle intégré à l'app
+
+- **Contexte :** le plan (P4.2) prévoit une porte à 8 sorties (6 organes, pas
+  du riz, photo inexploitable), un modèle multi-étiquette par organe et une
+  fusion. Les jeux publics ne contiennent aucune photo de collet, de racines
+  ou de plante entière, et très peu de tige et de panicule ; la collecte
+  terrain a été écartée (ADR-008). Le modèle plat `feuille_v2` (13 classes
+  dans un softmax, porte comprise) servait de point de comparaison.
+- **Décision :**
+  - **Étage A** (`ml/scripts/train_porte.py`, `ml/models/porte_v1`) : 2
+    sorties seulement, `pas_riz` / `riz_exploitable`. L'organe reste choisi
+    par l'agriculteur (P2.1) et la photo inexploitable refusée par les seuils
+    de netteté et d'exposition (P2.2) : un classifieur d'organe entraîné sans
+    photo de 3 organes sur 6 échouerait sans le dire.
+  - **Étage B** (`ml/scripts/train_feuille_multilabel.py`,
+    `ml/models/feuille_multilabel_v1`) : feuille seulement, 11 sorties
+    sigmoïdes, seuil par classe exporté dans `thresholds.json`, feuille saine
+    quand aucune sortie ne dépasse son seuil.
+  - **Étage C** : `ml/scripts/eval_chaine.py` mesure la chaîne par une décision
+    déterministe ; le branchement dans la fusion de P2.4
+    (`lib/core/ai/diagnosis_fusion.dart`) attend P4.5.
+  - Les deux modèles réutilisent le cache de features et le découpage de
+    `train_feuille.py` : même validation que `feuille_v2`, comparaison directe.
+- **Conséquences (mesurées, `ml/reports/architecture_3_etages_2026-09-17.md`) :**
+  - Sur la validation, la chaîne fait **moins bien** que le modèle plat
+    (78,7 % contre 83,0 % d'exactitude) : presque tout l'écart vient des
+    feuilles saines (F1 0,70 contre 0,85), à cause de seuils choisis classe par
+    classe pour le meilleur F1. Même défaut que celui qui a motivé ADR-006.
+  - Sur les 50 photos hors sujet indépendantes, la chaîne nomme une maladie à
+    tort 3 fois contre 8 pour le modèle plat ; les deux en rejettent 41.
+  - La porte rejette 98,8 % des négatifs de validation mais seulement 82 %
+    des photos hors sujet indépendantes : elle a appris le style de la
+    collecte, la cible P4.6 (95 %) n'est pas atteinte.
+  - Aucun modèle ne remplace l'embarqué : ni la chaîne ni le modèle plat ne
+    remplissent P4.6, et le choix entre les deux dépend d'un arbitrage
+    (fausses alertes sur riz sain contre maladies nommées sur du hors sujet)
+    qui revient à l'équipe.
+  - Chaque `.tflite` embarque son propre backbone : un seul modèle à deux
+    sorties sera nécessaire avant toute intégration.
+- **Alternatives écartées :**
+  - Porte à 8 sorties avec les seules données existantes : 3 organes sans
+    aucune image, le modèle les aurait confondus avec les autres sans signal.
+  - Remplir les organes manquants avec des images d'autres plantes ou des
+    photos de feuilles recadrées : données trompeuses, résultats invérifiables.
+  - Garder un seuil unique de 0,5 pour l'étage B : plus simple, mais laisse
+    les classes rares sans rappel ; le réglage conjoint des seuils, sous
+    contrainte sur les feuilles saines, est la suite proposée.
+
+---
+
+## ADR-014 — feuille_v2 embarqué dans l'app, garde-fous d'ADR-006 rétablis pour les sessions (2026-09-17)
+
+**Statut :** adopté (tâche P4.5, partielle)
+
+- **Contexte :** l'app embarquait encore le modèle de l'audit (3 classes, 120
+  images, sans classe saine). Avant de le remplacer, une mesure a reproduit
+  ce que voit l'agriculteur pour une photo de feuille
+  (`ml/reports/comparaison_integration_2026-09-17.md`). Elle a révélé que
+  **l'app nommait une maladie sur 50 photos hors sujet sur 50 et sur 670
+  feuilles saines sur 670**. Lors de la refonte en sessions (P2, ADR-007),
+  deux garde-fous d'ADR-006 avaient été perdus sans qu'aucun test ne le
+  voie :
+  - `session_scan_provider.dart` ne transmettait que le classement du modèle :
+    la certitude calculée par le service, qui applique le contrôle de
+    végétation (10 %), était jetée ;
+  - `session_result_screen.dart` affichait le nom de la première classe dès
+    qu'une photo était passée par le modèle, même en certitude « incertain »,
+    et la session l'enregistrait comme résultat.
+- **Décision :**
+  - **Modèle :** `ml/models/feuille_v2` (13 classes dans un softmax, dont
+    `feuille_saine` et `pas_riz`) remplace l'embarqué ; l'ancien est archivé
+    dans `ml/models/embarque_v1`. `model_version.json` passe en 2.0.0. La
+    chaîne à trois étages (ADR-013) n'est pas retenue ici : la fusion de P2.4
+    attend des probabilités qui somment à 1, pas des sigmoïdes, et le modèle
+    plat, garde-fous rétablis, ne nomme plus qu'une photo hors sujet sur 50
+    (la chaîne en nommait 3, mesurée sans ces garde-fous : comparaison
+    indicative seulement).
+  - **Garde-fous rétablis dans la fusion** (`diagnosis_fusion.dart`) : une
+    photo que le modèle rejette (moins de 10 % de végétation, ou `pas_riz` en
+    tête) n'apporte aucun score ; `pas_riz` n'est jamais un candidat ; un
+    résultat « incertain » n'est pas nommable ; si toutes les photos vues par
+    le modèle sont rejetées, la certitude enregistrée est « incertain », pour
+    que l'agent backend (qui lit certitude et top 3) ne nomme pas une piste
+    tirée des seules réponses.
+  - **Écran :** trois cas distincts — maladie nommée, photo analysée mais rien
+    retenu (« L'application ne reconnaît pas cette photo », consignes de
+    reprise), organe non analysé (message existant). Pas de question sur la
+    part de parcelle touchée pour une plante saine.
+  - **Présentation inchangée** : `probableMinScore` reste à 0,999, les
+    résultats restent des pistes à confirmer avec la mention « modèle
+    expérimental ». Rien n'est mesuré sur des photos malgaches (P4.6).
+  - **Deux vocabulaires cohabitent** : les ids de taxonomie du nouveau modèle,
+    et les étiquettes anglaises de l'ancien, gardées dans `DiseaseCatalog` et
+    dans `backend/app/agent/correspondances.py` pour les sessions déjà
+    enregistrées ou synchronisées. `DiseaseInfo.ficheId` relie chaque classe à
+    sa fiche de connaissance (`pyriculariose_feuille` → `pyriculariose`).
+  - **Questionnaire** : indices réexprimés dans le vocabulaire du modèle ;
+    l'indice du charbon foliaire (sans équivalent) est retiré ; aucun indice
+    inventé pour les nouvelles classes. Un test impose désormais que chaque clé
+    d'indice soit une étiquette du modèle embarqué.
+- **Conséquences (mesurées sur la validation publique, photo seule) :**
+  - Hors sujet avec une maladie nommée : 50/50 → 1/50 ; feuilles saines avec
+    fausse alerte : 670/670 → 42/670 ; maladies avec le bon nom : 15 % → 67 %,
+    avec un mauvais nom : 85 % → 7 %.
+  - 26 % des vraies maladies n'affichent rien ou « saine » (pyriculariose
+    34 %) : l'app renvoie alors vers le technicien, comme voulu.
+  - Le script `ml/scripts/eval_off_topic.py` ne vaut plus que pour son groupe
+    hors sujet : ses feuilles de riz viennent des jeux d'entraînement de
+    `feuille_v2`. `ml/scripts/comparer_integration.py` le remplace pour le riz.
+  - Les nouvelles chaînes malgaches (noms de maladies, message « non
+    reconnue ») sont à relire comme les autres
+    (`docs/traductions/relecture-malgache.csv`).
+  - Rien n'a été vérifié sur téléphone (aucun émulateur sur le poste) : taille
+    de l'APK, latence et mémoire du nouveau modèle restent à mesurer.
+  - Restent de P4.5 : `DiagnosisEngine`/`model_registry.dart`, inférence en
+    isolate, mise à jour à distance vérifiée par SHA-256.
+- **Alternatives écartées :**
+  - Garder l'ancien modèle et corriger seulement les garde-fous : l'ancien
+    modèle, même corrigé, nomme une maladie sur 21 photos hors sujet sur 50 et
+    donne un mauvais nom à 55 % des maladies.
+  - Intégrer la chaîne à trois étages : nécessite de redéfinir la fusion pour
+    des sorties sigmoïdes, pour un moins bon résultat sur les feuilles saines.
+  - Relever le seuil « probable » maintenant que le modèle est meilleur :
+    aucune mesure sur photos malgaches ne le justifie (P4.6).
+  - Traduire les anciennes étiquettes des sessions enregistrées vers le
+    nouveau vocabulaire : migration de données sans bénéfice, le catalogue
+    sait déjà lire les deux.
