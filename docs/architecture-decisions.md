@@ -197,3 +197,332 @@ Chaque décision structurante du projet AgriMada est consignée ici : contexte, 
   - Garder une photo = un diagnostic et dédupliquer à l'affichage : le journal aurait menti sur ce qui a été observé, et rien n'aurait permis de croiser feuille et collet.
   - Moyenne des probabilités entre photos : une seule photo très confiante (souvent à tort, cf. ADR-006) aurait emporté la décision.
   - Analyser quand même les photos floues en baissant la certitude : le modèle donne des scores élevés sur du flou, la baisse de certitude n'aurait rien corrigé.
+
+---
+
+## ADR-008 — Phase P3 limitée aux jeux publics, pas de collecte terrain dans l'app (2026-09-16)
+
+**Statut :** adopté par l'équipe (tâches P3.2, P3.6, P3.7 ; P3.3 abandonnée)
+
+- **Contexte :** le plan de correction prévoyait un mode de collecte dans l'app
+  (tâche P3.3, réservé aux techniciens et étudiants ISPM) pour photographier sur le
+  terrain les classes absentes des jeux publics : racines, RYMV malgache
+  (*mavoratsy*), dégâts de *voana*, toxicité ferreuse, pourriture de la gaine,
+  stérilité au froid, dégâts de punaises (voir `ml/DATASETS.md`, section « Classes
+  sans données publiques »). En cours de chantier, l'équipe a décidé de ne pas
+  construire cette collecte terrain dans l'app et de s'appuyer plutôt sur
+  l'ensemble des jeux déjà rassemblés (P0.4/ADR-003) : 8 jeux publics inventoriés
+  (`ml/data/raw/inventory.csv`), environ 29 400 images utiles une fois les classes
+  hors sujet écartées (`ml/data/manifest.csv`).
+- **Décision :**
+  - **P3.3 (mode collecte, rôle technicien, endpoint backend, consentement dans
+    l'app) n'est pas construite.** Aucune colonne de rôle, aucun nouvel endpoint,
+    aucun écran ajouté pour ce chantier.
+  - **P3.2** : `ml/label_map.yaml` fait correspondre chaque étiquette brute des 8
+    jeux déjà inventoriés à un id de `ml/taxonomy_v1.yaml` (44 classes brutes
+    mappées, aucune oubliée — vérifié par `ml/scripts/apply_label_map.py`, qui
+    échoue si une classe brute n'a pas de correspondance).
+  - **P3.6** : `ml/data/manifest.csv` (versionné) trace chaque image utile
+    (id, sha256, source, licence, organe, classe, site, date, annotateur, split),
+    à la granularité image pour les fichiers déjà extraits et à la granularité
+    archive pour les jeux publics pas encore décompressés (l'extraction réelle est
+    laissée à P4.1). `ml/data/dedup.py` calcule les quasi-doublons par empreinte
+    perceptuelle sur un dossier déjà extrait. DVC n'est pas initialisé : le
+    manifeste reste versionné par git seul tant qu'aucun bucket d'images n'existe.
+  - **P3.7** : `ml/scripts/fetch_negatives.py` (généralisation du script de P1.2)
+    reste sur Wikimedia Commons pour les photos négatives du modèle de porte.
+    Open Images et iNaturalist, mentionnés dans le plan, ne sont pas implémentés
+    (Open Images demande des index de plusieurs Go, iNaturalist une intégration
+    d'API distincte).
+  - **P3.4 (protocole de collecte terrain) et P3.5 (annotation/contrôle par
+    l'agronome)** sont recentrées sur les jeux publics : la validation à faire
+    par l'agronome porte sur les correspondances de `ml/label_map.yaml` et sur
+    les classes « à confirmer » de la taxonomie, pas sur des photos de terrain
+    (voir `docs/donnees/annotation-controle-qualite.md`).
+- **Conséquences :**
+  - Les classes sans jeu public (racines, RYMV malgache, *voana*, toxicité
+    ferreuse, pourriture de la gaine, stérilité au froid, punaises) restent non
+    couvertes par un modèle. L'app doit le dire explicitement (« non couvert : à
+    montrer à un technicien ») plutôt que deviner, comme le prévoyait déjà le
+    tableau des risques du plan de correction.
+  - P4 (modèles) démarre uniquement sur les jeux publics disponibles : le rappel
+    et la précision par classe (critères P4.6) ne pourront être mesurés que pour
+    les classes couvertes.
+  - Si l'équipe décide plus tard de combler ces classes, une nouvelle décision
+    (mode de collecte, partenariat, ou jeu tiers à trouver) sera nécessaire :
+    ce chantier n'est pas fermé, seulement non engagé maintenant.
+- **Alternatives écartées :**
+  - Construire P3.3 comme prévu au plan : rôle technicien, stockage de photos
+    côté serveur, écrans dédiés — écarté pour rester concentré sur l'exploitation
+    des données déjà disponibles plutôt que sur une collecte terrain qui demande
+    des techniciens sur site, hors du périmètre décidé pour ce chantier.
+  - Utiliser Open Images/iNaturalist pour P3.7 dès maintenant : reporté, la
+    volumétrie de mise en place (Open Images) ou l'intégration d'API distincte
+    (iNaturalist) n'était pas justifiée pour ce tour.
+
+---
+
+## ADR-009 — Fiches de connaissance regroupées par problème, pas par classe de taxonomie (2026-09-17)
+
+**Statut :** adopté (tâche P5.1 ; P5.2 à P5.6 non engagées)
+
+- **Contexte :** `ml/taxonomy_v1.yaml` découpe chaque maladie par organe pour
+  les besoins de la classification (ex. `pyriculariose_feuille`,
+  `pyriculariose_noeud_collet` et `pyriculariose_cou` sont trois ids
+  distincts). Le format de fiche du plan (P5.1) veut une fiche par problème
+  qu'un agriculteur reconnaît, avec une entrée par organe où il se manifeste
+  — pas une fiche par id de classification, qui aurait dupliqué le nom, les
+  sources et la prévention de la pyriculariose trois fois.
+- **Décision :**
+  - `ml/scripts/generate_fiches.py` regroupe les ids de taxonomie en fiches
+    par problème (table `FICHES`, champ `taxonomy_ids`) et calcule noms,
+    agent et sources depuis `ml/taxonomy_v1.yaml` pour rester cohérent sans
+    dupliquer à la main. Le contenu par organe (symptômes, confusions,
+    conditions, prévention) est écrit à la main à partir du plan de
+    correction (section « Diagnostiquer au-delà de la feuille ») et des
+    `notes` déjà sourcées de la taxonomie.
+  - Les classes « saines » et les catégories techniques de la porte
+    (`riz_exploitable`, `pas_riz`, `photo_inexploitable`, `*_sain(e)`) n'ont
+    pas de fiche : rien à prévenir ni à traiter.
+  - 30 fiches livrées dans `knowledge/fiches/*.json` (27 générées + 3 déjà
+    écrites à la main pour les carences NPK), toutes au statut `brouillon`
+    (`validation.statut`), aucune relue par l'agronome.
+  - `knowledge/schema.json` (JSON Schema) + `ml/scripts/validate_fiches.py`,
+    intégré à la CI (job `fiches`) : vérifie la structure, qu'aucun produit
+    ni dosage n'apparaît (`lutte_chimique.produits` toujours vide), et
+    qu'aucune fiche brouillon n'est référencée dans `lib/` — vrai
+    aujourd'hui par construction, puisque P5.3 (consultation hors ligne)
+    n'est pas fait : le critère « terminé quand » de P5.1 est donc
+    vérifiable mécaniquement dès qu'une intégration sera tentée.
+- **Conséquences :**
+  - Un contenu manquant au-delà de la `note` de taxonomie n'est jamais
+    inventé : quelques fiches (`racines_rongees`, `foyers_desseches`) n'ont
+    qu'une phrase, honnêtement incomplète, en attendant l'agronome.
+  - P5.2 (rédaction) est fait dans son volume (~30 fiches, conforme à
+    l'estimation du plan) mais pas dans sa validation : aucune fiche n'a de
+    `validation.par`/`date` renseignés, et les noms malgaches restent `null`
+    sauf ceux déjà sourcés d'une fiche FOFIFA dans la taxonomie.
+  - P5.3 (écran Guides relié aux fiches), P5.4 (endpoint RAG, pgvector,
+    SDK Anthropic) et P5.6 (boucle technicien, qui suppose une collecte
+    terrain écartée par ADR-008) ne sont pas engagées : ce sont des chantiers
+    à part entière (nouvelle fonctionnalité Flutter, choix d'infrastructure
+    vectorielle sur une base actuellement SQLite, coût réel d'appels API),
+    pas une suite mécanique de P5.1.
+- **Alternatives écartées :**
+  - Une fiche par id de taxonomie (comme les jeux d'entraînement) : aurait
+    dupliqué pyriculariose, toxicité ferreuse et les foreurs plusieurs fois
+    et cassé l'usage RAG visé (« une fiche = un sujet de conversation »).
+  - Écrire du contenu par organe pour toutes les classes même sans source :
+    écarté, contraire à l'honnêteté déjà pratiquée dans la taxonomie
+    (`a_confirmer`, `symptome_a_preciser`).
+
+---
+
+## ADR-010 — Consultation hors ligne des fiches, brouillon compris (2026-09-17)
+
+**Statut :** adopté (tâche P5.3)
+
+- **Contexte :** le critère « terminé quand » de P5.1 (ADR-009) interdisait
+  d'embarquer une fiche brouillon dans l'app — écrit avant que P5.3 (écran
+  Guides relié aux fiches) ne soit engagée, en supposant une validation
+  agronomique préalable. L'équipe a choisi d'avancer sur P5.3 sans attendre
+  cette validation, comme elle affiche déjà des résultats de modèle non
+  validés avec un bandeau « modèle expérimental » (ADR-006) plutôt que de ne
+  rien montrer.
+- **Décision :**
+  - Les 30 fiches de `assets/knowledge/fiches.json` sont embarquées dans
+    l'écran Guides, brouillon compris, à condition d'un bandeau visible par
+    fiche (clé ARB `guidesDraftBadge`) indiquant qu'elle n'est pas validée
+    par un agronome — même logique de divulgation qu'ADR-006.
+  - `ml/scripts/validate_fiches.py` ne bloque plus l'embarquement de fiches
+    brouillon ; il vérifie à la place que la clé de divulgation existe et
+    est réellement utilisée dans `lib/` dès que `fiches.json` y est
+    référencé. Une fiche embarquée sans divulgation reste bloquée en CI.
+  - Le questionnaire de confusion (champ `confusions` d'une fiche) est un
+    outil de lecture dans le guide, séparé du questionnaire de diagnostic de
+    P2 (`lib/features/scan/domain/questionnaire.dart`, indices de fusion
+    calibrés) : il aide à choisir entre deux fiches en les lisant, il n'ajoute
+    aucun indice à la fusion d'une session de scan.
+- **Conséquences :**
+  - Un agriculteur ou un technicien peut désormais consulter hors ligne les
+    30 classes de la taxonomie, pas seulement les 3 que le modèle embarqué
+    sait reconnaître — utile même si le modèle ne progresse pas.
+  - Le bandeau de divulgation devra rester quand des fiches seront validées
+    une à une (P5.2) : `ml/scripts/validate_fiches.py` continuera de
+    l'exiger tant qu'au moins une fiche reste brouillon.
+- **Alternatives écartées :**
+  - Attendre la validation agronomique de toutes les fiches avant d'écrire
+    l'écran : aurait bloqué P5.3 indéfiniment, sans bénéfice pour
+    l'utilisateur en attendant (le contenu brouillon reste plus utile que
+    l'absence de contenu, tant qu'il est signalé comme tel).
+  - Fusionner le questionnaire de confusion dans celui de P2 : aurait mélangé
+    des indices calibrés (P2.4) avec un outil de lecture non calibré.
+- **Suivi (revue de code du 2026-09-17) :**
+  - La divulgation est désormais garantie par un test widget
+    (`test/features/knowledge/presentation/widgets/fiche_card_test.dart`) et
+    non plus seulement par la recherche de texte de `validate_fiches.py` :
+    celle-ci restait verte si quelqu'un supprimait la condition d'affichage
+    en laissant la clé ARB dans le fichier.
+  - `validate_fiches.py` vérifie en plus que le bundle embarqué est le reflet
+    exact de `knowledge/fiches/` (l'app ne lit que le bundle : le valider seul
+    laissait passer un bundle périmé), que les confusions pointent vers des
+    fiches existantes, et que les codes d'organe du schéma correspondent à
+    l'enum `Organe` — un code connu du seul schéma ferait disparaître des
+    symptômes en silence côté Flutter.
+  - Une question de confusion non traduite vaut `null` et l'écran affiche le
+    français : les fiches embarquaient un texte d'attente
+    (« …à traduire et valider… ») qui s'affichait tel quel en malgache.
+
+---
+
+## ADR-011 — Conseil à partir des fiches : index en mémoire et API Gemini (2026-09-17)
+
+**Statut :** adopté (tâches P5.4 et P5.5)
+
+- **Contexte :** le plan prévoyait un endpoint RAG sur pgvector avec le SDK
+  Anthropic (rappelé dans ADR-009). Le backend tourne sur SQLite, le corpus se
+  limite aux 30 fiches (environ 150 extraits), et l'équipe dispose d'une clé
+  Google AI Studio. P5.5 prévoyait 150 cas validés par l'agronome référent,
+  qui n'est pas disponible.
+- **Décision :**
+  - Index vectoriel dans un fichier versionné
+    (`backend/app/rag/index_fiches.json`), construit hors ligne par
+    `backend/scripts/build_rag_index.py` avec `gemini-embedding-001`
+    (768 dimensions) et chargé en mémoire ; recherche exacte par similarité
+    cosinus. Ni pgvector ni migration vers Postgres.
+  - Génération par l'API Gemini, SDK `google-genai`, modèle
+    `gemini-3.5-flash-lite` par défaut (variable `RAG_MODELE_GENERATION`).
+  - `POST /api/conseil/question` : compte connecté obligatoire, quota de
+    20 questions par compte et par jour (heure de Madagascar), question rendue
+    au quota quand Gemini ne répond pas. Seul le nombre de questions est
+    stocké (table `usages_conseil`), jamais leur texte.
+  - Trois barrières contre l'invention : seuil de similarité (sous le seuil,
+    réponse fixe sans appel au modèle), réponse `HORS_FICHES` exigée du modèle
+    quand les extraits ne répondent pas, et filtre appliqué après génération
+    qui remplace toute réponse citant un produit ou une dose (ADR-005) — la
+    consigne seule ne le garantit pas.
+  - Réponses en français ou en malgache selon la demande. Chaque réponse
+    porte des avertissements codés, que l'application pourra traduire :
+    `reponse_automatique`, `fiches_brouillon` (ADR-010), `malgache_non_relu`.
+  - P5.5 : 150 cas (`knowledge/eval/cas_rag.yaml`) validés par l'équipe
+    elle-même, sans agronome — décision explicite de l'équipe.
+    `backend/scripts/eval_rag.py` mesure la recherche, propose un seuil,
+    vérifie abstention, sécurité et avertissements, et produit un CSV des
+    réponses à relire.
+- **Conséquences :**
+  - Toute modification de `knowledge/fiches/` impose de reconstruire l'index,
+    clé API comprise : `tests/test_rag.py` échoue en CI tant que l'empreinte
+    des fiches ne correspond plus.
+  - Le conseil exige une connexion : il complète le guide hors ligne
+    (ADR-010), il ne le remplace pas. L'application Flutter ne l'appelle pas
+    encore.
+  - Les résultats de P5.5 mesurent la cohérence du conseil avec les fiches,
+    pas la vérité agronomique : ni les fiches ni les cas n'ont été relus par un
+    agronome.
+  - Sur l'offre gratuite de Google AI Studio, les contenus envoyés peuvent
+    servir à Google pour améliorer ses services (à vérifier dans les
+    conditions en vigueur). Aucune identité ni localisation n'est transmise,
+    mais un agriculteur peut écrire ce qu'il veut dans sa question : passer à
+    l'offre payante avant un usage réel.
+- **Alternatives écartées :**
+  - pgvector sur Postgres : migration d'infrastructure complète pour environ
+    150 vecteurs.
+  - sqlite-vec : dépendance binaire à installer en local, en CI et dans
+    l'image Docker, sans gain à cette échelle.
+  - Quota en mémoire, comme la limite de connexion (P1.11) : remis à zéro à
+    chaque redémarrage, il ne plafonnerait pas la facture de façon fiable.
+  - SDK Anthropic prévu au plan : l'équipe dispose d'une clé Google et
+    n'en voit pas le besoin.
+
+---
+
+## ADR-012 — Agent de conseil relié aux fiches, parcelles et scans, derrière des garde-fous déterministes (2026-09-17)
+
+**Statut :** adopté
+
+- **Contexte :** le conseil RAG (ADR-011) ne voit que les fiches. L'équipe
+  veut un agent qui relie les briques existantes — fiches, parcelles et leur
+  contexte de culture, scans synchronisés (sessions, pistes de la fusion,
+  réponses au questionnaire) — et les garde-fous qui manquent pour que le
+  système soit complet. Deux constats faits avec le vrai modèle avant de
+  concevoir : `gemini-3.5-flash-lite` sait appeler des outils, mais il a
+  appelé `dernier_scan(parcelle_id=12)` avec un identifiant tiré de la
+  question, et il a classé « Quel fongicide pour ma rizière ? » comme une
+  question sur la parcelle plutôt qu'une demande de produit.
+- **Décision :**
+  - **Agent à outils, boucle bornée** (`backend/app/agent/`,
+    `POST /api/agent/message`) : Gemini choisit parmi quatre outils en lecture
+    seule — `rechercher_fiches`, `lire_fiche`, `lister_parcelles`,
+    `derniers_scans` —, 4 appels au plus par question, plafond de jetons en
+    entrée, arguments validés strictement (tout argument inconnu, dont un
+    `user_id`, est refusé).
+  - **Cloisonnement dans le code** : chaque outil filtre par le compte
+    authentifié ; une parcelle d'un autre compte répond « introuvable ». Les
+    champs saisis par l'agriculteur (nom de parcelle, variété, réponses) sont
+    nettoyés, raccourcis et présentés comme des données.
+  - **Pont modèle → fiches** explicite (`correspondances.py`) : les sessions
+    portent les étiquettes du modèle embarqué (`Bacterial leaf blight`…), pas
+    les identifiants de fiches ; `Leaf smut` (charbon foliaire) n'a aucune
+    fiche et le dit. Un scan que l'app ne nomme pas (aucune observation passée
+    par le modèle, ou certitude « incertain », ADR-006/007) n'est pas nommé
+    par l'agent non plus.
+  - **Garde-fous d'entrée, sans modèle** : urgence de santé humaine (servie
+    avant le coupe-circuit, le consentement et le quota), tentative
+    d'injection, salutation, demande de produit ou de dose (consigne
+    renforcée et orientation technicien), masquage des téléphones et
+    courriels avant tout envoi à Google et tout stockage.
+  - **Garde-fous de sortie, sans modèle** : produit ou dose → message fixe
+    (ADR-005) ; réponse sans aucun outil → « hors fiches » ; maladie nommée
+    sans que les outils l'aient renvoyée → réponse de repli construite à
+    partir des seules preuves ; diagnostic affirmé (ADR-006) → même repli.
+    Seules les fiches effectivement nommées sont citées ; l'avertissement
+    « brouillon » porte sur toutes les fiches consultées.
+  - **Orientation technicien** avec motifs codés : `piste_a_confirmer`,
+    `scan_sans_nom`, `gravite_elevee`, `maladie_a_signaler` (RYMV et
+    bactérioses), `hors_fiches`, `demande_traitement`.
+  - **Conversation multi-tours à historique signé** : le serveur ne garde
+    pas l'état ; il signe (HMAC dérivé de `SECRET_KEY`) chaque échange, lié au
+    compte et à la conversation ; l'app renvoie les 6 derniers. Un échange
+    modifié, fabriqué ou venu d'un autre compte est refusé (422), un échange
+    de plus de 24 h est écarté.
+  - **Traces avec les textes**, à la demande de l'équipe : table
+    `traces_agent` (question masquée, réponse, outils, garde-fous, jetons,
+    durée). En contrepartie : consentement explicite obligatoire (403 sinon,
+    écran d'accord dans l'app), conservation 90 jours puis purge
+    automatique, droit à l'effacement (`DELETE /api/agent/traces`, menu de
+    l'écran).
+  - **Coupe-circuit** `AGENT_ACTIF`, quota partagé avec le conseil RAG.
+  - **Écran Flutter « Conseiller »** (`lib/features/agent/`) : accord avant
+    tout envoi, bandeau permanent, avertissements traduits par l'app à partir
+    de leur code, bouton « Demander à un technicien » (partage) quand le
+    serveur le demande, synchronisation des scans avant chaque question (le
+    serveur ne voit que ce qui est synchronisé).
+- **Conséquences :**
+  - Chaque question coûte de 1 à 5 appels à Gemini (souvent 2 ou 3) ; le
+    quota par compte plafonne le total.
+  - Les garde-fous déterministes ont des faux positifs possibles ; ils
+    produisent alors une réponse plus pauvre mais sûre. Deux ont été trouvés
+    et corrigés pendant les essais réels : « diagnostic **sur** votre
+    culture » confondu avec « sûr » une fois les accents retirés, et « **non**
+    un diagnostic certain » pris pour une affirmation.
+  - La documentation du SDK indique le rôle `tool` pour les réponses
+    d'outils ; l'API Gemini le refuse (400) : le rôle `user` est utilisé.
+  - Les textes conservés sont des données personnelles potentielles, lues
+    aussi par Google sur l'offre gratuite : passer à l'offre payante et
+    confirmer la base légale avant un usage réel.
+  - Le journal serveur (`GET /api/journal`) lisait encore l'ancienne table
+    `diagnostics` et affichait « malade » pour toute piste. Corrigé dans la
+    foulée : il lit les sessions, applique la règle de l'app (`malade`
+    seulement pour un résultat probable, sinon `a_confirmer`, ADR-006) et ne
+    garde les anciens diagnostics qu'en repli pour une parcelle sans session.
+  - L'écran n'a été vérifié que par tests widget (aucun émulateur sur le
+    poste) ; les chaînes malgaches sont à relire comme les autres.
+- **Alternatives écartées :**
+  - Orchestrateur à plan fixe (le code choisit les briques) : plus
+    prévisible, mais incapable d'enchaîner librement parcelle → scan → fiche.
+  - Classer l'intention avec le modèle pour router les demandes dangereuses :
+    le modèle s'est trompé sur une demande de fongicide.
+  - Conversation stockée côté serveur : aurait lié l'agent à la durée de
+    conservation des traces ; l'historique signé garde l'agent sans état.
+  - Traces sans texte : proposé, écarté par l'équipe au profit de
+    l'amélioration des fiches à partir des vraies questions.
