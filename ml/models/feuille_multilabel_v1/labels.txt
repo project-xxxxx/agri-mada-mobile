@@ -1,0 +1,11 @@
+blb
+bls
+carence_azote
+carence_phosphore
+carence_potassium
+cercosporiose
+degats_hispa
+echaudure
+helminthosporiose
+mildiou
+pyriculariose_feuille
