@@ -1,15 +1,22 @@
 import 'package:dio/dio.dart';
 
-String? _extractServerMessage(Response<dynamic>? response) {
-  final Object? data = response?.data;
+import 'failure.dart';
 
-  if (data case final Map<String, dynamic> map) {
-    final Object? message = map['message'];
-    return message is String ? message : null;
-  }
-
-  return null;
-}
+/// Cause d'un échec réseau déduite de l'exception Dio (tâche P1.5).
+FailureCode failureCodeForDio(DioException e) => switch (e.type) {
+      DioExceptionType.connectionTimeout ||
+      DioExceptionType.sendTimeout ||
+      DioExceptionType.receiveTimeout =>
+        FailureCode.timeout,
+      DioExceptionType.connectionError => FailureCode.offline,
+      DioExceptionType.badResponse => switch (e.response?.statusCode) {
+          401 || 403 => FailureCode.sessionExpired,
+          422 => FailureCode.invalidData,
+          429 => FailureCode.tooManyAttempts,
+          _ => FailureCode.server,
+        },
+      _ => e.error is AuthFailure ? FailureCode.sessionExpired : FailureCode.unknown,
+    };
 
 sealed class AppException implements Exception {
   const AppException(this.message);
@@ -23,6 +30,10 @@ final class NetworkException extends AppException {
   const NetworkException(super.message);
 
   factory NetworkException.fromDioError(DioException e) {
+    final responseData = e.response?.data;
+    final responseMap =
+        responseData is Map<String, dynamic> ? responseData : null;
+
     return switch (e.type) {
       DioExceptionType.connectionTimeout ||
       DioExceptionType.sendTimeout ||
@@ -31,7 +42,9 @@ final class NetworkException extends AppException {
       DioExceptionType.connectionError =>
         const NetworkException('Impossible de se connecter au serveur'),
       DioExceptionType.badResponse => NetworkException(
-          _extractServerMessage(e.response) ?? 'Erreur serveur',
+          responseMap?['message'] as String? ??
+              responseMap?['detail'] as String? ??
+              'Erreur serveur',
         ),
       _ => NetworkException(e.message ?? 'Erreur réseau inconnue'),
     };

@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 
 abstract final class AppTypography {
-  static const String _fontFamily = 'Poppins';
+  // Use Inter as the brand font to match the splash design
+  static const String _fontFamily = 'Inter';
 
   static const TextStyle displayLarge = TextStyle(
     fontFamily: _fontFamily,
@@ -71,6 +72,14 @@ abstract final class AppTypography {
     fontFamily: _fontFamily,
     fontSize: 20,
     fontWeight: FontWeight.w700,
+    color: AppColors.textOnPrimary,
+  );
+
+  // Brand title used for splash and major headings (matches Figma visual)
+  static const TextStyle brandTitle = TextStyle(
+    fontFamily: 'Inter',
+    fontSize: 40,
+    fontWeight: FontWeight.w900,
     color: AppColors.textOnPrimary,
   );
 

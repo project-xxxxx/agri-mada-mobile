@@ -1,0 +1,55 @@
+{
+  "id": "carence_azote",
+  "noms": {
+    "fr": "Carence en azote",
+    "mg": null,
+    "sci": null,
+    "autres_noms_mg": []
+  },
+  "organes": {
+    "feuille": [
+      "chlorose (jaunissement) et réduction de la taille des feuilles",
+      "symptômes commençant sur les feuilles âgées puis se généralisant"
+    ]
+  },
+  "confusions": [
+    {
+      "fiche": "toxicite_ferreuse",
+      "question": {
+        "fr": "Le jaunissement est-il pâle et uniforme sur les vieilles feuilles, ou une pigmentation orange rouille qui commence à la pointe des feuilles ?",
+        "mg": null
+      }
+    }
+  ],
+  "conditions": {
+    "ecosystemes": [],
+    "altitude_m": [],
+    "facteurs": [
+      "sol pauvre en azote",
+      "apport d'azote insuffisant ou mal réparti dans le temps"
+    ]
+  },
+  "prevention": [
+    "apport d'azote fractionné plutôt qu'en une seule fois",
+    "surveillance de la couleur du feuillage aux stades clés (tallage, montaison)"
+  ],
+  "lutte_chimique": {
+    "statut": "sans_objet",
+    "note": "carence nutritionnelle, pas une maladie : correction par la fertilisation, pas par un produit phytosanitaire"
+  },
+  "sources": [
+    {
+      "titre": "Manifestations de quelques carences courantes en éléments minéraux",
+      "id_reference": "cours_epsa_pathologie_riz",
+      "page": 48
+    }
+  ],
+  "taxonomy_ids": [
+    "carence_azote"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}

@@ -1,0 +1,61 @@
+{
+  "date": "2026-09-17",
+  "framework": "tensorflow 2.21.0",
+  "etage": "A (porte)",
+  "classes": [
+    "pas_riz",
+    "riz_exploitable"
+  ],
+  "effectifs_entrainement": {
+    "pas_riz": 334,
+    "riz_exploitable": 11621
+  },
+  "exactitude_validation": 0.9996652159357214,
+  "par_classe": [
+    {
+      "classe": "pas_riz",
+      "support": 84,
+      "precision": 1.0,
+      "rappel": 0.9880952380952381,
+      "f1": 0.9940119760479043
+    },
+    {
+      "classe": "riz_exploitable",
+      "support": 2903,
+      "precision": 0.9996556473829201,
+      "rappel": 1.0,
+      "f1": 0.9998277940416739
+    }
+  ],
+  "criteres_plan_p4_6": {
+    "pas_riz_rejetees": 0.9880952380952381,
+    "cible_pas_riz_rejetees": 0.95,
+    "riz_exploitable_rejete": 0.0,
+    "cible_riz_exploitable_rejete_max": 0.05,
+    "mesure_sur": "photos publiques (Inde, Bangladesh, Wikimedia), pas un jeu de test malgache"
+  },
+  "hors_sujet": {
+    "n_photos": 50,
+    "confiance_moyenne": 0.9932384490966797,
+    "confiance_max": 1.0,
+    "au_dessus_du_seuil": {
+      "0.7": 50,
+      "0.9": 49,
+      "0.999": 41
+    },
+    "classees_pas_riz": 41
+  },
+  "epochs_effectues": 26,
+  "regularisation": {
+    "label_smoothing": 0.05,
+    "mixup_alpha": 0.2,
+    "seed": 123
+  },
+  "calibration": {
+    "temperature": 0.29874371859296484,
+    "ece_avant": 0.03187228290780077,
+    "ece_apres": 0.0006860741054010024,
+    "brier_avant": 0.003667942991538799,
+    "brier_apres": 0.0007923268040661364
+  }
+}

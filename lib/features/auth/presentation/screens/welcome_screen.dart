@@ -1,40 +1,86 @@
+import 'package:agri_mada/l10n/app_localizations.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import '../../../../app/router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
-import '../../../../core/constants/test_keys.dart';
 import '../../../../core/widgets/app_button/app_button.dart';
+import '../providers/session_provider.dart';
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends ConsumerWidget {
   const WelcomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context);
+    final bootstrapAsync = ref.watch(appBootstrapProvider);
+    final snapshot = bootstrapAsync.valueOrNull;
+    final prenom = snapshot?.profile['prenom'];
+    final modelVersion = snapshot?.modelVersion?.version;
+    final iaStatus = snapshot?.isAiReady == true
+        ? loc.splashStatusAiReady
+        : loc.splashStatusAiUnavailable;
+
     return Scaffold(
       backgroundColor: AppColors.background,
       body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(
-            horizontal: AppSpacing.screenHorizontal,
-          ),
-          child: Column(
-            children: [
-              const SizedBox(height: AppSpacing.lg),
-              const _WelcomeLogo(),
-              const Spacer(),
-              const _WelcomeHero(),
-              const Spacer(),
-              _WelcomeTexts(),
-              const SizedBox(height: AppSpacing.xl),
-              _WelcomeActions(
-                onStart: () => context.go(AppRoutes.home),
-                onLogin: () => context.go(AppRoutes.login),
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: constraints.maxHeight),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.screenHorizontal,
+                  ),
+                  child: Column(
+                    children: [
+                      const SizedBox(height: AppSpacing.lg),
+                      const _WelcomeLogo(),
+                      const SizedBox(height: AppSpacing.xl),
+                      const _WelcomeHero(),
+                      const SizedBox(height: AppSpacing.xl),
+                      _WelcomeTexts(),
+                      if (prenom != null && prenom.trim().isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(top: AppSpacing.sm),
+                          child: Text(
+                            loc.homeHelloUser(prenom),
+                            style: AppTypography.bodyMedium.copyWith(
+                              color: AppColors.primary,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                      Padding(
+                        padding: const EdgeInsets.only(top: AppSpacing.xs),
+                        child: Text(
+                          modelVersion == null
+                              ? iaStatus
+                              : '$iaStatus • ${loc.welcomeModelVersion(modelVersion)}',
+                          style: AppTypography.bodySmall,
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xl),
+                      _WelcomeActions(
+                        onStart: () => context.go(
+                          snapshot?.isLoggedIn == true
+                              ? AppRoutes.home
+                              : AppRoutes.login,
+                        ),
+                        onLogin: () => context.go(AppRoutes.login),
+                      ),
+                      const SizedBox(height: AppSpacing.xl),
+                    ],
+                  ),
+                ),
               ),
-              const SizedBox(height: AppSpacing.xl),
-            ],
-          ),
+            );
+          },
         ),
       ),
     );
@@ -78,7 +124,6 @@ class _WelcomeHero extends StatelessWidget {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // Cercle principal
           Container(
             width: 269,
             height: 269,
@@ -86,47 +131,33 @@ class _WelcomeHero extends StatelessWidget {
               shape: BoxShape.circle,
               color: AppColors.primaryLight,
             ),
-            child: ClipOval(
-              child: Image.asset(
-                'assets/images/welcome_hero.png',
-                fit: BoxFit.cover,
-                errorBuilder: (_, __, ___) => Container(
-                  color: AppColors.primaryLight,
-                  child: const Icon(
-                    Icons.person,
-                    size: 120,
-                    color: AppColors.primary,
-                  ),
-                ),
-              ),
+            // Pas encore d'illustration validée : icône plutôt qu'un fichier
+            // image absent du dépôt (tâche P1.10).
+            child: const Icon(
+              Icons.grass,
+              size: 120,
+              color: AppColors.primary,
             ),
           ),
-          // Décoration haut droite
           const Positioned(
             top: -10,
             right: -10,
-            child: _DecorativeCircle(
-              size: 38,
-              imagePath: 'assets/images/deco_rice_1.png',
-            ),
+            child: _DecorativeCircle(size: 38),
           ),
-          // Décoration bas gauche
           const Positioned(
             bottom: -20,
             left: -20,
-            child: _DecorativeCircle(
-              size: 46,
-              imagePath: 'assets/images/deco_rice_2.png',
-            ),
+            child: _DecorativeCircle(size: 46),
           ),
-          // Décoration bas droite
           const Positioned(
             bottom: 10,
             right: -10,
-            child: _DecorativeCircle(
-              size: 28,
-              imagePath: 'assets/images/deco_rice_3.png',
-            ),
+            child: _DecorativeCircle(size: 28),
+          ),
+          const Positioned(
+            top: 30,
+            left: -15,
+            child: _DecorativeCircle(size: 32),
           ),
         ],
       ),
@@ -135,13 +166,9 @@ class _WelcomeHero extends StatelessWidget {
 }
 
 class _DecorativeCircle extends StatelessWidget {
-  const _DecorativeCircle({
-    required this.size,
-    required this.imagePath,
-  });
+  const _DecorativeCircle({required this.size});
 
   final double size;
-  final String imagePath;
 
   @override
   Widget build(BuildContext context) {
@@ -150,18 +177,10 @@ class _DecorativeCircle extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
+        color: AppColors.primaryLight,
         border: Border.all(
-          color: AppColors.primaryLight,
+          color: AppColors.background,
           width: 2,
-        ),
-      ),
-      child: ClipOval(
-        child: Image.asset(
-          imagePath,
-          fit: BoxFit.cover,
-          errorBuilder: (_, __, ___) => Container(
-            color: AppColors.primaryLight,
-          ),
         ),
       ),
     );
@@ -171,16 +190,17 @@ class _DecorativeCircle extends StatelessWidget {
 class _WelcomeTexts extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return const Column(
+    final loc = AppLocalizations.of(context);
+    return Column(
       children: [
         Text(
-          "L'intelligence au service de vos rizières",
+          loc.welcomeHeadline,
           style: AppTypography.headlineLarge,
           textAlign: TextAlign.center,
         ),
-        SizedBox(height: AppSpacing.sm),
+        const SizedBox(height: AppSpacing.sm),
         Text(
-          "Un riz sain et protégé grâce à l'expertise AgriMada.",
+          loc.welcomeBody,
           style: AppTypography.bodySmall,
           textAlign: TextAlign.center,
         ),
@@ -200,16 +220,16 @@ class _WelcomeActions extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     return Column(
       children: [
         AppButton(
-          key: const Key(TestKeys.welcomeStartButton),
-          label: 'Commencer',
+          label: loc.welcomeStart,
           onPressed: onStart,
         ),
         const SizedBox(height: AppSpacing.sm),
         AppButton(
-          label: 'Se connecter',
+          label: loc.loginSubmit,
           onPressed: onLogin,
           variant: AppButtonVariant.secondary,
         ),

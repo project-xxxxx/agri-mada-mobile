@@ -7,14 +7,12 @@ part 'auth_model.g.dart';
 
 @freezed
 class AuthModel with _$AuthModel {
-  @JsonSerializable(fieldRename: FieldRename.snake)
   const factory AuthModel({
-    required String userId,
-    required String email,
-    required String accessToken,
-    required String refreshToken,
-    String? displayName,
-    String? avatarUrl,
+    @JsonKey(name: 'access_token') required String accessToken,
+    @JsonKey(name: 'token_type') required String tokenType,
+    // Absents des réponses d'un serveur antérieur à la tâche P1.8.
+    @JsonKey(name: 'refresh_token') String? refreshToken,
+    @JsonKey(name: 'expires_in') int? expiresIn,
   }) = _AuthModel;
 
   factory AuthModel.fromJson(Map<String, dynamic> json) =>
@@ -22,12 +20,8 @@ class AuthModel with _$AuthModel {
 }
 
 extension AuthModelMapper on AuthModel {
-  AuthEntity toEntity() => AuthEntity(
-        userId: userId,
-        email: email,
+  AuthToken toEntity() => AuthToken(
         accessToken: accessToken,
-        refreshToken: refreshToken,
-        displayName: displayName,
-        avatarUrl: avatarUrl,
+        tokenType: tokenType,
       );
 }

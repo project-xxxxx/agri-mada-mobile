@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import '../../../../app/router.dart';
-import '../../../../app/theme/app_colors.dart';
-import '../../../../app/theme/app_typography.dart';
-import '../../../../app/theme/app_spacing.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class SplashScreen extends StatefulWidget {
+import '../../../../app/theme/app_colors.dart';
+import '../../../../app/theme/app_spacing.dart';
+import '../../../../app/theme/app_typography.dart';
+import '../providers/session_provider.dart';
+import 'package:agri_mada/l10n/app_localizations.dart';
+
+class SplashScreen extends ConsumerStatefulWidget {
   const SplashScreen({super.key});
 
   @override
-  State<SplashScreen> createState() => _SplashScreenState();
+  ConsumerState<SplashScreen> createState() => _SplashScreenState();
 }
 
-class _SplashScreenState extends State<SplashScreen>
+class _SplashScreenState extends ConsumerState<SplashScreen>
     with SingleTickerProviderStateMixin {
   late final AnimationController _controller;
   late final Animation<double> _fadeAnimation;
@@ -33,14 +35,6 @@ class _SplashScreenState extends State<SplashScreen>
       CurvedAnimation(parent: _controller, curve: Curves.easeOutBack),
     );
     _controller.forward();
-    _navigateAfterDelay();
-  }
-
-  Future<void> _navigateAfterDelay() async {
-    await Future<void>.delayed(const Duration(seconds: 2));
-    if (mounted) {
-      context.go(AppRoutes.welcome);
-    }
   }
 
   @override
@@ -51,14 +45,16 @@ class _SplashScreenState extends State<SplashScreen>
 
   @override
   Widget build(BuildContext context) {
+    final bootstrapAsync = ref.watch(appBootstrapProvider);
+
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: AppColors.primary,
       body: Center(
         child: FadeTransition(
           opacity: _fadeAnimation,
           child: ScaleTransition(
             scale: _scaleAnimation,
-            child: const _SplashContent(),
+            child: _SplashContent(bootstrapAsync: bootstrapAsync),
           ),
         ),
       ),
@@ -67,32 +63,59 @@ class _SplashScreenState extends State<SplashScreen>
 }
 
 class _SplashContent extends StatelessWidget {
-  const _SplashContent();
+  const _SplashContent({required this.bootstrapAsync});
+
+  final AsyncValue<AppBootstrapSnapshot> bootstrapAsync;
 
   @override
   Widget build(BuildContext context) {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        Image.asset(
-          'assets/images/splash_rice.png',
-          width: 180,
-          height: 237,
-          fit: BoxFit.contain,
-          errorBuilder: (_, __, ___) => const _RicePlaceholder(),
+        Semantics(
+          label: AppLocalizations.of(context).splashLogoSemantics,
+          image: true,
+          child: const _RicePlaceholder(),
         ),
         const SizedBox(height: AppSpacing.lg),
         const _AgriMadaLogo(),
         const SizedBox(height: AppSpacing.sm),
         Text(
-          'Diagnostiquer les maladies du riz, hors ligne',
+          AppLocalizations.of(context).splashSubtitle,
           style: AppTypography.bodySmall.copyWith(
             color: AppColors.textSecondary,
-            fontSize: 13,
           ),
           textAlign: TextAlign.center,
         ),
+        const SizedBox(height: AppSpacing.sm),
+        _SplashStatus(bootstrapAsync: bootstrapAsync),
       ],
+    );
+  }
+}
+
+class _SplashStatus extends StatelessWidget {
+  const _SplashStatus({required this.bootstrapAsync});
+
+  final AsyncValue<AppBootstrapSnapshot> bootstrapAsync;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = AppTypography.bodySmall.copyWith(
+      color: AppColors.textSecondary,
+    );
+
+    return bootstrapAsync.when(
+      loading: () => Text(AppLocalizations.of(context).splashStatusInitializing, style: style),
+      error: (_, __) =>
+          Text(AppLocalizations.of(context).splashStatusDegraded, style: style),
+      data: (snapshot) {
+        final loc = AppLocalizations.of(context);
+        final mode = snapshot.isAiReady ? loc.splashStatusAiReady : loc.splashStatusAiUnavailable;
+        final session =
+            snapshot.isLoggedIn ? loc.splashStatusSessionActive : loc.splashStatusSessionGuest;
+        return Text('$mode • $session', style: style);
+      },
     );
   }
 }
@@ -128,7 +151,7 @@ class _AgriMadaLogo extends StatelessWidget {
       children: [
         const Text(
           'AgriMada',
-          style: AppTypography.displayMedium,
+          style: AppTypography.brandTitle,
         ),
         const SizedBox(width: AppSpacing.xs),
         Container(

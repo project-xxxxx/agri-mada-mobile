@@ -66,5 +66,7 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+	<key>NSCameraUsageDescription</key>
+	<string>AgriMada utilise l'appareil photo pour photographier vos plants de riz et vous aider à décrire le problème.</string>
 </dict>
 </plist>

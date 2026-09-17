@@ -1,0 +1,88 @@
+# Intégration continue AgriMada (tâche P0.3)
+# - Flutter : analyse statique (avertissements bloquants) et tests unitaires/widgets.
+#   Les tests d'intégration (integration_test/, Patrol) demandent un appareil et ne tournent pas ici.
+# - Backend FastAPI : pytest.
+# - Fiches de connaissance : schéma + garde-fou brouillon (P5.1).
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  flutter:
+    name: Flutter — analyse et tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: 3.41.9
+          cache: true
+
+      - name: Dépendances
+        run: flutter pub get
+
+      - name: Métadonnées du modèle à jour
+        run: dart run tool/gen_model_version.dart --check
+
+      - name: Analyse statique
+        run: flutter analyze --fatal-warnings --no-fatal-infos
+
+      - name: Tests unitaires et widgets
+        run: flutter test
+
+  backend:
+    name: Backend — pytest
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: backend
+    env:
+      # Valeur factice propre à la CI (32 caractères minimum exigés depuis P1.11) ;
+      # la vraie clé n'est jamais versionnée.
+      SECRET_KEY: ci-only-key-never-used-in-production-0001
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: backend/requirements.txt
+
+      - name: Dépendances
+        run: pip install -r requirements.txt
+
+      - name: Tests
+        run: pytest -q
+
+  fiches:
+    name: Fiches de connaissance — schéma et bundle embarqué (P5.1, P5.3)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Dépendances
+        run: pip install "jsonschema>=4.20"
+
+      - name: Validation
+        run: python ml/scripts/validate_fiches.py

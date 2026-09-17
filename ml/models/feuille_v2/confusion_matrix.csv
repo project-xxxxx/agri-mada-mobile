@@ -1,0 +1,14 @@
+,blb,bls,carence_azote,carence_phosphore,carence_potassium,cercosporiose,degats_hispa,echaudure,feuille_saine,helminthosporiose,mildiou,pas_riz,pyriculariose_feuille
+blb,246,1,0,0,0,6,7,4,8,8,2,0,7
+bls,0,55,0,0,0,0,0,0,0,0,1,0,1
+carence_azote,0,0,86,0,0,0,0,0,0,0,0,0,1
+carence_phosphore,0,0,0,63,3,0,0,0,0,0,0,0,0
+carence_potassium,0,0,1,5,70,0,0,0,0,0,0,0,0
+cercosporiose,2,0,0,0,0,16,0,3,0,2,0,0,0
+degats_hispa,6,3,0,0,0,0,247,0,16,8,6,0,11
+echaudure,7,1,0,0,0,2,1,57,1,1,0,1,5
+feuille_saine,4,0,0,0,0,0,34,1,578,12,4,1,36
+helminthosporiose,13,2,0,0,0,5,9,18,30,392,5,2,41
+mildiou,0,0,0,0,0,0,3,0,3,1,84,0,6
+pas_riz,0,0,0,0,0,0,0,0,0,0,0,82,2
+pyriculariose_feuille,5,1,0,0,0,6,11,15,52,43,11,1,503

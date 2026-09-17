@@ -13,13 +13,12 @@ void main() {
   late LoginUseCase useCase;
   late MockAuthRepository mockRepo;
 
-  const tEmail = 'user@agrimada.mg';
+  const tTel = '0341234567';
   const tPassword = 'password123';
-  const tUser = AuthEntity(
+  const UserProfile tUser = UserProfile(
     userId: 'user-001',
-    email: tEmail,
-    accessToken: 'access-token',
-    refreshToken: 'refresh-token',
+    email: 'user@agrimada.mg',
+    phoneNumber: tTel,
   );
 
   setUp(() {
@@ -30,62 +29,54 @@ void main() {
   group('LoginUseCase', () {
     test('retourne un AuthEntity quand le repository répond avec succès',
         () async {
-      // Arrange
-      when(() => mockRepo.login(email: tEmail, password: tPassword))
-          .thenAnswer((_) async => const Right<Failure, AuthEntity>(tUser));
+      when(() => mockRepo.login(tel: tTel, password: tPassword)).thenAnswer(
+        (_) async => const Right<Failure, UserProfile>(tUser),
+      );
 
-      // Act
-      final result = await useCase(email: tEmail, password: tPassword);
+      final result = await useCase(tel: tTel, password: tPassword);
 
-      // Assert
-      expect(result, const Right<Failure, AuthEntity>(tUser));
-      verify(() => mockRepo.login(email: tEmail, password: tPassword))
-          .called(1);
+      expect(result, const Right<Failure, UserProfile>(tUser));
+      verify(() => mockRepo.login(tel: tTel, password: tPassword)).called(1);
       verifyNoMoreInteractions(mockRepo);
     });
 
     test('retourne un NetworkFailure quand le réseau est indisponible',
         () async {
-      // Arrange
       when(() => mockRepo.login(
-              email: any(named: 'email'), password: any(named: 'password')))
-          .thenAnswer((_) async =>
-              const Left<Failure, AuthEntity>(NetworkFailure('No connection')));
+          tel: any(named: 'tel'),
+          password: any(named: 'password'))).thenAnswer(
+        (_) async => const Left<Failure, UserProfile>(
+          NetworkFailure('No connection'),
+        ),
+      );
 
-      // Act
-      final result = await useCase(email: tEmail, password: tPassword);
+      final result = await useCase(tel: tTel, password: tPassword);
 
-      // Assert
       expect(
         result,
-        const Left<Failure, AuthEntity>(NetworkFailure('No connection')),
+        const Left<Failure, UserProfile>(NetworkFailure('No connection')),
       );
     });
 
     test('retourne un AuthFailure quand les identifiants sont incorrects',
         () async {
-      // Arrange
       when(() => mockRepo.login(
-              email: any(named: 'email'), password: any(named: 'password')))
+              tel: any(named: 'tel'), password: any(named: 'password')))
           .thenAnswer(
               (_) async => const Left(AuthFailure('Identifiants incorrects')));
 
-      // Act
-      final result = await useCase(email: tEmail, password: tPassword);
+      final result = await useCase(tel: tTel, password: tPassword);
 
-      // Assert
       result.fold(
         (f) => expect(f, isA<AuthFailure>()),
         (_) => fail('Expected Left'),
       );
     });
 
-    test('retourne une ValidationFailure sans appel réseau si email vide',
+    test('retourne une ValidationFailure sans appel réseau si tel vide',
         () async {
-      // Act
-      final result = await useCase(email: '', password: tPassword);
+      final result = await useCase(tel: '', password: tPassword);
 
-      // Assert
       expect(result.isLeft(), isTrue);
       result.fold(
         (f) => expect(f, isA<ValidationFailure>()),
@@ -93,24 +84,22 @@ void main() {
       );
       verifyNever(
         () => mockRepo.login(
-            email: any(named: 'email'), password: any(named: 'password')),
+            tel: any(named: 'tel'), password: any(named: 'password')),
       );
     });
 
     test(
         'retourne une ValidationFailure sans appel réseau si mot de passe vide',
         () async {
-      // Act
-      final result = await useCase(email: tEmail, password: '');
+      final result = await useCase(tel: tTel, password: '');
 
-      // Assert
       result.fold(
         (f) => expect(f, isA<ValidationFailure>()),
         (_) => fail('Expected Left'),
       );
       verifyNever(
         () => mockRepo.login(
-            email: any(named: 'email'), password: any(named: 'password')),
+            tel: any(named: 'tel'), password: any(named: 'password')),
       );
     });
   });

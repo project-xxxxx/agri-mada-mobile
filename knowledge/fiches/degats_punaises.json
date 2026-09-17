@@ -1,0 +1,43 @@
+{
+  "id": "degats_punaises",
+  "noms": {
+    "fr": "Grains vides ou piqués (punaises)",
+    "mg": "Besoroka",
+    "sci": null,
+    "autres_noms_mg": []
+  },
+  "organes": {
+    "panicule_grains": [
+      "grains vides, piqués ou mangés"
+    ]
+  },
+  "confusions": [],
+  "conditions": {
+    "ecosystemes": [],
+    "altitude_m": [],
+    "facteurs": []
+  },
+  "prevention": [
+    "surveillance régulière de la parcelle",
+    "élimination des adventices hôtes",
+    "avis d'un technicien avant tout traitement"
+  ],
+  "lutte_chimique": {
+    "statut": "a_completer_liste_DPV",
+    "produits": []
+  },
+  "sources": [
+    {
+      "titre": "Ireo bibikely fahavalon'ny vary an-drano sy an-tanety aty Alaotra, 2017",
+      "url": "https://www.fofifa.mg/wp-content/uploads/2020/07/KISARY-BIBIKELY.pdf"
+    }
+  ],
+  "taxonomy_ids": [
+    "degats_punaises"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}

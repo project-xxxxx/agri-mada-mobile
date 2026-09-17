@@ -1,0 +1,51 @@
+{
+  "id": "carence_phosphore",
+  "noms": {
+    "fr": "Carence en phosphore",
+    "mg": null,
+    "sci": null,
+    "autres_noms_mg": []
+  },
+  "organes": {
+    "feuille": [
+      "réduction de la croissance et de la taille des feuilles",
+      "chute des bourgeons terminaux, puis des feuilles et des bourgeons latéraux dans les cas avancés"
+    ]
+  },
+  "confusions": [],
+  "conditions": {
+    "ecosystemes": [],
+    "altitude_m": [],
+    "facteurs": [
+      "sol pauvre en phosphore (en dessous d'environ 400 ppm de phosphore dans la solution du sol)",
+      "sols pauvres en phosphore fréquents dans les rizières malgaches"
+    ]
+  },
+  "prevention": [
+    "technique FOFIFA du P-dipping : trempage des racines des jeunes plants dans une bouillie phosphatée avant repiquage, pour les sols pauvres en phosphore (voir la fiche FOFIFA dédiée, sans dosage repris ici)",
+    "apport de phosphore adapté à l'analyse du sol"
+  ],
+  "lutte_chimique": {
+    "statut": "sans_objet",
+    "note": "carence nutritionnelle, pas une maladie : correction par la fertilisation ou le P-dipping, pas par un produit phytosanitaire ; aucun dosage n'est repris ici (voir ADR-005)"
+  },
+  "sources": [
+    {
+      "titre": "Manifestations de quelques carences courantes en éléments minéraux",
+      "id_reference": "cours_epsa_pathologie_riz",
+      "page": 48
+    },
+    {
+      "titre": "Voka-tsoa azo avimin'ny teknika P-Dipping",
+      "id_reference": "fofifa_p_dipping"
+    }
+  ],
+  "taxonomy_ids": [
+    "carence_phosphore"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}

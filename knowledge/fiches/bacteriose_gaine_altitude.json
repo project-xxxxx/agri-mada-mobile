@@ -1,0 +1,58 @@
+{
+  "id": "bacteriose_gaine_altitude",
+  "noms": {
+    "fr": "Pourriture brune de la gaine (bactériose d'altitude)",
+    "mg": null,
+    "sci": "Pseudomonas fuscovaginae",
+    "autres_noms_mg": []
+  },
+  "organes": {
+    "tige_gaine": [
+      "stries anguleuses sur les gaines, visibles à la formation de la panicule",
+      "stérilité variable selon les variétés"
+    ]
+  },
+  "confusions": [
+    {
+      "fiche": "sterilite_froid",
+      "question": {
+        "fr": "Y a-t-il des stries anguleuses visibles sur les gaines (bactériose), ou seulement des grains vides sans marque sur les gaines (froid) ?",
+        "mg": null
+      }
+    }
+  ],
+  "conditions": {
+    "ecosystemes": [],
+    "altitude_m": [
+      1600,
+      2200
+    ],
+    "facteurs": [
+      "Hautes Terres, au-dessus de 1600 m"
+    ]
+  },
+  "prevention": [
+    "semences saines",
+    "résidus de récolte retirés ou enfouis",
+    "outils nettoyés entre parcelles",
+    "avis d'un technicien avant tout traitement"
+  ],
+  "lutte_chimique": {
+    "statut": "a_completer_liste_DPV",
+    "produits": []
+  },
+  "sources": [
+    {
+      "titre": "Importance des maladies de riz et proposition de lutte (Halitiana Rafalimanana, contexte malgache)",
+      "fichier": "knowledge/sources/cours/Maladies de riz.pdf"
+    }
+  ],
+  "taxonomy_ids": [
+    "bacteriose_gaine_altitude"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}

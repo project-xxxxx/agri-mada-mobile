@@ -1,0 +1,165 @@
+{
+  "date": "2026-09-17",
+  "seuil_porte": 0.5,
+  "validation": {
+    "n": 2987,
+    "exactitude": 0.7874121191831269,
+    "macro_f1": 0.8229204389766662,
+    "par_classe": [
+      {
+        "classe": "blb",
+        "support": 289,
+        "precision": 0.8980392156862745,
+        "rappel": 0.7923875432525952,
+        "f1": 0.8419117647058824
+      },
+      {
+        "classe": "bls",
+        "support": 57,
+        "precision": 0.9629629629629629,
+        "rappel": 0.9122807017543859,
+        "f1": 0.9369369369369369
+      },
+      {
+        "classe": "carence_azote",
+        "support": 87,
+        "precision": 0.9885057471264368,
+        "rappel": 0.9885057471264368,
+        "f1": 0.9885057471264368
+      },
+      {
+        "classe": "carence_phosphore",
+        "support": 66,
+        "precision": 0.9838709677419355,
+        "rappel": 0.9242424242424242,
+        "f1": 0.9531249999999999
+      },
+      {
+        "classe": "carence_potassium",
+        "support": 76,
+        "precision": 0.9452054794520548,
+        "rappel": 0.9078947368421053,
+        "f1": 0.9261744966442953
+      },
+      {
+        "classe": "cercosporiose",
+        "support": 23,
+        "precision": 0.5652173913043478,
+        "rappel": 0.5652173913043478,
+        "f1": 0.5652173913043478
+      },
+      {
+        "classe": "degats_hispa",
+        "support": 297,
+        "precision": 0.7808641975308642,
+        "rappel": 0.8518518518518519,
+        "f1": 0.814814814814815
+      },
+      {
+        "classe": "echaudure",
+        "support": 76,
+        "precision": 0.676056338028169,
+        "rappel": 0.631578947368421,
+        "f1": 0.6530612244897959
+      },
+      {
+        "classe": "feuille_saine",
+        "support": 670,
+        "precision": 0.6730245231607629,
+        "rappel": 0.7373134328358208,
+        "f1": 0.7037037037037036
+      },
+      {
+        "classe": "helminthosporiose",
+        "support": 517,
+        "precision": 0.8104166666666667,
+        "rappel": 0.7524177949709865,
+        "f1": 0.7803410230692076
+      },
+      {
+        "classe": "mildiou",
+        "support": 97,
+        "precision": 0.813953488372093,
+        "rappel": 0.7216494845360825,
+        "f1": 0.7650273224043715
+      },
+      {
+        "classe": "pas_riz",
+        "support": 84,
+        "precision": 1.0,
+        "rappel": 0.9880952380952381,
+        "f1": 0.9940119760479043
+      },
+      {
+        "classe": "pyriculariose_feuille",
+        "support": 648,
+        "precision": 0.7709923664122137,
+        "rappel": 0.779320987654321,
+        "f1": 0.7751343054489638
+      }
+    ]
+  },
+  "reference_plate_feuille_v2": {
+    "exactitude": 0.8299296953465015,
+    "macro_f1": 0.8360087823199873,
+    "meme_validation": true
+  },
+  "hors_sujet": {
+    "n_photos": 50,
+    "rejetees_pas_riz": 41,
+    "prises_pour_feuille_saine": 6,
+    "maladie_nommee_a_tort": 3,
+    "detail": {
+      "autres_feuilles/autres_feuilles_01.jpg": "pas_riz",
+      "autres_feuilles/autres_feuilles_02.jpg": "pas_riz",
+      "autres_feuilles/autres_feuilles_03.jpg": "pas_riz",
+      "autres_feuilles/autres_feuilles_04.jpg": "pas_riz",
+      "autres_feuilles/autres_feuilles_05.jpg": "pas_riz",
+      "canne_a_sucre/canne_a_sucre_01.jpg": "feuille_saine",
+      "canne_a_sucre/canne_a_sucre_02.jpg": "pas_riz",
+      "canne_a_sucre/canne_a_sucre_03.jpg": "feuille_saine",
+      "canne_a_sucre/canne_a_sucre_04.jpg": "pas_riz",
+      "canne_a_sucre/canne_a_sucre_05.jpg": "bls",
+      "eau/eau_01.jpg": "pas_riz",
+      "eau/eau_02.jpg": "pas_riz",
+      "eau/eau_03.jpg": "pas_riz",
+      "eau/eau_04.jpg": "pas_riz",
+      "eau/eau_05.jpg": "pas_riz",
+      "ecrans/ecrans_01.jpg": "pas_riz",
+      "ecrans/ecrans_02.jpg": "pas_riz",
+      "ecrans/ecrans_03.jpg": "pas_riz",
+      "ecrans/ecrans_04.jpg": "feuille_saine",
+      "ecrans/ecrans_05.jpg": "pas_riz",
+      "herbes/herbes_01.jpg": "pas_riz",
+      "herbes/herbes_02.jpg": "degats_hispa",
+      "herbes/herbes_03.jpg": "feuille_saine",
+      "herbes/herbes_04.jpg": "feuille_saine",
+      "herbes/herbes_05.jpg": "pas_riz",
+      "mains/mains_01.jpg": "pas_riz",
+      "mains/mains_02.jpg": "pas_riz",
+      "mains/mains_03.jpg": "pas_riz",
+      "mains/mains_04.jpg": "pas_riz",
+      "mains/mains_05.jpg": "pas_riz",
+      "mais/mais_01.jpg": "pas_riz",
+      "mais/mais_02.jpg": "pas_riz",
+      "mais/mais_03.jpg": "feuille_saine",
+      "mais/mais_04.jpg": "pyriculariose_feuille",
+      "mais/mais_05.jpg": "pas_riz",
+      "outils/outils_01.jpg": "pas_riz",
+      "outils/outils_02.jpg": "pas_riz",
+      "outils/outils_03.jpg": "pas_riz",
+      "outils/outils_04.jpg": "pas_riz",
+      "outils/outils_05.jpg": "pas_riz",
+      "sol/sol_01.jpg": "pas_riz",
+      "sol/sol_02.jpg": "pas_riz",
+      "sol/sol_03.jpg": "pas_riz",
+      "sol/sol_04.jpg": "pas_riz",
+      "sol/sol_05.jpg": "pas_riz",
+      "zebus/zebus_01.jpg": "pas_riz",
+      "zebus/zebus_02.jpg": "pas_riz",
+      "zebus/zebus_03.jpg": "pas_riz",
+      "zebus/zebus_04.jpg": "pas_riz",
+      "zebus/zebus_05.jpg": "pas_riz"
+    }
+  }
+}

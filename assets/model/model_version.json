@@ -1,0 +1,20 @@
+{
+  "version": "2.0.0",
+  "date": "2026-09-17",
+  "modele_sha256": "1d5e80c99df51f4679f6a9e21eea466239532c4e199b7338caffd432a3daf5c2",
+  "maladies_supportees": [
+    "blb",
+    "bls",
+    "carence_azote",
+    "carence_phosphore",
+    "carence_potassium",
+    "cercosporiose",
+    "degats_hispa",
+    "echaudure",
+    "feuille_saine",
+    "helminthosporiose",
+    "mildiou",
+    "pas_riz",
+    "pyriculariose_feuille"
+  ]
+}

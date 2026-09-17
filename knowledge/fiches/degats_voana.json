@@ -1,0 +1,49 @@
+{
+  "id": "degats_voana",
+  "noms": {
+    "fr": "Base de tige rongée (scarabée noir)",
+    "mg": "Voana · fano",
+    "sci": "Heteronychus spp.",
+    "autres_noms_mg": []
+  },
+  "organes": {
+    "collet": [
+      "base de tige rongée",
+      "plant desséché qui s'arrache à la main en laissant ses racines dans le sol"
+    ]
+  },
+  "confusions": [],
+  "conditions": {
+    "ecosystemes": [
+      "tanety_pluvial"
+    ],
+    "altitude_m": [],
+    "facteurs": [
+      "surtout sur jeunes plants de riz pluvial"
+    ]
+  },
+  "prevention": [
+    "lutte biologique à base du champignon Metarhizium (voir la fiche FOFIFA dédiée)",
+    "surveillance régulière de la parcelle",
+    "élimination des adventices hôtes",
+    "avis d'un technicien avant tout traitement"
+  ],
+  "lutte_chimique": {
+    "statut": "a_completer_liste_DPV",
+    "produits": []
+  },
+  "sources": [
+    {
+      "titre": "Fantaro ny voana na fano, ny sakivy, ary ny fampiasana holatra Metarhizium, 2010",
+      "url": "https://www.fofifa.mg/wp-content/uploads/2020/06/FICHE-METARHIZIUM_2010.pdf"
+    }
+  ],
+  "taxonomy_ids": [
+    "degats_voana"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}

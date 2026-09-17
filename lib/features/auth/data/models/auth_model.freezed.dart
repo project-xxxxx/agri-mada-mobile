@@ -20,19 +20,18 @@ AuthModel _$AuthModelFromJson(Map<String, dynamic> json) {
 
 /// @nodoc
 mixin _$AuthModel {
-  String get userId => throw _privateConstructorUsedError;
-  String get email => throw _privateConstructorUsedError;
+  @JsonKey(name: 'access_token')
   String get accessToken => throw _privateConstructorUsedError;
-  String get refreshToken => throw _privateConstructorUsedError;
-  String? get displayName => throw _privateConstructorUsedError;
-  String? get avatarUrl => throw _privateConstructorUsedError;
+  @JsonKey(name: 'token_type')
+  String get tokenType =>
+      throw _privateConstructorUsedError; // Absents des réponses d'un serveur antérieur à la tâche P1.8.
+  @JsonKey(name: 'refresh_token')
+  String? get refreshToken => throw _privateConstructorUsedError;
+  @JsonKey(name: 'expires_in')
+  int? get expiresIn => throw _privateConstructorUsedError;
 
-  /// Serializes this AuthModel to a JSON map.
   Map<String, dynamic> toJson() => throw _privateConstructorUsedError;
-
-  /// Create a copy of AuthModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   $AuthModelCopyWith<AuthModel> get copyWith =>
       throw _privateConstructorUsedError;
 }
@@ -43,12 +42,10 @@ abstract class $AuthModelCopyWith<$Res> {
       _$AuthModelCopyWithImpl<$Res, AuthModel>;
   @useResult
   $Res call(
-      {String userId,
-      String email,
-      String accessToken,
-      String refreshToken,
-      String? displayName,
-      String? avatarUrl});
+      {@JsonKey(name: 'access_token') String accessToken,
+      @JsonKey(name: 'token_type') String tokenType,
+      @JsonKey(name: 'refresh_token') String? refreshToken,
+      @JsonKey(name: 'expires_in') int? expiresIn});
 }
 
 /// @nodoc
@@ -61,43 +58,31 @@ class _$AuthModelCopyWithImpl<$Res, $Val extends AuthModel>
   // ignore: unused_field
   final $Res Function($Val) _then;
 
-  /// Create a copy of AuthModel
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? userId = null,
-    Object? email = null,
     Object? accessToken = null,
-    Object? refreshToken = null,
-    Object? displayName = freezed,
-    Object? avatarUrl = freezed,
+    Object? tokenType = null,
+    Object? refreshToken = freezed,
+    Object? expiresIn = freezed,
   }) {
     return _then(_value.copyWith(
-      userId: null == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
-              as String,
-      email: null == email
-          ? _value.email
-          : email // ignore: cast_nullable_to_non_nullable
-              as String,
       accessToken: null == accessToken
           ? _value.accessToken
           : accessToken // ignore: cast_nullable_to_non_nullable
               as String,
-      refreshToken: null == refreshToken
+      tokenType: null == tokenType
+          ? _value.tokenType
+          : tokenType // ignore: cast_nullable_to_non_nullable
+              as String,
+      refreshToken: freezed == refreshToken
           ? _value.refreshToken
           : refreshToken // ignore: cast_nullable_to_non_nullable
-              as String,
-      displayName: freezed == displayName
-          ? _value.displayName
-          : displayName // ignore: cast_nullable_to_non_nullable
               as String?,
-      avatarUrl: freezed == avatarUrl
-          ? _value.avatarUrl
-          : avatarUrl // ignore: cast_nullable_to_non_nullable
-              as String?,
+      expiresIn: freezed == expiresIn
+          ? _value.expiresIn
+          : expiresIn // ignore: cast_nullable_to_non_nullable
+              as int?,
     ) as $Val);
   }
 }
@@ -111,12 +96,10 @@ abstract class _$$AuthModelImplCopyWith<$Res>
   @override
   @useResult
   $Res call(
-      {String userId,
-      String email,
-      String accessToken,
-      String refreshToken,
-      String? displayName,
-      String? avatarUrl});
+      {@JsonKey(name: 'access_token') String accessToken,
+      @JsonKey(name: 'token_type') String tokenType,
+      @JsonKey(name: 'refresh_token') String? refreshToken,
+      @JsonKey(name: 'expires_in') int? expiresIn});
 }
 
 /// @nodoc
@@ -127,78 +110,64 @@ class __$$AuthModelImplCopyWithImpl<$Res>
       _$AuthModelImpl _value, $Res Function(_$AuthModelImpl) _then)
       : super(_value, _then);
 
-  /// Create a copy of AuthModel
-  /// with the given fields replaced by the non-null parameter values.
   @pragma('vm:prefer-inline')
   @override
   $Res call({
-    Object? userId = null,
-    Object? email = null,
     Object? accessToken = null,
-    Object? refreshToken = null,
-    Object? displayName = freezed,
-    Object? avatarUrl = freezed,
+    Object? tokenType = null,
+    Object? refreshToken = freezed,
+    Object? expiresIn = freezed,
   }) {
     return _then(_$AuthModelImpl(
-      userId: null == userId
-          ? _value.userId
-          : userId // ignore: cast_nullable_to_non_nullable
-              as String,
-      email: null == email
-          ? _value.email
-          : email // ignore: cast_nullable_to_non_nullable
-              as String,
       accessToken: null == accessToken
           ? _value.accessToken
           : accessToken // ignore: cast_nullable_to_non_nullable
               as String,
-      refreshToken: null == refreshToken
+      tokenType: null == tokenType
+          ? _value.tokenType
+          : tokenType // ignore: cast_nullable_to_non_nullable
+              as String,
+      refreshToken: freezed == refreshToken
           ? _value.refreshToken
           : refreshToken // ignore: cast_nullable_to_non_nullable
-              as String,
-      displayName: freezed == displayName
-          ? _value.displayName
-          : displayName // ignore: cast_nullable_to_non_nullable
               as String?,
-      avatarUrl: freezed == avatarUrl
-          ? _value.avatarUrl
-          : avatarUrl // ignore: cast_nullable_to_non_nullable
-              as String?,
+      expiresIn: freezed == expiresIn
+          ? _value.expiresIn
+          : expiresIn // ignore: cast_nullable_to_non_nullable
+              as int?,
     ));
   }
 }
 
 /// @nodoc
-
-@JsonSerializable(fieldRename: FieldRename.snake)
+@JsonSerializable()
 class _$AuthModelImpl implements _AuthModel {
   const _$AuthModelImpl(
-      {required this.userId,
-      required this.email,
-      required this.accessToken,
-      required this.refreshToken,
-      this.displayName,
-      this.avatarUrl});
+      {@JsonKey(name: 'access_token') required this.accessToken,
+      @JsonKey(name: 'token_type') required this.tokenType,
+      @JsonKey(name: 'refresh_token') this.refreshToken,
+      @JsonKey(name: 'expires_in') this.expiresIn});
 
   factory _$AuthModelImpl.fromJson(Map<String, dynamic> json) =>
       _$$AuthModelImplFromJson(json);
 
   @override
-  final String userId;
-  @override
-  final String email;
-  @override
+  @JsonKey(name: 'access_token')
   final String accessToken;
   @override
-  final String refreshToken;
+  @JsonKey(name: 'token_type')
+  final String tokenType;
+// Absents des réponses d'un serveur antérieur à la tâche P1.8.
   @override
-  final String? displayName;
+  @JsonKey(name: 'refresh_token')
+  final String? refreshToken;
   @override
-  final String? avatarUrl;
+  @JsonKey(name: 'expires_in')
+  final int? expiresIn;
 
   @override
   String toString() {
-    return 'AuthModel(userId: $userId, email: $email, accessToken: $accessToken, refreshToken: $refreshToken, displayName: $displayName, avatarUrl: $avatarUrl)';
+    return 'AuthModel(accessToken: $accessToken, tokenType: $tokenType, refreshToken: $refreshToken, expiresIn: $expiresIn)';
   }
 
   @override
@@ -206,26 +175,22 @@ class _$AuthModelImpl implements _AuthModel {
     return identical(this, other) ||
         (other.runtimeType == runtimeType &&
             other is _$AuthModelImpl &&
-            (identical(other.userId, userId) || other.userId == userId) &&
-            (identical(other.email, email) || other.email == email) &&
             (identical(other.accessToken, accessToken) ||
                 other.accessToken == accessToken) &&
+            (identical(other.tokenType, tokenType) ||
+                other.tokenType == tokenType) &&
             (identical(other.refreshToken, refreshToken) ||
                 other.refreshToken == refreshToken) &&
-            (identical(other.displayName, displayName) ||
-                other.displayName == displayName) &&
-            (identical(other.avatarUrl, avatarUrl) ||
-                other.avatarUrl == avatarUrl));
+            (identical(other.expiresIn, expiresIn) ||
+                other.expiresIn == expiresIn));
   }
 
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
-  int get hashCode => Object.hash(runtimeType, userId, email, accessToken,
-      refreshToken, displayName, avatarUrl);
+  int get hashCode =>
+      Object.hash(runtimeType, accessToken, tokenType, refreshToken, expiresIn);
 
-  /// Create a copy of AuthModel
-  /// with the given fields replaced by the non-null parameter values.
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   @override
   @pragma('vm:prefer-inline')
   _$$AuthModelImplCopyWith<_$AuthModelImpl> get copyWith =>
@@ -241,33 +206,28 @@ class _$AuthModelImpl implements _AuthModel {
 
 abstract class _AuthModel implements AuthModel {
   const factory _AuthModel(
-      {required final String userId,
-      required final String email,
-      required final String accessToken,
-      required final String refreshToken,
-      final String? displayName,
-      final String? avatarUrl}) = _$AuthModelImpl;
+      {@JsonKey(name: 'access_token') required final String accessToken,
+      @JsonKey(name: 'token_type') required final String tokenType,
+      @JsonKey(name: 'refresh_token') final String? refreshToken,
+      @JsonKey(name: 'expires_in') final int? expiresIn}) = _$AuthModelImpl;
 
   factory _AuthModel.fromJson(Map<String, dynamic> json) =
       _$AuthModelImpl.fromJson;
 
   @override
-  String get userId;
-  @override
-  String get email;
-  @override
+  @JsonKey(name: 'access_token')
   String get accessToken;
   @override
-  String get refreshToken;
+  @JsonKey(name: 'token_type')
+  String get tokenType;
+  @override // Absents des réponses d'un serveur antérieur à la tâche P1.8.
+  @JsonKey(name: 'refresh_token')
+  String? get refreshToken;
   @override
-  String? get displayName;
+  @JsonKey(name: 'expires_in')
+  int? get expiresIn;
   @override
-  String? get avatarUrl;
-
-  /// Create a copy of AuthModel
-  /// with the given fields replaced by the non-null parameter values.
-  @override
-  @JsonKey(includeFromJson: false, includeToJson: false)
+  @JsonKey(ignore: true)
   _$$AuthModelImplCopyWith<_$AuthModelImpl> get copyWith =>
       throw _privateConstructorUsedError;
 }

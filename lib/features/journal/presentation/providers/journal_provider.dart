@@ -1,110 +1,121 @@
+// Providers Riverpod pour la gestion du journal agricole (Isar)
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:fpdart/fpdart.dart';
-import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:riverpod_annotation/riverpod_annotation.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-
-import '../../../../core/errors/failure.dart';
-import '../../../scan/domain/entities/scan_result_entity.dart';
-import '../../data/datasources/journal_local_datasource.dart';
-import '../../data/repositories/journal_repository_impl.dart';
-import '../../domain/entities/journal_entry_entity.dart';
+import '../../../../core/local_db/models/parcelle_local.dart';
+import '../../domain/entities/resultat_scan.dart';
+import '../../../scan/presentation/providers/session_scan_provider.dart'
+    show sessionRepositoryProvider;
+import '../../data/repositories/parcelle_local_repository.dart';
+import '../../data/services/export_service.dart';
+import '../../domain/entities/journal_entry.dart';
 import '../../domain/repositories/journal_repository.dart';
-import '../../domain/usecases/get_journal_entries_usecase.dart';
-import '../../domain/usecases/save_journal_entry_usecase.dart';
+import '../../domain/usecases/export_journal_usecase.dart';
+import '../../domain/usecases/get_parcelles_usecase.dart';
 
-part 'journal_provider.freezed.dart';
-part 'journal_provider.g.dart';
+/// Accès au repository des parcelles
+final parcelleRepositoryProvider = Provider<ParcelleLocalRepository>(
+  (_) => ParcelleLocalRepository(),
+);
 
-@freezed
-class JournalState with _$JournalState {
-  const factory JournalState.initial() = JournalInitial;
-  const factory JournalState.loading() = JournalLoading;
-  const factory JournalState.loaded(List<JournalEntryEntity> entries) =
-      JournalLoaded;
-  const factory JournalState.empty() = JournalEmpty;
-  const factory JournalState.error(String message) = JournalError;
-}
+/// Contrat domain du journal
+final journalRepositoryProvider = Provider<JournalRepository>(
+  (ref) => ref.watch(parcelleRepositoryProvider),
+);
 
-@riverpod
-Future<SharedPreferences> sharedPreferences(Ref ref) async =>
-    SharedPreferences.getInstance();
+/// Use case de lecture des parcelles
+final getParcellesUseCaseProvider = Provider<GetParcellesUseCase>(
+  (ref) => GetParcellesUseCase(ref.watch(journalRepositoryProvider)),
+);
 
-@riverpod
-Future<JournalLocalDatasource> journalLocalDatasource(Ref ref) async {
-  try {
-    final prefs = await ref.watch(sharedPreferencesProvider.future);
-    return JournalLocalDatasource(prefs);
-  } catch (_) {
-    return JournalLocalDatasource.inMemory();
+final exportServiceProvider = Provider<ExportService>(
+  (_) => ExportService(),
+);
+
+// Réutilise diagnosticRepositoryProvider centralisé depuis scan_provider
+
+final exportJournalUseCaseProvider = Provider<ExportJournalUseCase>(
+  (ref) => ExportJournalUseCase(
+    sessionRepository: ref.watch(sessionRepositoryProvider),
+    parcelleRepository: ref.watch(parcelleRepositoryProvider),
+    exportService: ref.watch(exportServiceProvider),
+  ),
+);
+
+/// Journal agricole complet avec statut de santé de chaque parcelle
+final journalAgricoleProvider =
+    FutureProvider<List<JournalEntry>>((ref) async {
+  return ref.read(parcelleRepositoryProvider).getJournalAgricole();
+});
+
+/// Liste de toutes les parcelles, lues directement dans Isar : photo,
+/// emplacement et date de création ne sont plus perdus (tâche P1.6).
+final parcellesProvider = FutureProvider<List<ParcelleLocal>>((ref) {
+  return ref.read(parcelleRepositoryProvider).getAllParcelles();
+});
+
+/// Historique complet des scans, sessions terminées comprises (tâche P2.3).
+final resultatsHistoryProvider = FutureProvider<List<ResultatScan>>((ref) async {
+  return ref.read(sessionRepositoryProvider).resultats();
+});
+
+/// Scans d'une parcelle donnée.
+final resultatsParParcelleProvider =
+    FutureProvider.family<List<ResultatScan>, int>((ref, parcelleId) async {
+  return ref.read(sessionRepositoryProvider).resultats(parcelleLocalId: parcelleId);
+});
+
+/// Notifier pour les actions de création / mise à jour des parcelles
+class ParcelleNotifier extends StateNotifier<AsyncValue<void>> {
+  ParcelleNotifier(this._repo) : super(const AsyncValue.data(null));
+
+  final ParcelleLocalRepository _repo;
+
+  /// Crée une parcelle et renvoie celle qui vient d'être enregistrée,
+  /// ou null en cas d'échec.
+  Future<ParcelleLocal?> createParcelle({
+    required String nom,
+    String? description,
+    String? culture,
+    double? surface,
+    double? latitude,
+    double? longitude,
+    String? photoPath,
+    String? ecosysteme,
+    String? region,
+    String? altitudeTranche,
+    double? altitudeMetres,
+    String? variete,
+    String? saison,
+    DateTime? dateRepiquage,
+  }) async {
+    state = const AsyncValue.loading();
+    try {
+      final parcelle = await _repo.createParcelle(
+        nomParcelle: nom,
+        description: description,
+        culture: culture ?? 'Riz',
+        surface: surface,
+        latitude: latitude,
+        longitude: longitude,
+        photoPath: photoPath,
+        ecosysteme: ecosysteme,
+        region: region,
+        altitudeTranche: altitudeTranche,
+        altitudeMetres: altitudeMetres,
+        variete: variete,
+        saison: saison,
+        dateRepiquage: dateRepiquage,
+      );
+      state = const AsyncValue.data(null);
+      return parcelle;
+    } catch (e, st) {
+      state = AsyncValue.error(e, st);
+      return null;
+    }
   }
 }
 
-@riverpod
-Future<JournalRepository> journalRepository(Ref ref) async {
-  final datasource = await ref.watch(journalLocalDatasourceProvider.future);
-  return JournalRepositoryImpl(datasource);
-}
-
-@riverpod
-Future<GetJournalEntriesUseCase> getJournalEntriesUseCase(Ref ref) async {
-  final repository = await ref.watch(journalRepositoryProvider.future);
-  return GetJournalEntriesUseCase(repository);
-}
-
-@riverpod
-Future<SaveJournalEntryUseCase> saveJournalEntryUseCase(Ref ref) async {
-  final repository = await ref.watch(journalRepositoryProvider.future);
-  return SaveJournalEntryUseCase(repository);
-}
-
-@riverpod
-class JournalNotifier extends _$JournalNotifier {
-  @override
-  JournalState build() => const JournalState.initial();
-
-  Future<void> loadEntries() async {
-    state = const JournalState.loading();
-
-    final usecase = await ref.read(getJournalEntriesUseCaseProvider.future);
-    final result = await usecase.call();
-
-    state = result.fold(
-      (failure) => JournalState.error(_toMessage(failure)),
-      (entries) => entries.isEmpty
-          ? const JournalState.empty()
-          : JournalState.loaded(entries),
-    );
-  }
-
-  Future<Either<Failure, Unit>> saveScanResult(
-    ScanResultEntity scanResult,
-  ) async {
-    final entry = JournalEntryEntity(
-      id: scanResult.id,
-      imagePath: scanResult.imagePath,
-      diseaseName: scanResult.diseaseName,
-      scientificName: scanResult.scientificName,
-      confidence: scanResult.confidence,
-      severity: scanResult.severity,
-      recommendations: scanResult.recommendations,
-      createdAt: scanResult.analyzedAt,
-    );
-
-    final usecase = await ref.read(saveJournalEntryUseCaseProvider.future);
-    final saved = await usecase.call(entry: entry);
-
-    await saved.match(
-      (_) async {
-        state = JournalState.error(_toMessage(_));
-      },
-      (_) async {
-        await loadEntries();
-      },
-    );
-
-    return saved;
-  }
-
-  String _toMessage(Failure failure) => failure.message;
-}
+final parcelleNotifierProvider =
+    StateNotifierProvider<ParcelleNotifier, AsyncValue<void>>(
+  (ref) => ParcelleNotifier(ref.watch(parcelleRepositoryProvider)),
+);

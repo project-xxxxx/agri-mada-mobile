@@ -1,0 +1,219 @@
+{
+  "date": "2026-09-17",
+  "seuils_app": {
+    "probable_min_score": 0.999,
+    "probable_min_margin": 0.2,
+    "possible_min_score": 0.5,
+    "min_vegetation": 0.1
+  },
+  "resultats": {
+    "A_embarque_parcours_actuel": {
+      "hors_sujet": {
+        "maladie_nommee": 50
+      },
+      "pas_riz_validation": {
+        "maladie_nommee": 84
+      },
+      "feuilles_saines": {
+        "fausse_alerte": 670
+      },
+      "toutes_maladies": {
+        "mauvais_nom": 1905,
+        "bon_nom": 328
+      },
+      "blb_et_helminthosporiose": {
+        "mauvais_nom": 478,
+        "bon_nom": 328
+      },
+      "par_maladie": {
+        "blb": {
+          "mauvais_nom": 24,
+          "bon_nom": 265
+        },
+        "bls": {
+          "mauvais_nom": 57
+        },
+        "carence_azote": {
+          "mauvais_nom": 87
+        },
+        "carence_phosphore": {
+          "mauvais_nom": 66
+        },
+        "carence_potassium": {
+          "mauvais_nom": 76
+        },
+        "cercosporiose": {
+          "mauvais_nom": 23
+        },
+        "degats_hispa": {
+          "mauvais_nom": 297
+        },
+        "echaudure": {
+          "mauvais_nom": 76
+        },
+        "helminthosporiose": {
+          "bon_nom": 63,
+          "mauvais_nom": 454
+        },
+        "mildiou": {
+          "mauvais_nom": 97
+        },
+        "pyriculariose_feuille": {
+          "mauvais_nom": 648
+        }
+      }
+    },
+    "B_embarque_garde_fous": {
+      "hors_sujet": {
+        "rien": 29,
+        "maladie_nommee": 21
+      },
+      "pas_riz_validation": {
+        "rien": 53,
+        "maladie_nommee": 31
+      },
+      "feuilles_saines": {
+        "fausse_alerte": 420,
+        "rien": 250
+      },
+      "toutes_maladies": {
+        "rien_ou_sain": 748,
+        "bon_nom": 251,
+        "mauvais_nom": 1234
+      },
+      "blb_et_helminthosporiose": {
+        "rien_ou_sain": 238,
+        "bon_nom": 251,
+        "mauvais_nom": 317
+      },
+      "par_maladie": {
+        "blb": {
+          "rien_ou_sain": 56,
+          "bon_nom": 226,
+          "mauvais_nom": 7
+        },
+        "bls": {
+          "mauvais_nom": 50,
+          "rien_ou_sain": 7
+        },
+        "carence_azote": {
+          "mauvais_nom": 38,
+          "rien_ou_sain": 49
+        },
+        "carence_phosphore": {
+          "rien_ou_sain": 40,
+          "mauvais_nom": 26
+        },
+        "carence_potassium": {
+          "rien_ou_sain": 45,
+          "mauvais_nom": 31
+        },
+        "cercosporiose": {
+          "rien_ou_sain": 4,
+          "mauvais_nom": 19
+        },
+        "degats_hispa": {
+          "mauvais_nom": 204,
+          "rien_ou_sain": 93
+        },
+        "echaudure": {
+          "rien_ou_sain": 30,
+          "mauvais_nom": 46
+        },
+        "helminthosporiose": {
+          "bon_nom": 25,
+          "mauvais_nom": 310,
+          "rien_ou_sain": 182
+        },
+        "mildiou": {
+          "rien_ou_sain": 42,
+          "mauvais_nom": 55
+        },
+        "pyriculariose_feuille": {
+          "mauvais_nom": 448,
+          "rien_ou_sain": 200
+        }
+      }
+    },
+    "C_feuille_v2_garde_fous": {
+      "hors_sujet": {
+        "rien": 49,
+        "maladie_nommee": 1
+      },
+      "pas_riz_validation": {
+        "rien": 84
+      },
+      "feuilles_saines": {
+        "sain": 472,
+        "rien": 156,
+        "fausse_alerte": 42
+      },
+      "toutes_maladies": {
+        "bon_nom": 1486,
+        "rien_ou_sain": 581,
+        "mauvais_nom": 166
+      },
+      "blb_et_helminthosporiose": {
+        "bon_nom": 540,
+        "rien_ou_sain": 209,
+        "mauvais_nom": 57
+      },
+      "par_maladie": {
+        "blb": {
+          "bon_nom": 219,
+          "rien_ou_sain": 52,
+          "mauvais_nom": 18
+        },
+        "bls": {
+          "bon_nom": 54,
+          "mauvais_nom": 2,
+          "rien_ou_sain": 1
+        },
+        "carence_azote": {
+          "bon_nom": 84,
+          "rien_ou_sain": 3
+        },
+        "carence_phosphore": {
+          "rien_ou_sain": 3,
+          "bon_nom": 60,
+          "mauvais_nom": 3
+        },
+        "carence_potassium": {
+          "bon_nom": 69,
+          "mauvais_nom": 2,
+          "rien_ou_sain": 5
+        },
+        "cercosporiose": {
+          "mauvais_nom": 9,
+          "rien_ou_sain": 8,
+          "bon_nom": 6
+        },
+        "degats_hispa": {
+          "mauvais_nom": 19,
+          "bon_nom": 206,
+          "rien_ou_sain": 72
+        },
+        "echaudure": {
+          "rien_ou_sain": 41,
+          "bon_nom": 26,
+          "mauvais_nom": 9
+        },
+        "helminthosporiose": {
+          "bon_nom": 321,
+          "mauvais_nom": 39,
+          "rien_ou_sain": 157
+        },
+        "mildiou": {
+          "bon_nom": 77,
+          "rien_ou_sain": 17,
+          "mauvais_nom": 3
+        },
+        "pyriculariose_feuille": {
+          "bon_nom": 364,
+          "rien_ou_sain": 222,
+          "mauvais_nom": 62
+        }
+      }
+    }
+  }
+}

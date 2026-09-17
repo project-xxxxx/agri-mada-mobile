@@ -1,0 +1,52 @@
+{
+  "id": "coeur_mort_foreurs",
+  "noms": {
+    "fr": "Cœur mort (foreurs de tige)",
+    "mg": "Fositra fotsy · fositra mavokely",
+    "sci": "Maliarpha separatella, Sesamia calamistis",
+    "autres_noms_mg": []
+  },
+  "organes": {
+    "tige_gaine": [
+      "pousse centrale sèche qui se retire d'un coup (cœur mort)",
+      "trou et larve visibles dans la tige fendue"
+    ],
+    "panicule_grains": [
+      "panicule blanche dressée qui s'arrache facilement (attaque à l'épiaison)"
+    ]
+  },
+  "confusions": [],
+  "conditions": {
+    "ecosystemes": [],
+    "altitude_m": [],
+    "facteurs": []
+  },
+  "prevention": [
+    "surveillance régulière de la parcelle",
+    "élimination des adventices hôtes",
+    "avis d'un technicien avant tout traitement"
+  ],
+  "lutte_chimique": {
+    "statut": "a_completer_liste_DPV",
+    "produits": []
+  },
+  "sources": [
+    {
+      "titre": "Ireo bibikely fahavalon'ny vary an-drano sy an-tanety aty Alaotra, 2017",
+      "url": "https://www.fofifa.mg/wp-content/uploads/2020/07/KISARY-BIBIKELY.pdf"
+    },
+    {
+      "titre": "Maliarpha separatella Ragonot, foreur du riz. Fiche technique",
+      "url": "https://agritrop.cirad.fr/407181/"
+    }
+  ],
+  "taxonomy_ids": [
+    "coeur_mort_foreurs",
+    "panicule_blanche_foreurs"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}

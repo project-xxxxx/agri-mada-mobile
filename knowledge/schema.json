@@ -1,0 +1,137 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://agrimada.local/knowledge/schema.json",
+  "title": "Fiche de connaissance AgriMada (P5.1)",
+  "description": "Une fiche par problème identifiable (maladie, ravageur, trouble abiotique), organe par organe. Voir knowledge/fiches/README.md.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["id", "noms", "organes", "confusions", "conditions", "prevention", "lutte_chimique", "sources", "validation"],
+  "properties": {
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z][a-z0-9_]*$",
+      "description": "Identifiant stable, en minuscules avec underscores. Ne correspond pas forcément à un seul id de ml/taxonomy_v1.yaml (voir taxonomy_ids)."
+    },
+    "taxonomy_ids": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "Les ids de ml/taxonomy_v1.yaml regroupés par cette fiche (souvent plusieurs, un par organe touché)."
+    },
+    "noms": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["fr", "mg", "sci"],
+      "properties": {
+        "fr": { "type": "string", "minLength": 1 },
+        "mg": { "type": ["string", "null"] },
+        "sci": { "type": ["string", "null"] },
+        "autres_noms_mg": {
+          "type": "array",
+          "items": { "type": "string", "minLength": 1 },
+          "description": "Synonymes malgaches supplémentaires, pour la recherche (P5.3)."
+        }
+      }
+    },
+    "organes": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "array",
+        "items": { "type": "string", "minLength": 1 },
+        "minItems": 1
+      },
+      "propertyNames": {
+        "enum": ["feuille", "tige_gaine", "collet", "racines", "panicule_grains", "plante_entiere"]
+      }
+    },
+    "confusions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["fiche", "question"],
+        "properties": {
+          "fiche": { "type": "string" },
+          "question": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": ["fr", "mg"],
+            "properties": {
+              "fr": { "type": "string", "minLength": 1 },
+              "mg": {
+                "type": ["string", "null"],
+                "minLength": 1,
+                "description": "null tant qu'un locuteur malgache n'a pas traduit : l'app affiche alors le français (P5.3)."
+              }
+            }
+          }
+        }
+      }
+    },
+    "conditions": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["ecosystemes", "altitude_m", "facteurs"],
+      "properties": {
+        "ecosystemes": {
+          "type": "array",
+          "items": { "enum": ["irrigue", "bas_fond", "tanety_pluvial"] }
+        },
+        "altitude_m": {
+          "type": "array",
+          "items": { "type": "number" },
+          "maxItems": 2,
+          "description": "[min, max] en mètres, vide si non précisé."
+        },
+        "facteurs": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      }
+    },
+    "prevention": {
+      "type": "array",
+      "items": { "type": "string", "minLength": 1 },
+      "minItems": 1,
+      "description": "Gestes préventifs seulement : aucun produit ni dosage (ADR-005)."
+    },
+    "lutte_chimique": {
+      "type": "object",
+      "required": ["statut"],
+      "properties": {
+        "statut": { "enum": ["a_completer_liste_DPV", "sans_objet"] },
+        "produits": { "type": "array", "items": {}, "maxItems": 0 },
+        "note": { "type": "string" }
+      },
+      "additionalProperties": false,
+      "description": "`produits` doit toujours rester vide tant que la liste officielle DPV n'a pas été obtenue (P5.1)."
+    },
+    "sources": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["titre"],
+        "additionalProperties": false,
+        "properties": {
+          "titre": { "type": "string", "minLength": 1 },
+          "url": { "type": "string" },
+          "fichier": { "type": "string" },
+          "id_reference": { "type": "string" },
+          "page": { "type": "integer" },
+          "org": { "type": "string" }
+        }
+      }
+    },
+    "validation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["par", "date", "statut"],
+      "properties": {
+        "par": { "type": ["string", "null"] },
+        "date": { "type": ["string", "null"] },
+        "statut": { "enum": ["brouillon", "valide"] }
+      }
+    }
+  }
+}
