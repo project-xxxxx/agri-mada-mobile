@@ -89,6 +89,7 @@ void main() {
 
         expect(fusion.nommable, isFalse);
         expect(fusion.analyseParModele, isTrue);
+        expect(fusion.photoAcceptee, isFalse, reason: 'message « non reconnue », pas « le modèle hésite »');
         expect(fusion.classement, isEmpty);
       });
 
@@ -149,6 +150,76 @@ void main() {
         expect(fusion.certitude, DiagnosisCertainty.incertain);
         expect(fusion.nommable, isFalse);
         expect(fusion.analyseParModele, isTrue);
+        expect(fusion.photoAcceptee, isTrue, reason: 'message « le modèle hésite », pas « peut-être pas du riz »');
+      });
+    });
+
+    group('certitude lue sur les scores bruts de la photo (ADR-015)', () {
+      test('une photo de terrain à 0,61 contre 0,36 est une piste, plus « non reconnue »', () {
+        // Scores réels d'une photo de feuille envoyée par l'équipe le 2026-09-17 :
+        // la fusion les ramenait à 0,486, sous le seuil de 0,5.
+        final fusion = fuseObservations([
+          _feuille(const [
+            ScoredLabel('helminthosporiose', 0.606),
+            ScoredLabel('blb', 0.361),
+            ScoredLabel('cercosporiose', 0.016),
+          ]),
+        ]);
+
+        expect(_probabilite(fusion, 'helminthosporiose'), lessThan(CertaintyThresholds.possibleMinScore));
+        expect(fusion.certitude, DiagnosisCertainty.possible);
+        expect(fusion.nommable, isTrue);
+        expect(fusion.classement.first.label, 'helminthosporiose');
+      });
+
+      test('une photo sous le seuil brut reste incertaine, même quand la fusion la gonfle', () {
+        final fusion = fuseObservations([
+          _feuille(const [
+            ScoredLabel('blb', 0.40),
+            ScoredLabel('bls', 0.05),
+            ScoredLabel('helminthosporiose', 0.05),
+          ]),
+        ]);
+
+        expect(_probabilite(fusion, 'blb'), greaterThan(CertaintyThresholds.possibleMinScore),
+            reason: 'renormalisée sur le top 3, la fusion dépasse 0,5');
+        expect(fusion.certitude, DiagnosisCertainty.incertain);
+        expect(fusion.nommable, isFalse);
+        expect(fusion.photoAcceptee, isTrue);
+      });
+
+      test('les réponses classent, mais ne rendent pas sûre une photo incertaine', () {
+        final fusion = fuseObservations([
+          _feuille(
+            const [ScoredLabel('helminthosporiose', 0.40), ScoredLabel('blb', 0.35), ScoredLabel('bls', 0.25)],
+            indices: const {'blb': 5.0},
+          ),
+        ]);
+
+        expect(fusion.classement.first.label, 'blb');
+        expect(fusion.nommable, isFalse);
+      });
+
+      test('les réponses peuvent désigner une autre piste que le modèle sûr de lui', () {
+        final fusion = fuseObservations([
+          _feuille(
+            const [ScoredLabel('helminthosporiose', 0.62), ScoredLabel('blb', 0.38)],
+            indices: const {'blb': 1.6, 'helminthosporiose': -0.5},
+          ),
+        ]);
+
+        expect(fusion.classement.first.label, 'blb');
+        expect(fusion.certitude, DiagnosisCertainty.possible);
+        expect(fusion.nommable, isTrue);
+      });
+
+      test('jamais « probable » tant que le modèle n\'est pas validé sur des photos malgaches (P4.6)', () {
+        final fusion = fuseObservations([
+          _feuille(const [ScoredLabel('blb', 0.9995), ScoredLabel('bls', 0.0005)]),
+        ]);
+
+        expect(fusion.certitude, DiagnosisCertainty.possible);
+        expect(fusion.nommable, isTrue);
       });
     });
 

@@ -5,7 +5,8 @@
 // aussi de dérouler le parcours en test.
 //
 // Une photo floue ou à contre-jour est refusée avec une consigne précise : elle
-// n'est ni analysée ni enregistrée.
+// n'est ni analysée ni enregistrée. Une photo importée de la galerie passe par
+// les mêmes contrôles qu'une photo prise sur le moment.
 
 import 'dart:io';
 
@@ -40,6 +41,15 @@ final camerasProvider = FutureProvider<List<CameraDescription>>((ref) async {
 final fallbackPhotoProvider = Provider<Future<XFile?> Function()>(
   (ref) => () => ImagePicker().pickImage(
         source: ImageSource.camera,
+        imageQuality: 90,
+        maxWidth: 1600,
+      ),
+);
+
+/// Photo déjà prise, choisie dans la galerie du téléphone.
+final galleryPhotoProvider = Provider<Future<XFile?> Function()>(
+  (ref) => () => ImagePicker().pickImage(
+        source: ImageSource.gallery,
         imageQuality: 90,
         maxWidth: 1600,
       ),
@@ -103,6 +113,18 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
     await notifier.ajouterPhoto(File(photo.path));
   }
 
+  Future<void> _importerDeLaGalerie() async {
+    XFile? photo;
+    try {
+      photo = await ref.read(galleryPhotoProvider)();
+    } catch (e, st) {
+      AppLogger.error('Import depuis la galerie impossible', error: e, stackTrace: st);
+    }
+    if (photo == null) return;
+
+    await ref.read(scanSessionProvider.notifier).ajouterPhoto(File(photo.path));
+  }
+
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
@@ -154,7 +176,7 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
                 style: AppTypography.bodySmall.copyWith(color: AppColors.textSecondary),
               ),
             ),
-          if (etat.peutAjouterPhoto)
+          if (etat.peutAjouterPhoto) ...[
             ElevatedButton.icon(
               onPressed: etat.enCours ? null : _capturer,
               icon: const Icon(Icons.camera_alt_outlined),
@@ -167,6 +189,16 @@ class _CaptureScreenState extends ConsumerState<CaptureScreen> {
                 elevation: 0,
               ),
             ),
+            TextButton.icon(
+              onPressed: etat.enCours ? null : _importerDeLaGalerie,
+              icon: const Icon(Icons.photo_library_outlined),
+              label: Text(loc.scanCaptureFromGallery),
+              style: TextButton.styleFrom(
+                foregroundColor: AppColors.primary,
+                minimumSize: const Size.fromHeight(48),
+              ),
+            ),
+          ],
           const SizedBox(height: AppSpacing.sm),
           OutlinedButton.icon(
             onPressed: photos.isEmpty || etat.enCours

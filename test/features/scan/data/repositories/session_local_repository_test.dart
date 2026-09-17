@@ -177,4 +177,52 @@ void main() {
     expect(historique.first.createdAt, DateTime(2026, 9, 15));
     expect(historique.last.createdAt, DateTime(2026, 9, 1));
   });
+
+  group('detail (journal)', () {
+    test('rend les photos dans l\'ordre, les réponses et les pistes du scan', () async {
+      final session = await repository.ouvrirSession(parcelleLocalId: 2);
+      await repository.ajouterObservation(
+        sessionId: session.id,
+        organe: Organe.feuille,
+        imagePath: 'deuxieme.jpg',
+        createdAt: DateTime(2026, 9, 17, 10, 5),
+      );
+      await repository.ajouterObservation(
+        sessionId: session.id,
+        organe: Organe.feuille,
+        imagePath: 'premiere.jpg',
+        createdAt: DateTime(2026, 9, 17, 10, 0),
+      );
+      await repository.enregistrerReponses(
+        sessionId: session.id,
+        organe: Organe.feuille,
+        reponses: const {'feuille_taches': 'bandes_bord'},
+      );
+      await repository.enregistrerResultat(
+        sessionId: session.id,
+        fusion: const FusedDiagnosis(
+          classement: [ScoredLabel('blb', 0.7), ScoredLabel('bls', 0.2)],
+          certitude: DiagnosisCertainty.possible,
+          nommable: true,
+        ),
+      );
+
+      final detail = await repository.detail(session.id);
+
+      expect(detail, isNotNull);
+      expect(detail!.photos.map((p) => p.imagePath), ['premiere.jpg', 'deuxieme.jpg']);
+      expect(detail.reponsesParOrgane[Organe.feuille], {'feuille_taches': 'bandes_bord'});
+      expect(detail.classement.map((c) => c.label), ['blb', 'bls']);
+      expect(detail.resume.ficheId, 'blb');
+      expect(detail.resume.parcelleLocalId, 2);
+      expect(detail.estSynchronise, isFalse);
+    });
+
+    test('une session sans résultat ou supprimée n\'a pas de détail', () async {
+      final enCours = await repository.ouvrirSession();
+
+      expect(await repository.detail(enCours.id), isNull);
+      expect(await repository.detail(9999), isNull);
+    });
+  });
 }

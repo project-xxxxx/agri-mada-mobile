@@ -9,8 +9,10 @@ import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
 import '../../../../core/ai/disease_catalog.dart';
+import '../../../../core/local_db/models/parcelle_local.dart';
 import '../../../../core/widgets/app_sidebar.dart';
 import '../../../scan/domain/entities/declared_severity.dart';
+import '../../../scan/domain/entities/organe.dart';
 import '../../../scan/presentation/diagnosis_labels.dart';
 import '../../../scan/presentation/organ_labels.dart';
 import '../../domain/entities/resultat_scan.dart';
@@ -27,11 +29,35 @@ class JournalScreen extends ConsumerStatefulWidget {
 
 class _JournalScreenState extends ConsumerState<JournalScreen> {
   DiagnosticFilter _filter = DiagnosticFilter.all;
+  final _recherche = TextEditingController();
+  int? _parcelleId;
+  Organe? _organe;
+  TriJournal _tri = TriJournal.plusRecents;
+
+  @override
+  void dispose() {
+    _recherche.dispose();
+    super.dispose();
+  }
+
+  List<ResultatScan> _visibles(List<ResultatScan> resultats, AppLocalizations loc) =>
+      rechercherDansJournal(
+        applyDiagnosticFilter(resultats, _filter),
+        nomDe: (resultat) {
+          final info = resultat.ficheId == null ? null : DiseaseCatalog.of(resultat.ficheId!);
+          return '${nomResultat(resultat, loc)} ${info?.scientificName ?? ''}';
+        },
+        texte: _recherche.text,
+        parcelleId: _parcelleId,
+        organe: _organe,
+        tri: _tri,
+      );
 
   @override
   Widget build(BuildContext context) {
     final loc = AppLocalizations.of(context);
     final resultatsAsync = ref.watch(resultatsHistoryProvider);
+    final parcelles = ref.watch(parcellesProvider).valueOrNull ?? const <ParcelleLocal>[];
 
     return Scaffold(
       backgroundColor: AppColors.scaffoldBackground,
@@ -72,13 +98,31 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
               return _EmptyHistory(onScan: () => context.go(AppRoutes.scanOrgane));
             }
 
-            final visible = applyDiagnosticFilter(resultats, _filter);
+            final visible = _visibles(resultats, loc);
+            final organesPresents = [
+              for (final organe in Organe.values)
+                if (resultats.any((resultat) => resultat.organes.contains(organe))) organe,
+            ];
             return Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                _BarreRecherche(
+                  controleur: _recherche,
+                  tri: _tri,
+                  onChanged: () => setState(() {}),
+                  onTri: (tri) => setState(() => _tri = tri),
+                ),
                 _FilterBar(
                   selected: _filter,
                   onSelected: (filter) => setState(() => _filter = filter),
+                ),
+                _FiltresParcelleOrgane(
+                  parcelles: parcelles,
+                  organes: organesPresents,
+                  parcelleId: _parcelleId,
+                  organe: _organe,
+                  onParcelle: (id) => setState(() => _parcelleId = id),
+                  onOrgane: (organe) => setState(() => _organe = organe),
                 ),
                 Expanded(
                   child: visible.isEmpty
@@ -109,6 +153,185 @@ class _JournalScreenState extends ConsumerState<JournalScreen> {
         onPressed: () => context.go(AppRoutes.scanOrgane),
         backgroundColor: AppColors.primary,
         child: const Icon(Icons.add, color: AppColors.textOnPrimary),
+      ),
+    );
+  }
+}
+
+class _BarreRecherche extends StatelessWidget {
+  const _BarreRecherche({
+    required this.controleur,
+    required this.tri,
+    required this.onChanged,
+    required this.onTri,
+  });
+
+  final TextEditingController controleur;
+  final TriJournal tri;
+  final VoidCallback onChanged;
+  final ValueChanged<TriJournal> onTri;
+
+  String _libelleTri(TriJournal tri, AppLocalizations loc) => switch (tri) {
+        TriJournal.plusRecents => loc.journalSortNewest,
+        TriJournal.plusAnciens => loc.journalSortOldest,
+        TriJournal.gravite => loc.journalSortSeverity,
+      };
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.sm, AppSpacing.xs, 0),
+      child: Row(
+        children: [
+          Expanded(
+            child: TextField(
+              controller: controleur,
+              onChanged: (_) => onChanged(),
+              textInputAction: TextInputAction.search,
+              decoration: InputDecoration(
+                hintText: loc.journalSearchHint,
+                prefixIcon: const Icon(Icons.search),
+                suffixIcon: controleur.text.isEmpty
+                    ? null
+                    : IconButton(
+                        icon: const Icon(Icons.close),
+                        tooltip: loc.commonCancel,
+                        onPressed: () {
+                          controleur.clear();
+                          onChanged();
+                        },
+                      ),
+                isDense: true,
+                filled: true,
+                fillColor: AppColors.cardBackground,
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(30),
+                  borderSide: BorderSide.none,
+                ),
+              ),
+            ),
+          ),
+          PopupMenuButton<TriJournal>(
+            icon: const Icon(Icons.sort),
+            tooltip: loc.journalSortTooltip,
+            initialValue: tri,
+            onSelected: onTri,
+            itemBuilder: (context) => [
+              for (final option in TriJournal.values)
+                CheckedPopupMenuItem(
+                  value: option,
+                  checked: option == tri,
+                  child: Text(_libelleTri(option, loc)),
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Parcelle et organe : des menus plutôt que des puces, la liste des
+/// parcelles pouvant être longue.
+class _FiltresParcelleOrgane extends StatelessWidget {
+  const _FiltresParcelleOrgane({
+    required this.parcelles,
+    required this.organes,
+    required this.parcelleId,
+    required this.organe,
+    required this.onParcelle,
+    required this.onOrgane,
+  });
+
+  final List<ParcelleLocal> parcelles;
+  final List<Organe> organes;
+  final int? parcelleId;
+  final Organe? organe;
+  final ValueChanged<int?> onParcelle;
+  final ValueChanged<Organe?> onOrgane;
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    final nomParcelle = switch (parcelleId) {
+      null => loc.journalPlotAll,
+      sansParcelle => loc.journalPlotNone,
+      final id => parcelles.where((p) => p.id == id).firstOrNull?.nomParcelle ?? loc.journalPlotAll,
+    };
+
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(AppSpacing.md, AppSpacing.xs, AppSpacing.md, 0),
+      child: Wrap(
+        spacing: AppSpacing.sm,
+        runSpacing: AppSpacing.xs,
+        children: [
+          if (parcelles.isNotEmpty)
+            _MenuFiltre<int?>(
+              icone: Icons.map_outlined,
+              libelle: nomParcelle,
+              actif: parcelleId != null,
+              onSelected: onParcelle,
+              options: [
+                (null, loc.journalPlotAll),
+                for (final parcelle in parcelles) (parcelle.id, parcelle.nomParcelle),
+                (sansParcelle, loc.journalPlotNone),
+              ],
+            ),
+          if (organes.length > 1)
+            _MenuFiltre<Organe?>(
+              icone: Icons.eco_outlined,
+              libelle: organe?.label(loc) ?? loc.journalOrganAll,
+              actif: organe != null,
+              onSelected: onOrgane,
+              options: [
+                (null, loc.journalOrganAll),
+                for (final option in organes) (option, option.label(loc)),
+              ],
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MenuFiltre<T> extends StatelessWidget {
+  const _MenuFiltre({
+    required this.icone,
+    required this.libelle,
+    required this.actif,
+    required this.options,
+    required this.onSelected,
+  });
+
+  final IconData icone;
+  final String libelle;
+  final bool actif;
+  final List<(T, String)> options;
+  final ValueChanged<T> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    // Un PopupMenuButton ne sait pas renvoyer null : on passe par l'index.
+    return PopupMenuButton<int>(
+      onSelected: (index) => onSelected(options[index].$1),
+      itemBuilder: (context) => [
+        for (var i = 0; i < options.length; i++)
+          PopupMenuItem(value: i, child: Text(options[i].$2)),
+      ],
+      child: Chip(
+        avatar: Icon(icone, size: 18, color: actif ? AppColors.primary : AppColors.textSecondary),
+        label: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 160),
+              child: Text(libelle, overflow: TextOverflow.ellipsis),
+            ),
+            const Icon(Icons.arrow_drop_down, size: 18),
+          ],
+        ),
+        backgroundColor: actif ? AppColors.primaryLight : null,
       ),
     );
   }
@@ -190,7 +413,12 @@ class _ResultatCard extends StatelessWidget {
           )
         ],
       ),
-      child: Padding(
+      clipBehavior: Clip.antiAlias,
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+        onTap: () => context.push(AppRoutes.scanDetailPath(resultat.sessionId)),
+        child: Padding(
         padding: const EdgeInsets.all(AppSpacing.sm),
         child: Row(
           children: [
@@ -286,6 +514,8 @@ class _ResultatCard extends StatelessWidget {
             ),
             const SizedBox(width: AppSpacing.xs),
           ],
+        ),
+      ),
         ),
       ),
     );

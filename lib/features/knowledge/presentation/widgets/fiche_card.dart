@@ -13,9 +13,12 @@ import '../../../scan/presentation/organ_labels.dart';
 import '../../domain/entities/fiche.dart';
 
 class FicheCard extends StatelessWidget {
-  const FicheCard({super.key, required this.fiche});
+  const FicheCard({super.key, required this.fiche, this.initiallyExpanded = false});
 
   final Fiche fiche;
+
+  /// Ouverte d'emblée quand la fiche est montrée seule (détail d'un scan).
+  final bool initiallyExpanded;
 
   @override
   Widget build(BuildContext context) {
@@ -30,6 +33,7 @@ class FicheCard extends StatelessWidget {
       ),
       clipBehavior: Clip.antiAlias,
       child: ExpansionTile(
+        initiallyExpanded: initiallyExpanded,
         leading: const Icon(Icons.menu_book_outlined, color: AppColors.primary),
         title: Text(
           fiche.noms.mg == null ? fiche.noms.fr : '${fiche.noms.fr} · ${fiche.noms.mg}',

@@ -9,6 +9,11 @@
 // Les pondérations sont provisoires : elles seront recalibrées en P4 sur des
 // diagnostics validés par des techniciens.
 //
+// Ces règles ne font que classer les fiches. La certitude est lue sur les
+// scores bruts des photos acceptées, avec les seuils calibrés d'ADR-006
+// (ADR-015) : les scores fusionnés sont écrasés par le poids et les bornes, et
+// une photo à 0,61 contre 0,36 y tombait sous 0,5, donc « non reconnue ».
+//
 // Garde-fous repris de l'ADR-006 (rétablis pour les sessions en ADR-014) :
 //   - une session sans observation analysée par un modèle ne nomme aucune
 //     maladie : elle part au technicien ;
@@ -17,7 +22,9 @@
 //   - une photo que le modèle rejette (moins de 10 % de végétation, ou classe
 //     pas_riz en tête) n'apporte aucun score ;
 //   - un résultat « incertain » ne nomme aucune maladie et n'est pas
-//     enregistré comme tel.
+//     enregistré comme tel ;
+//   - une session appuyée sur le modèle n'atteint pas « probable » tant que le
+//     modèle n'est pas validé sur des photos malgaches (P4.6).
 
 import 'dart:math' as math;
 
@@ -63,6 +70,7 @@ class FusedDiagnosis {
     required this.certitude,
     required this.nommable,
     this.analyseParModele = false,
+    this.photoAcceptee = false,
   });
 
   /// Jusqu'à trois candidats, du plus au moins probable.
@@ -77,6 +85,11 @@ class FusedDiagnosis {
   /// true quand au moins une photo est passée par le modèle, même rejetée :
   /// l'app dit alors « non reconnue » plutôt que « partie non analysée ».
   final bool analyseParModele;
+
+  /// true quand au moins une photo a été acceptée par le modèle (ni pas_riz en
+  /// tête, ni trop peu de végétation). Si rien n'est nommé, l'app dit alors
+  /// que le modèle hésite, et non que la photo n'est peut-être pas du riz.
+  final bool photoAcceptee;
 
   static const FusedDiagnosis aucun = FusedDiagnosis(
     classement: <ScoredLabel>[],
@@ -118,6 +131,7 @@ FusedDiagnosis fuseObservations(
       certitude: DiagnosisCertainty.incertain,
       nommable: false,
       analyseParModele: avecModele,
+      photoAcceptee: avecScores,
     );
   }
 
@@ -143,30 +157,41 @@ FusedDiagnosis fuseObservations(
 
   final classement = _softmax(logScores)..sort((a, b) => b.score.compareTo(a.score));
   final top = classement.take(k).toList();
-  // Photos vues par le modèle mais toutes rejetées : la certitude enregistrée
-  // doit le dire, sinon les réponses seules donneraient « possible » et
-  // l'agent backend (qui lit certitude et top_k) nommerait ce que l'app tait.
-  final certitude = avecModele && !avecScores
-      ? DiagnosisCertainty.incertain
-      : _certitude(top, avecScores);
+  final certitude = avecModele ? _certitudeModele(observations) : _certitudeReponsesSeules(top);
 
   return FusedDiagnosis(
     classement: top,
     certitude: certitude,
     nommable: avecScores && certitude != DiagnosisCertainty.incertain,
     analyseParModele: avecModele,
+    photoAcceptee: avecScores,
   );
 }
 
-DiagnosisCertainty _certitude(List<ScoredLabel> classement, bool avecModele) {
-  if (classement.isEmpty) return DiagnosisCertainty.incertain;
-  if (!avecModele) {
-    // Des réponses seules ne valent pas un diagnostic : au mieux une piste.
-    return classement.first.score >= CertaintyThresholds.possibleMinScore
+/// Des réponses seules ne valent pas un diagnostic : au mieux une piste.
+DiagnosisCertainty _certitudeReponsesSeules(List<ScoredLabel> classement) =>
+    classement.isNotEmpty && classement.first.score >= CertaintyThresholds.possibleMinScore
         ? DiagnosisCertainty.possible
         : DiagnosisCertainty.incertain;
+
+/// Certitude de la photo acceptée la plus sûre, lue sur ses scores bruts
+/// (ADR-015).
+///
+/// Photos vues par le modèle mais toutes rejetées : « incertain », sinon les
+/// réponses seules donneraient « possible » et l'agent backend (qui lit
+/// certitude et top_k) nommerait ce que l'app tait.
+DiagnosisCertainty _certitudeModele(List<ObservationEvidence> observations) {
+  var certitude = DiagnosisCertainty.incertain;
+  for (final observation in observations) {
+    if (!observation.apporteDesScores) continue;
+    final photo = certaintyOf(observation.scores, vegetationRatio: observation.vegetationRatio);
+    if (photo != DiagnosisCertainty.incertain) {
+      certitude = DiagnosisCertainty.possible;
+    }
   }
-  return certaintyOf(classement);
+  // Même à 0,999, une photo reste une piste tant que P4.6 n'a pas validé le
+  // modèle : « probable » marquerait la parcelle comme confirmée.
+  return certitude;
 }
 
 List<ScoredLabel> _softmax(Map<String, double> logScores) {

@@ -2804,6 +2804,12 @@ abstract class AppLocalizations {
   /// **'Ajouter une autre photo'**
   String get scanCaptureAnother;
 
+  /// No description provided for @scanCaptureFromGallery.
+  ///
+  /// In fr, this message translates to:
+  /// **'Importer depuis la galerie'**
+  String get scanCaptureFromGallery;
+
   /// No description provided for @scanCaptureContinue.
   ///
   /// In fr, this message translates to:
@@ -2852,11 +2858,23 @@ abstract class AppLocalizations {
   /// **'Cette partie de la plante n\'est pas analysée par le modèle. Vos photos et vos réponses sont enregistrées : montrez-les à un technicien.'**
   String get scanSessionNoNameBody;
 
-  /// Session dont la photo a été analysée mais rien retenu : rejet pas_riz, trop peu de végétation ou résultat incertain (ADR-014)
+  /// Session dont toutes les photos analysées ont été rejetées : pas_riz en tête ou trop peu de végétation (ADR-014)
   ///
   /// In fr, this message translates to:
   /// **'Ce n\'est peut-être pas du riz, ou la photo est floue ou mal éclairée. Aucune maladie n\'est retenue. Vos photos et vos réponses sont enregistrées : montrez-les à un technicien.'**
   String get scanSessionNotRecognizedBody;
+
+  /// Photo acceptée par le modèle, mais scores bruts trop faibles pour retenir une maladie (ADR-015)
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'application n\'arrive pas à trancher'**
+  String get scanSessionHesitationTitle;
+
+  /// Texte du résultat où le modèle hésite (ADR-015) ; ne dit pas que la photo n'est pas du riz
+  ///
+  /// In fr, this message translates to:
+  /// **'La feuille a bien été analysée, mais plusieurs maladies restent possibles et aucune ne ressort assez nettement. Aucune maladie n\'est retenue. Vos photos et vos réponses sont enregistrées : montrez-les à un technicien.'**
+  String get scanSessionHesitationBody;
 
   /// No description provided for @scanSessionPhotosSaved.
   ///
@@ -3073,6 +3091,156 @@ abstract class AppLocalizations {
   /// In fr, this message translates to:
   /// **'{count} photo(s)'**
   String journalPhotoCount(int count);
+
+  /// No description provided for @journalSearchHint.
+  ///
+  /// In fr, this message translates to:
+  /// **'Rechercher une maladie'**
+  String get journalSearchHint;
+
+  /// No description provided for @journalSortTooltip.
+  ///
+  /// In fr, this message translates to:
+  /// **'Trier'**
+  String get journalSortTooltip;
+
+  /// No description provided for @journalSortNewest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus récents d\'abord'**
+  String get journalSortNewest;
+
+  /// No description provided for @journalSortOldest.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus anciens d\'abord'**
+  String get journalSortOldest;
+
+  /// No description provided for @journalSortSeverity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Plus graves d\'abord'**
+  String get journalSortSeverity;
+
+  /// No description provided for @journalPlotAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Toutes les parcelles'**
+  String get journalPlotAll;
+
+  /// No description provided for @journalPlotNone.
+  ///
+  /// In fr, this message translates to:
+  /// **'Sans parcelle'**
+  String get journalPlotNone;
+
+  /// No description provided for @journalOrganAll.
+  ///
+  /// In fr, this message translates to:
+  /// **'Tous les organes'**
+  String get journalOrganAll;
+
+  /// No description provided for @scanDetailTitle.
+  ///
+  /// In fr, this message translates to:
+  /// **'Détail du scan'**
+  String get scanDetailTitle;
+
+  /// No description provided for @scanDetailNotFound.
+  ///
+  /// In fr, this message translates to:
+  /// **'Ce scan n\'existe plus sur ce téléphone.'**
+  String get scanDetailNotFound;
+
+  /// No description provided for @scanDetailUnnamedBody.
+  ///
+  /// In fr, this message translates to:
+  /// **'L\'app n\'a pas su nommer ce problème. Montrez les photos et vos réponses à un technicien.'**
+  String get scanDetailUnnamedBody;
+
+  /// No description provided for @scanDetailDeclaredSeverity.
+  ///
+  /// In fr, this message translates to:
+  /// **'Part de la parcelle touchée : {gravite}'**
+  String scanDetailDeclaredSeverity(String gravite);
+
+  /// No description provided for @scanDetailAnswers.
+  ///
+  /// In fr, this message translates to:
+  /// **'Vos réponses'**
+  String get scanDetailAnswers;
+
+  /// No description provided for @scanDetailPlot.
+  ///
+  /// In fr, this message translates to:
+  /// **'Parcelle : {nom}'**
+  String scanDetailPlot(String nom);
+
+  /// No description provided for @scanDetailNoPlot.
+  ///
+  /// In fr, this message translates to:
+  /// **'Pas encore rattaché à une parcelle'**
+  String get scanDetailNoPlot;
+
+  /// No description provided for @scanDetailChangePlot.
+  ///
+  /// In fr, this message translates to:
+  /// **'Changer'**
+  String get scanDetailChangePlot;
+
+  /// No description provided for @scanDetailOpenFiche.
+  ///
+  /// In fr, this message translates to:
+  /// **'Voir la fiche du guide'**
+  String get scanDetailOpenFiche;
+
+  /// No description provided for @scanDetailFollowUp.
+  ///
+  /// In fr, this message translates to:
+  /// **'Refaire un scan de suivi'**
+  String get scanDetailFollowUp;
+
+  /// No description provided for @scanDetailAskAdvisor.
+  ///
+  /// In fr, this message translates to:
+  /// **'Poser une question au conseiller'**
+  String get scanDetailAskAdvisor;
+
+  /// No description provided for @scanDetailDelete.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer ce scan'**
+  String get scanDetailDelete;
+
+  /// No description provided for @scanDetailDeleteConfirm.
+  ///
+  /// In fr, this message translates to:
+  /// **'Le scan disparaîtra du journal de ce téléphone. Les photos de votre galerie ne sont pas touchées.'**
+  String get scanDetailDeleteConfirm;
+
+  /// No description provided for @scanDetailDeleteSyncedWarning.
+  ///
+  /// In fr, this message translates to:
+  /// **'Il a déjà été envoyé au serveur : il y reste enregistré.'**
+  String get scanDetailDeleteSyncedWarning;
+
+  /// No description provided for @scanDetailDeleteAction.
+  ///
+  /// In fr, this message translates to:
+  /// **'Supprimer'**
+  String get scanDetailDeleteAction;
+
+  /// No description provided for @scanDetailDeleted.
+  ///
+  /// In fr, this message translates to:
+  /// **'Scan supprimé'**
+  String get scanDetailDeleted;
+
+  /// No description provided for @scanDetailPhotoMissing.
+  ///
+  /// In fr, this message translates to:
+  /// **'Photo introuvable sur ce téléphone'**
+  String get scanDetailPhotoMissing;
 }
 
 class _AppLocalizationsDelegate

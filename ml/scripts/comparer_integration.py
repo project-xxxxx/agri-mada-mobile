@@ -10,14 +10,17 @@ Reproduit le parcours de scan de l'app pour une photo de feuille :
      à [0,05 ; 0,95], puis softmax) ;
   4. certitude avec les seuils de lib/core/ai/diagnosis_certainty.dart.
 
-Trois configurations :
+Quatre configurations :
   A. modèle embarqué, parcours actuel — le nom de la première classe est
      affiché dès qu'une photo passe par le modèle, même « incertain », et le
      contrôle de végétation d'ADR-006 n'est plus appliqué dans la fusion ;
   B. modèle embarqué, garde-fous rétablis — rien n'est nommé si la certitude
      est « incertain » ou si la photo a moins de 10 % de pixels végétaux ;
   C. feuille_v2, garde-fous rétablis — et rien n'est nommé si la première
-     classe est pas_riz.
+     classe est pas_riz (règle d'ADR-014 : certitude lue sur les scores
+     fusionnés) ;
+  D. feuille_v2, règle d'ADR-015 — mêmes rejets que C, mais la certitude est
+     lue sur les scores bruts de la photo ; la fusion ne fait que classer.
 
 Données : la validation de train_feuille.py (même découpage, jamais vue par
 feuille_v2 ; indépendante aussi pour le modèle embarqué, entraîné sur un autre
@@ -82,6 +85,17 @@ def vue_agriculteur(top3, vegetation: float, seuils, garde_fous: bool, traduire)
     return traduire(premier) or "autre"
 
 
+def vue_certitude_brute(top3, vegetation: float, seuils) -> str:
+    """Règle d'ADR-015 (lib/core/ai/diagnosis_fusion.dart). Pour une photo seule
+    sans questionnaire, la fusion garde l'ordre du modèle : la maladie nommée
+    est la première classe, si ses scores bruts ne la disent pas incertaine."""
+    if vegetation < seuils.min_vegetation or top3[0][0] == "pas_riz":
+        return "rien"
+    if certitude(top3, seuils) == "incertain":
+        return "rien"
+    return "sain" if top3[0][0] in SAINES else top3[0][0]
+
+
 def resumer(vues: list[str], attendus: list[str]) -> dict:
     par_groupe: dict[str, Counter] = {}
     for vue, attendu in zip(vues, attendus):
@@ -115,6 +129,7 @@ def main() -> int:
         sys.stdout.reconfigure(encoding="utf-8")
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--data-root", type=Path, default=Path("D:/agrimada-ml"))
+    parser.add_argument("--rapport", type=Path, default=RAPPORT, help="fichier JSON écrit (défaut : daté du jour)")
     args = parser.parse_args()
 
     seuils = read_app_thresholds()
@@ -131,7 +146,12 @@ def main() -> int:
     embarque = Model(EMBARQUE_V1 / "model.tflite", EMBARQUE_V1 / "labels.txt")
     candidat = Model(FEUILLE_V2 / "model.tflite", FEUILLE_V2 / "labels.txt")
 
-    vues = {"A_embarque_parcours_actuel": [], "B_embarque_garde_fous": [], "C_feuille_v2_garde_fous": []}
+    vues = {
+        "A_embarque_parcours_actuel": [],
+        "B_embarque_garde_fous": [],
+        "C_feuille_v2_garde_fous": [],
+        "D_feuille_v2_certitude_brute": [],
+    }
     attendus = []
     for n, (chemin, attendu) in enumerate(images, start=1):
         data = chemin.read_bytes()
@@ -141,12 +161,13 @@ def main() -> int:
         vues["A_embarque_parcours_actuel"].append(vue_agriculteur(top_e, veg, seuils, False, EMBARQUE_VERS_TAXONOMIE.get))
         vues["B_embarque_garde_fous"].append(vue_agriculteur(top_e, veg, seuils, True, EMBARQUE_VERS_TAXONOMIE.get))
         vues["C_feuille_v2_garde_fous"].append(vue_agriculteur(top_c, veg, seuils, True, lambda label: label))
+        vues["D_feuille_v2_certitude_brute"].append(vue_certitude_brute(top_c, veg, seuils))
         attendus.append(attendu)
         if n % 500 == 0:
             print(f"  {n}/{len(images)}")
 
     resultats = {nom: resumer(v, attendus) for nom, v in vues.items()}
-    RAPPORT.write_text(
+    args.rapport.write_text(
         json.dumps({"date": date.today().isoformat(), "seuils_app": seuils.__dict__, "resultats": resultats}, indent=2, ensure_ascii=False),
         encoding="utf-8",
     )
@@ -156,7 +177,7 @@ def main() -> int:
         total = sum(groupe.values()) or 1
         return f"{groupe.get(issue, 0)}/{total} ({100 * groupe.get(issue, 0) / total:.0f} %)"
 
-    print("\n                                   A embarqué actuel   B embarqué + garde-fous   C feuille_v2 + garde-fous")
+    print("\n" + " " * 35 + "   ".join(f"{nom[:22]:<22}" for nom in vues))
     for titre, cle, issue in [
         ("Hors sujet : maladie nommée", "hors_sujet", "maladie_nommee"),
         ("Feuilles saines : fausse alerte", "feuilles_saines", "fausse_alerte"),
@@ -166,7 +187,7 @@ def main() -> int:
         ("Toutes maladies : mauvais nom", "toutes_maladies", "mauvais_nom"),
     ]:
         print(f"  {titre:<33} " + "   ".join(f"{ligne(nom, cle, issue):<22}" for nom in vues))
-    print(f"\nRapport : {RAPPORT.relative_to(ROOT).as_posix()}")
+    print(f"\nRapport : {args.rapport.resolve().as_posix()}")
     return 0
 
 

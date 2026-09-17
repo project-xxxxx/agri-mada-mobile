@@ -1536,6 +1536,9 @@ class AppLocalizationsMg extends AppLocalizations {
   String get scanCaptureAnother => 'Manampy sary hafa';
 
   @override
+  String get scanCaptureFromGallery => 'Maka sary ao amin\'ny galerie';
+
+  @override
   String get scanCaptureContinue => 'Manohy';
 
   @override
@@ -1567,6 +1570,13 @@ class AppLocalizationsMg extends AppLocalizations {
   @override
   String get scanSessionNotRecognizedBody =>
       'Mety tsy vary izy, na manjavozavo na tsy ampy hazavana ny sary. Tsy misy aretina voatazona. Voatahiry ny sary sy ny valin-teninao : asehoy teknisianina izany.';
+
+  @override
+  String get scanSessionHesitationTitle => 'Misalasala ny fampiharana';
+
+  @override
+  String get scanSessionHesitationBody =>
+      'Voadinika ny ravina, saingy aretina maromaro no mety ary tsy misy miavaka mazava. Tsy misy aretina voatazona. Voatahiry ny sary sy ny valin-teninao : asehoy teknisianina izany.';
 
   @override
   String scanSessionPhotosSaved(int count) {
@@ -1681,4 +1691,87 @@ class AppLocalizationsMg extends AppLocalizations {
   String journalPhotoCount(int count) {
     return 'Sary $count';
   }
+
+  @override
+  String get journalSearchHint => 'Hitady aretina';
+
+  @override
+  String get journalSortTooltip => 'Alaharo';
+
+  @override
+  String get journalSortNewest => 'Ny vaovao indrindra aloha';
+
+  @override
+  String get journalSortOldest => 'Ny taloha indrindra aloha';
+
+  @override
+  String get journalSortSeverity => 'Ny mafy indrindra aloha';
+
+  @override
+  String get journalPlotAll => 'Tanimbary rehetra';
+
+  @override
+  String get journalPlotNone => 'Tsy misy tanimbary';
+
+  @override
+  String get journalOrganAll => 'Ampahany rehetra';
+
+  @override
+  String get scanDetailTitle => 'Antsipirian\'ny scan';
+
+  @override
+  String get scanDetailNotFound =>
+      'Tsy misy intsony amin\'ity finday ity io scan io.';
+
+  @override
+  String get scanDetailUnnamedBody =>
+      'Tsy nahay nanome anarana ity olana ity ny fampiharana. Asehoy teknisianina ny sary sy ny valinteninao.';
+
+  @override
+  String scanDetailDeclaredSeverity(String gravite) {
+    return 'Ampahan\'ny tanimbary voa : $gravite';
+  }
+
+  @override
+  String get scanDetailAnswers => 'Ny valinteninao';
+
+  @override
+  String scanDetailPlot(String nom) {
+    return 'Tanimbary : $nom';
+  }
+
+  @override
+  String get scanDetailNoPlot => 'Mbola tsy mifandray amin\'ny tanimbary';
+
+  @override
+  String get scanDetailChangePlot => 'Hanova';
+
+  @override
+  String get scanDetailOpenFiche => 'Hijery ny taratasy ao amin\'ny torolalana';
+
+  @override
+  String get scanDetailFollowUp => 'Hanao scan fanaraha-maso indray';
+
+  @override
+  String get scanDetailAskAdvisor => 'Hanontany ny mpanolotsaina';
+
+  @override
+  String get scanDetailDelete => 'Hamafa ity scan ity';
+
+  @override
+  String get scanDetailDeleteConfirm =>
+      'Hanjavona ao amin\'ny tantaran\'ity finday ity ny scan. Tsy voakasika ny sary ao amin\'ny galerie.';
+
+  @override
+  String get scanDetailDeleteSyncedWarning =>
+      'Efa nalefa tany amin\'ny serveur izy : mbola voatahiry any.';
+
+  @override
+  String get scanDetailDeleteAction => 'Hamafa';
+
+  @override
+  String get scanDetailDeleted => 'Voafafa ny scan';
+
+  @override
+  String get scanDetailPhotoMissing => 'Tsy hita amin\'ity finday ity ny sary';
 }

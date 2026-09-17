@@ -658,3 +658,57 @@ Chaque décision structurante du projet AgriMada est consignée ici : contexte, 
   - Traduire les anciennes étiquettes des sessions enregistrées vers le
     nouveau vocabulaire : migration de données sans bénéfice, le catalogue
     sait déjà lire les deux.
+
+## ADR-015 — Certitude d'une session lue sur les scores bruts des photos (2026-09-17)
+
+**Statut :** proposé (implémenté, non commité) — compromis mesuré à confirmer par l'équipe
+
+- **Contexte :** une photo de feuille prise au champ, envoyée par l'équipe,
+  affichait « L'application ne reconnaît pas cette photo… Ce n'est peut-être
+  pas du riz ». Le modèle ne la rejetait pourtant pas : tache brune 0,606, BLB
+  0,361, végétation 91 %. La fusion d'ADR-007 (poids du modèle 0,5,
+  probabilités bornées à [0,05 ; 0,95], renormalisation sur le top 3) ramenait
+  0,606 à 0,486, sous le seuil « possible » de 0,5. Ce seuil a été calibré sur
+  les scores bruts du modèle (ADR-006). Appliqué aux scores fusionnés, il
+  n'avait plus de sens : une photo seule sans questionnaire y plafonne à
+  0,685, une photo à 0,61 contre 0,36 tombe dessous, et une photo à 0,40
+  (reste réparti hors du top 3) passe au-dessus. Le même message couvrait en
+  outre deux situations différentes : photo rejetée, et modèle qui hésite.
+- **Décision :**
+  - **Certitude** (`diagnosis_fusion.dart`) : lue sur les scores bruts de
+    chaque photo acceptée, avec `certaintyOf` et les seuils d'ADR-006. La
+    session est « possible » si au moins une photo acceptée l'est, « incertain »
+    sinon. La fusion ne fait plus que classer les fiches (modèle, questionnaire,
+    contexte) : les réponses peuvent désigner une autre piste que le modèle,
+    mais ne rendent jamais nommable une photo dont le modèle n'est pas sûr.
+  - **Jamais « probable »** pour une session appuyée sur le modèle, même à
+    0,999, tant que P4.6 n'a pas validé le modèle sur des photos malgaches :
+    « probable » marquerait la parcelle comme confirmée. L'ancienne règle y
+    aboutissait déjà de fait (plafond de 0,685).
+  - **Inchangé :** rejet `pas_riz` et végétation < 10 %, `pas_riz` jamais
+    candidat, certitude « incertain » si toutes les photos analysées sont
+    rejetées, sessions sans modèle jamais nommables.
+  - **Écran :** nouveau champ `FusedDiagnosis.photoAcceptee`. Photo acceptée
+    mais rien de nommé → « L'application n'arrive pas à trancher » (plusieurs
+    maladies restent possibles, aucune n'est retenue) ; photos rejetées →
+    message existant « ne reconnaît pas cette photo » ; organe sans modèle →
+    message existant.
+- **Conséquences (mesurées sur la validation publique, photo seule,
+  `ml/reports/comparaison_integration_2026-09-17_certitude_brute.md`) :**
+  - Maladies sans réponse : 26,0 % → 19,7 % ; bon nom : 66,5 % → 70,7 %.
+  - Mauvais nom : 7,4 % → 9,5 % ; fausses alertes sur feuilles saines :
+    42/670 → 59/670 ; photos hors sujet nommées : 1/50 → 2/50. Sur les 140
+    photos de maladie désormais nommées, un tiers porte un mauvais nom.
+  - Toutes restent des pistes « possibles » avec bandeau « modèle
+    expérimental » et technicien proposé.
+  - Chaînes malgaches nouvelles à relire (`docs/traductions/relecture-malgache.csv`).
+  - Rien n'est vérifié sur téléphone ni sur photos malgaches (P4.6).
+- **Alternatives écartées :**
+  - Baisser le seuil appliqué aux scores fusionnés : leur échelle dépend du
+    nombre de candidats et des bornes, aucun seuil n'y est calibré.
+  - Supprimer la racine carrée ou les bornes de la fusion : change aussi le
+    poids du questionnaire, dont les pondérations sont des estimations
+    d'expert à recalibrer en P4.
+  - Relever dès maintenant le seuil brut « possible » pour compenser le coût :
+    possible (levier `CertaintyThresholds.possibleMinScore`), mais demande un
+    balayage sur les mêmes photos et une décision de l'équipe sur le compromis.

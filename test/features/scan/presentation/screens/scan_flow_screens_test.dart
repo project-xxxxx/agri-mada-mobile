@@ -193,6 +193,7 @@ void main() {
           photoCheckerProvider.overrideWithValue((_) async => qualite),
           camerasProvider.overrideWith((ref) async => <CameraDescription>[]),
           fallbackPhotoProvider.overrideWithValue(() async => XFile('photo.jpg')),
+          galleryPhotoProvider.overrideWithValue(() async => XFile('galerie.jpg')),
         ],
         child: MaterialApp.router(
           routerConfig: router,
@@ -267,6 +268,30 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.byType(ScanQuestionsScreen), findsOneWidget);
+    });
+
+    testWidgets('une photo importée de la galerie est comptée comme une photo prise', (tester) async {
+      await pumpParcours(tester);
+      await tester.tap(find.text('Feuilles · Ravina'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Importer depuis la galerie'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('1 photo(s) sur 3'), findsOneWidget);
+      expect(repository.observationsAjoutees, hasLength(1));
+    });
+
+    testWidgets('une photo floue importée de la galerie est refusée comme les autres', (tester) async {
+      await pumpParcours(tester, qualite: _floue);
+      await tester.tap(find.text('Feuilles · Ravina'));
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Importer depuis la galerie'));
+      await tester.pumpAndSettle();
+
+      expect(find.textContaining('Photo floue'), findsOneWidget);
+      expect(repository.observationsAjoutees, isEmpty);
     });
   });
 

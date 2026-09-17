@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:go_router/go_router.dart';
 
+import 'package:agri_mada/app/router.dart';
 import 'package:agri_mada/features/journal/domain/entities/resultat_scan.dart';
 import 'package:agri_mada/features/journal/presentation/diagnostic_filter.dart';
 import 'package:agri_mada/features/journal/presentation/providers/journal_provider.dart';
@@ -84,12 +86,72 @@ void main() {
     });
   });
 
+  group('rechercherDansJournal', () {
+    String nom(ResultatScan resultat) => switch (resultat.ficheId) {
+          'Brown spot' => 'Helminthosporiose (tache brune)',
+          'Leaf smut' => 'Charbon foliaire',
+          'healthy' => 'Plante saine',
+          _ => 'Résultat non nommé',
+        };
+    final sansParcelleRacines = ResultatScan(
+      sessionId: 5,
+      date: now.subtract(const Duration(days: 2)),
+      organes: const [Organe.racines],
+      certitude: 'incertain',
+    );
+    final avecSansParcelle = [...tous, sansParcelleRacines];
+
+    test('la recherche ignore majuscules et accents', () {
+      expect(
+        rechercherDansJournal(tous, nomDe: nom, texte: 'HELMINTHO'),
+        [graveHier],
+      );
+      expect(
+        rechercherDansJournal([nonNomme], nomDe: nom, texte: 'resultat non'),
+        [nonNomme],
+      );
+    });
+
+    test('filtre par parcelle, y compris les scans sans parcelle', () {
+      expect(
+        rechercherDansJournal(avecSansParcelle, nomDe: nom, parcelleId: sansParcelle),
+        [sansParcelleRacines],
+      );
+      expect(
+        rechercherDansJournal(avecSansParcelle, nomDe: nom, parcelleId: 1),
+        tous,
+      );
+    });
+
+    test('filtre par organe', () {
+      expect(
+        rechercherDansJournal(avecSansParcelle, nomDe: nom, organe: Organe.racines),
+        [sansParcelleRacines],
+      );
+    });
+
+    test('trie du plus ancien au plus récent', () {
+      expect(
+        rechercherDansJournal(tous, nomDe: nom, tri: TriJournal.plusAnciens),
+        [ancienCharbon, graveHier, sainAujourdhui],
+      );
+    });
+
+    test('trie par gravité déclarée, les plantes saines en dernier', () {
+      expect(
+        rechercherDansJournal(avecSansParcelle, nomDe: nom, tri: TriJournal.gravite),
+        [graveHier, ancienCharbon, sansParcelleRacines, sainAujourdhui],
+      );
+    });
+  });
+
   group('JournalScreen', () {
     Future<void> pumpJournal(WidgetTester tester, List<ResultatScan> resultats) async {
       await tester.pumpWidget(
         ProviderScope(
           overrides: [
             resultatsHistoryProvider.overrideWith((ref) async => resultats),
+            parcellesProvider.overrideWith((ref) async => const []),
           ],
           child: const MaterialApp(
             locale: Locale('fr'),
@@ -160,6 +222,55 @@ void main() {
 
       expect(find.text('À confirmer'), findsNothing);
       expect(find.text('Sain'), findsOneWidget);
+    });
+
+    testWidgets('la recherche restreint la liste pendant la saisie', (tester) async {
+      await pumpJournal(tester, tous);
+
+      await tester.enterText(find.byType(TextField), 'charbon');
+      await tester.pumpAndSettle();
+
+      expect(find.text(nomCharbon), findsOneWidget);
+      expect(find.text(nomTacheBrune), findsNothing);
+      expect(find.text(nomSain), findsNothing);
+    });
+
+    testWidgets('toucher un scan ouvre son détail', (tester) async {
+      final router = GoRouter(
+        initialLocation: AppRoutes.journal,
+        routes: [
+          GoRoute(path: AppRoutes.journal, builder: (context, state) => const JournalScreen()),
+          GoRoute(
+            path: AppRoutes.scanDetail,
+            builder: (context, state) => Text('détail ${state.pathParameters['id']}'),
+          ),
+        ],
+      );
+      await tester.pumpWidget(
+        ProviderScope(
+          overrides: [
+            resultatsHistoryProvider.overrideWith((ref) async => [graveHier]),
+            parcellesProvider.overrideWith((ref) async => const []),
+          ],
+          child: MaterialApp.router(
+            routerConfig: router,
+            locale: const Locale('fr'),
+            supportedLocales: const [Locale('fr'), Locale('mg')],
+            localizationsDelegates: const [
+              AppLocalizations.delegate,
+              GlobalMaterialLocalizations.delegate,
+              GlobalWidgetsLocalizations.delegate,
+              GlobalCupertinoLocalizations.delegate,
+            ],
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text(nomTacheBrune));
+      await tester.pumpAndSettle();
+
+      expect(find.text('détail 2'), findsOneWidget);
     });
   });
 }

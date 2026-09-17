@@ -17,6 +17,7 @@ import '../features/scan/presentation/screens/session_result_screen.dart';
 import '../features/journal/presentation/screens/journal_screen.dart';
 import '../features/journal/presentation/screens/my_parcelles_screen.dart';
 import '../features/journal/presentation/screens/parcelle_detail_screen.dart';
+import '../features/journal/presentation/screens/scan_detail_screen.dart';
 import '../features/onboarding/presentation/screens/onboarding_screen.dart';
 import '../core/local_db/session_service.dart';
 import '../core/widgets/main_layout.dart';
@@ -38,11 +39,18 @@ abstract final class AppRoutes {
   static const String journal = '/journal';
   static const String myParcelles = '/my-parcelles';
   static const String parcelleDetail = '/parcelle/:id';
+  /// Scan passé, ouvert depuis le journal ou la fiche d'une parcelle.
+  static const String scanDetail = '/journal/scan/:id';
   static const String prevention = '/prevention';
   static const String guides = '/guides';
   static const String onboarding = '/onboarding';
   /// Conseiller : agent du serveur relié aux fiches et aux scans (ADR-012).
   static const String conseiller = '/conseiller';
+
+  /// Chemins concrets des routes à paramètre : `parcelleDetail` et `scanDetail`
+  /// sont des motifs, on n'y colle pas un identifiant à la suite.
+  static String parcelleDetailPath(int id) => '/parcelle/$id';
+  static String scanDetailPath(int sessionId) => '/journal/scan/$sessionId';
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -70,6 +78,8 @@ final routerProvider = Provider<GoRouter>((ref) {
           route == AppRoutes.scanSessionResult ||
           route == AppRoutes.journal ||
           route == AppRoutes.myParcelles ||
+          route.startsWith('/parcelle/') ||
+          route.startsWith('/journal/scan/') ||
           route == AppRoutes.conseiller;
       final isOnboardingConsultationMode =
           state.uri.queryParameters['mode'] == 'help';
@@ -164,6 +174,12 @@ final routerProvider = Provider<GoRouter>((ref) {
               child: child,
             );
           },
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.scanDetail,
+        builder: (context, state) => ScanDetailScreen(
+          sessionId: int.tryParse(state.pathParameters['id'] ?? '0') ?? 0,
         ),
       ),
       GoRoute(

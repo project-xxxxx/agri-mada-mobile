@@ -1526,6 +1526,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get scanCaptureAnother => 'Ajouter une autre photo';
 
   @override
+  String get scanCaptureFromGallery => 'Importer depuis la galerie';
+
+  @override
   String get scanCaptureContinue => 'Continuer';
 
   @override
@@ -1557,6 +1560,14 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get scanSessionNotRecognizedBody =>
       'Ce n\'est peut-être pas du riz, ou la photo est floue ou mal éclairée. Aucune maladie n\'est retenue. Vos photos et vos réponses sont enregistrées : montrez-les à un technicien.';
+
+  @override
+  String get scanSessionHesitationTitle =>
+      'L\'application n\'arrive pas à trancher';
+
+  @override
+  String get scanSessionHesitationBody =>
+      'La feuille a bien été analysée, mais plusieurs maladies restent possibles et aucune ne ressort assez nettement. Aucune maladie n\'est retenue. Vos photos et vos réponses sont enregistrées : montrez-les à un technicien.';
 
   @override
   String scanSessionPhotosSaved(int count) {
@@ -1671,4 +1682,86 @@ class AppLocalizationsFr extends AppLocalizations {
   String journalPhotoCount(int count) {
     return '$count photo(s)';
   }
+
+  @override
+  String get journalSearchHint => 'Rechercher une maladie';
+
+  @override
+  String get journalSortTooltip => 'Trier';
+
+  @override
+  String get journalSortNewest => 'Plus récents d\'abord';
+
+  @override
+  String get journalSortOldest => 'Plus anciens d\'abord';
+
+  @override
+  String get journalSortSeverity => 'Plus graves d\'abord';
+
+  @override
+  String get journalPlotAll => 'Toutes les parcelles';
+
+  @override
+  String get journalPlotNone => 'Sans parcelle';
+
+  @override
+  String get journalOrganAll => 'Tous les organes';
+
+  @override
+  String get scanDetailTitle => 'Détail du scan';
+
+  @override
+  String get scanDetailNotFound => 'Ce scan n\'existe plus sur ce téléphone.';
+
+  @override
+  String get scanDetailUnnamedBody =>
+      'L\'app n\'a pas su nommer ce problème. Montrez les photos et vos réponses à un technicien.';
+
+  @override
+  String scanDetailDeclaredSeverity(String gravite) {
+    return 'Part de la parcelle touchée : $gravite';
+  }
+
+  @override
+  String get scanDetailAnswers => 'Vos réponses';
+
+  @override
+  String scanDetailPlot(String nom) {
+    return 'Parcelle : $nom';
+  }
+
+  @override
+  String get scanDetailNoPlot => 'Pas encore rattaché à une parcelle';
+
+  @override
+  String get scanDetailChangePlot => 'Changer';
+
+  @override
+  String get scanDetailOpenFiche => 'Voir la fiche du guide';
+
+  @override
+  String get scanDetailFollowUp => 'Refaire un scan de suivi';
+
+  @override
+  String get scanDetailAskAdvisor => 'Poser une question au conseiller';
+
+  @override
+  String get scanDetailDelete => 'Supprimer ce scan';
+
+  @override
+  String get scanDetailDeleteConfirm =>
+      'Le scan disparaîtra du journal de ce téléphone. Les photos de votre galerie ne sont pas touchées.';
+
+  @override
+  String get scanDetailDeleteSyncedWarning =>
+      'Il a déjà été envoyé au serveur : il y reste enregistré.';
+
+  @override
+  String get scanDetailDeleteAction => 'Supprimer';
+
+  @override
+  String get scanDetailDeleted => 'Scan supprimé';
+
+  @override
+  String get scanDetailPhotoMissing => 'Photo introuvable sur ce téléphone';
 }

@@ -11,6 +11,7 @@ import '../../../../core/local_db/isar_service.dart';
 import '../../../../core/local_db/models/diagnostic_session_local.dart';
 import '../../../../core/local_db/models/observation_local.dart';
 import '../../../../core/utils/client_uuid.dart';
+import '../../../journal/domain/entities/detail_scan.dart';
 import '../../../journal/domain/entities/resultat_scan.dart';
 import '../../domain/entities/organe.dart';
 
@@ -163,6 +164,30 @@ class SessionLocalRepository {
       for (final session in sessions)
         _versResultat(session, parSession[session.id] ?? const []),
     ];
+  }
+
+  /// Détail d'un scan terminé ; null si la session n'existe plus ou n'a pas
+  /// de résultat.
+  Future<DetailScan?> detail(int sessionId) async {
+    final session = await this.session(sessionId);
+    if (session == null || session.certitude == null) return null;
+
+    final observations = await this.observations(sessionId)
+      ..sort((a, b) => a.createdAt.compareTo(b.createdAt));
+
+    return DetailScan(
+      resume: _versResultat(session, observations),
+      photos: [
+        for (final observation in observations)
+          PhotoDuScan(
+            organe: observation.organe,
+            imagePath: observation.imagePath,
+            reponses: decoderReponses(observation.reponses),
+          ),
+      ],
+      classement: decoderClassement(session.classement),
+      estSynchronise: session.isSynced,
+    );
   }
 
   ResultatScan _versResultat(

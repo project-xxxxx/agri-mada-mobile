@@ -366,7 +366,7 @@ class _ParcelleCard extends StatelessWidget {
     };
 
     return GestureDetector(
-      onTap: () => context.push('${AppRoutes.parcelleDetail}/${parcelle.id}'),
+      onTap: () => context.push(AppRoutes.parcelleDetailPath(parcelle.id)),
       child: Container(
       decoration: BoxDecoration(
         color: AppColors.cardBackground,

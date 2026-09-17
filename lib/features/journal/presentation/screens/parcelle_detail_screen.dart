@@ -270,14 +270,18 @@ class _ResultatHistoryItem extends StatelessWidget {
         ? AppColors.severityLow
         : (isConfirmed ? AppColors.severityHigh : AppColors.severityMedium);
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: AppSpacing.screenHorizontal, vertical: 4),
-      padding: const EdgeInsets.all(AppSpacing.sm),
-      decoration: BoxDecoration(
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.screenHorizontal, vertical: 4),
+      child: Material(
         color: AppColors.cardBackground,
         borderRadius: BorderRadius.circular(AppSpacing.sm),
-        boxShadow: [BoxShadow(color: Colors.black.withAlpha(10), blurRadius: 4, offset: const Offset(0, 1))],
-      ),
+        elevation: 1,
+        shadowColor: Colors.black.withAlpha(40),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+        onTap: () => context.push(AppRoutes.scanDetailPath(resultat.sessionId)),
+        child: Padding(
+      padding: const EdgeInsets.all(AppSpacing.sm),
       child: Row(
         children: [
           Container(
@@ -301,6 +305,9 @@ class _ResultatHistoryItem extends StatelessWidget {
           ),
           Text(DateFormat('dd/MM/yyyy').format(resultat.date), style: AppTypography.caption.copyWith(color: AppColors.textSecondary)),
         ],
+      ),
+        ),
+        ),
       ),
     );
   }

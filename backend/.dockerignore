@@ -1,0 +1,15 @@
+# L'image ne reçoit que le code : ni secrets, ni environnement Windows, ni base locale.
+.env
+venv/
+env/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+*.db
+*.db.bak*
+*.sqlite3
+token.txt
+test_jwt.py
+test_parcelles.json
+test_diagnostics.json

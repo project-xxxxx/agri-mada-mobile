@@ -22,8 +22,14 @@ import 'package:agri_mada/features/auth/presentation/screens/login_screen.dart';
 import 'package:agri_mada/features/auth/presentation/screens/register_screen.dart';
 import 'package:agri_mada/features/auth/presentation/screens/welcome_screen.dart';
 import 'package:agri_mada/features/home/presentation/screens/home_screen.dart';
+import 'package:agri_mada/core/local_db/models/parcelle_local.dart';
+import 'package:agri_mada/features/journal/domain/entities/detail_scan.dart';
 import 'package:agri_mada/features/journal/domain/entities/journal_entry.dart';
+import 'package:agri_mada/features/journal/domain/entities/resultat_scan.dart';
 import 'package:agri_mada/features/journal/presentation/providers/journal_provider.dart';
+import 'package:agri_mada/features/journal/presentation/screens/journal_screen.dart';
+import 'package:agri_mada/features/journal/presentation/screens/scan_detail_screen.dart';
+import 'package:agri_mada/features/knowledge/presentation/providers/fiches_provider.dart';
 import 'package:agri_mada/features/onboarding/presentation/screens/onboarding_screen.dart';
 import 'package:agri_mada/features/scan/domain/entities/organe.dart';
 import 'package:agri_mada/features/scan/presentation/providers/session_scan_provider.dart';
@@ -147,6 +153,69 @@ void main() {
       )),
     ),
     'scan-resultat': (const SessionResultScreen(), false, _scan(resultat)),
+    // Recherche, tri, puces de filtre et menus parcelle/organe tous visibles.
+    'journal': (
+      const JournalScreen(),
+      true,
+      [
+        resultatsHistoryProvider.overrideWith((ref) async => [
+              ResultatScan(
+                sessionId: 1,
+                date: DateTime(2026, 9, 17),
+                organes: const [Organe.feuille, Organe.collet],
+                parcelleLocalId: 1,
+                ficheId: 'pyriculariose_feuille',
+                certitude: 'possible',
+                graviteDeclaree: 'plus_tiers',
+                nbPhotos: 3,
+              ),
+              ResultatScan(
+                sessionId: 2,
+                date: DateTime(2026, 9, 10),
+                organes: const [Organe.racines],
+                certitude: 'incertain',
+              ),
+            ]),
+        parcellesProvider.overrideWith((ref) async => [
+              ParcelleLocal()
+                ..id = 1
+                ..nomParcelle = 'Rizière du bas-fond de Betafo, côté source'
+                ..createdAt = DateTime(2026, 9, 1),
+            ]),
+      ],
+    ),
+    'journal-detail': (
+      const ScanDetailScreen(sessionId: 1),
+      false,
+      [
+        detailScanProvider(1).overrideWith((ref) async => DetailScan(
+              resume: ResultatScan(
+                sessionId: 1,
+                date: DateTime(2026, 9, 17),
+                organes: const [Organe.feuille],
+                ficheId: 'pyriculariose_feuille',
+                certitude: 'possible',
+                graviteDeclaree: 'moins_tiers',
+                nbPhotos: 2,
+              ),
+              photos: const [
+                PhotoDuScan(
+                  organe: Organe.feuille,
+                  imagePath: 'feuille.jpg',
+                  reponses: {'feuille_taches': 'bandes_bord'},
+                ),
+                PhotoDuScan(organe: Organe.feuille, imagePath: 'feuille2.jpg'),
+              ],
+              classement: const [
+                ScoredLabel('pyriculariose_feuille', 0.5),
+                ScoredLabel('helminthosporiose', 0.3),
+                ScoredLabel('blb', 0.2),
+              ],
+            )),
+        parcellesProvider.overrideWith((ref) async => const []),
+        fichesProvider.overrideWith((ref) async => const []),
+      ],
+    ),
   };
 
   Future<void> pumpAt(

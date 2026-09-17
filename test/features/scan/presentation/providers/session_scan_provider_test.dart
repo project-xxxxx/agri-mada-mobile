@@ -232,6 +232,31 @@ void main() {
     });
   });
 
+  test('une photo acceptée à 0,61 contre 0,36, sans réponse, reste une piste (ADR-015)', () async {
+    when(() => tflite.analyzeImage(any())).thenAnswer((_) async => const TFLiteInferenceResult(
+          maladieDetectee: 'helminthosporiose',
+          confiance: 0.606,
+          classement: [
+            ScoredLabel('helminthosporiose', 0.606),
+            ScoredLabel('blb', 0.361),
+            ScoredLabel('cercosporiose', 0.016),
+          ],
+          vegetationRatio: 0.91,
+        ));
+    final container = conteneur();
+    final notifier = container.read(scanSessionProvider.notifier);
+    await notifier.demarrer(organe: Organe.feuille);
+    await notifier.ajouterPhoto(File('feuille.jpg'));
+    notifier.passerAuxQuestions();
+    await notifier.validerQuestions();
+
+    final etat = container.read(scanSessionProvider);
+    expect(etat.fusion!.nommable, isTrue, reason: 'la fusion ramenait 0,606 à 0,486 : « non reconnue »');
+    final session = (await repository.session(etat.sessionId!))!;
+    expect(session.resultatFicheId, 'helminthosporiose');
+    expect(session.certitude, 'possible');
+  });
+
   test('« Je ne sais pas » enchaîne les trois organes de la séquence guidée (P2.1)', () async {
     final container = conteneur();
     final notifier = container.read(scanSessionProvider.notifier);

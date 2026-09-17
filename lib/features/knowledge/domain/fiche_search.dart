@@ -12,12 +12,13 @@ const _lettresAccentuees = 'àáâãäåçèéêëìíîïñòóôõöùúûüý
 const _lettresSimples = 'aaaaaaceeeeiiiinooooouuuuyy';
 
 List<Fiche> rechercherFiches(List<Fiche> fiches, String requete) {
-  final motsClefs = _normaliser(requete.trim());
+  final motsClefs = normaliserRecherche(requete.trim());
   if (motsClefs.isEmpty) return fiches;
   return fiches.where((fiche) => _correspond(fiche, motsClefs)).toList();
 }
 
-String _normaliser(String texte) {
+/// Minuscules sans accents : « Pyriculariose » et « pyriculariose » se trouvent.
+String normaliserRecherche(String texte) {
   final tampon = StringBuffer();
   for (final rune in texte.toLowerCase().runes) {
     final caractere = String.fromCharCode(rune);
@@ -28,7 +29,7 @@ String _normaliser(String texte) {
 }
 
 bool _contient(String? texte, String motsClefs) =>
-    texte != null && _normaliser(texte).contains(motsClefs);
+    texte != null && normaliserRecherche(texte).contains(motsClefs);
 
 bool _correspond(Fiche fiche, String motsClefs) {
   if (_contient(fiche.noms.fr, motsClefs)) return true;

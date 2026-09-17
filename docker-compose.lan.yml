@@ -1,0 +1,45 @@
+# Serveur AgriMada sur le réseau local de l'équipe : API + PostgreSQL sur ce poste,
+# joignable par les téléphones connectés au même réseau. Mode d'emploi :
+# docs/deploiement-local.md
+#
+#   docker compose -f docker-compose.lan.yml up -d --build
+name: agrimada-lan
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: agrimada
+      POSTGRES_USER: agrimada
+      # Aucun port publié : seule l'API atteint la base, par le réseau interne de Compose.
+      POSTGRES_PASSWORD: agrimada-lan
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agrimada -d agrimada"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  api:
+    build: ./backend
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    # SECRET_KEY, GEMINI_API_KEY et réglages RAG : backend/.env (non versionné,
+    # modèle dans backend/.env.example). Les valeurs ci-dessous l'emportent.
+    env_file: backend/.env
+    environment:
+      DATABASE_URL: postgresql://agrimada:agrimada-lan@db:5432/agrimada
+    ports:
+      - "8000:8000"
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/')"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+volumes:
+  pgdata:

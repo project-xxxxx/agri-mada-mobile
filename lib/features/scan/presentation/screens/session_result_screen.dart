@@ -6,13 +6,9 @@
 //   - elle ne sait pas : elle le dit et renvoie au technicien, avec les photos
 //     et les réponses.
 
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
-import 'package:share_plus/share_plus.dart';
 
 import '../../../../app/router.dart';
 import '../../../../app/theme/app_colors.dart';
@@ -23,11 +19,9 @@ import '../../../../core/ai/disease_catalog.dart';
 import '../../../../l10n/app_localizations.dart';
 import '../../../journal/presentation/providers/journal_provider.dart';
 import '../../domain/entities/declared_severity.dart';
-import '../../domain/entities/organe.dart';
-import '../../domain/questionnaire.dart';
 import '../diagnosis_labels.dart';
-import '../organ_labels.dart';
 import '../providers/session_scan_provider.dart';
+import '../technician_message.dart';
 
 class SessionResultScreen extends ConsumerStatefulWidget {
   const SessionResultScreen({super.key});
@@ -67,7 +61,11 @@ class _SessionResultScreenState extends ConsumerState<SessionResultScreen> {
                 if (fusion.nommable && fusion.classement.isNotEmpty)
                   ..._resultatNomme(loc, etat, fusion.classement.first.label)
                 else
-                  _CarteNonNomme(loc: loc, analyseParModele: fusion.analyseParModele),
+                  _CarteNonNomme(
+                    loc: loc,
+                    analyseParModele: fusion.analyseParModele,
+                    photoAcceptee: fusion.photoAcceptee,
+                  ),
                 const SizedBox(height: AppSpacing.md),
                 Text(
                   loc.scanSessionPhotosSaved(etat.photos.length),
@@ -273,58 +271,56 @@ class _SessionResultScreenState extends ConsumerState<SessionResultScreen> {
     final pistes = fusion != null && fusion.nommable
         ? fusion.classement
             .map((candidat) => DiseaseCatalog.displayName(candidat.label, loc))
-            .join(', ')
-        : '';
+            .toList()
+        : const <String>[];
 
-    final texte = [
-      loc.scanAskTechnicianMessage,
-      for (final organe in etat.photos.map((p) => p.organe).toSet())
-        '${organeLabelBilingue(organe, loc)} : ${_reponsesLisibles(loc, etat, organe)}',
-      if (pistes.isNotEmpty) loc.scanAskTechnicianCandidates(pistes),
-      loc.scanShareDate(DateFormat('dd/MM/yyyy').format(DateTime.now())),
-    ].join('\n');
+    final texte = messageTechnicien(
+      loc: loc,
+      reponsesParOrgane: {
+        for (final organe in etat.photos.map((p) => p.organe).toSet())
+          organe: etat.reponsesDe(organe),
+      },
+      pistes: pistes,
+      date: DateTime.now(),
+    );
 
-    final fichiers = [
-      for (final photo in etat.photos)
-        if (File(photo.chemin).existsSync()) XFile(photo.chemin),
-    ];
-
-    if (fichiers.isEmpty) {
-      await Share.share(texte);
-    } else {
-      await Share.shareXFiles(fichiers, text: texte);
-    }
-  }
-
-  String _reponsesLisibles(
-    AppLocalizations loc,
-    ScanSessionState etat,
-    Organe organe,
-  ) {
-    final reponses = etat.reponsesDe(organe);
-    if (reponses.isEmpty) return loc.commonDontKnow;
-
-    final libelles = <String>[];
-    for (final question in ScanQuestionnaire.pour(organe)) {
-      final option = question.optionById(reponses[question.id]);
-      if (option != null) libelles.add(option.label(loc));
-    }
-    return libelles.isEmpty ? loc.commonDontKnow : libelles.join(' ; ');
+    await partagerAvecTechnicien(
+      texte: texte,
+      cheminsPhotos: etat.photos.map((photo) => photo.chemin),
+    );
   }
 }
 
 class _CarteNonNomme extends StatelessWidget {
-  const _CarteNonNomme({required this.loc, required this.analyseParModele});
+  const _CarteNonNomme({
+    required this.loc,
+    required this.analyseParModele,
+    required this.photoAcceptee,
+  });
 
   final AppLocalizations loc;
 
-  /// true : le modèle a vu une photo mais n'a rien reconnu de sûr (pas du riz,
-  /// trop peu de végétation, résultat incertain). false : aucune photo d'un
-  /// organe analysé par le modèle.
+  /// true : le modèle a vu une photo mais n'a rien retenu. false : aucune photo
+  /// d'un organe analysé par le modèle.
   final bool analyseParModele;
+
+  /// true : une photo a été acceptée mais le modèle hésite (ADR-015). false :
+  /// photos rejetées (pas_riz en tête, trop peu de végétation).
+  final bool photoAcceptee;
 
   @override
   Widget build(BuildContext context) {
+    final titre = !analyseParModele
+        ? loc.scanSessionNoName
+        : photoAcceptee
+            ? loc.scanSessionHesitationTitle
+            : loc.scanUncertainTitle;
+    final texte = !analyseParModele
+        ? loc.scanSessionNoNameBody
+        : photoAcceptee
+            ? loc.scanSessionHesitationBody
+            : loc.scanSessionNotRecognizedBody;
+
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
@@ -341,7 +337,7 @@ class _CarteNonNomme extends StatelessWidget {
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: Text(
-                  analyseParModele ? loc.scanUncertainTitle : loc.scanSessionNoName,
+                  titre,
                   style: AppTypography.bodyMedium.copyWith(
                     fontWeight: FontWeight.w600,
                     color: AppColors.severityMedium,
@@ -352,7 +348,7 @@ class _CarteNonNomme extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.xs),
           Text(
-            analyseParModele ? loc.scanSessionNotRecognizedBody : loc.scanSessionNoNameBody,
+            texte,
             style: AppTypography.bodySmall,
           ),
           if (analyseParModele) ...[

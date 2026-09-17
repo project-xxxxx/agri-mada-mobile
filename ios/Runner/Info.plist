@@ -68,5 +68,7 @@
 	</array>
 	<key>NSCameraUsageDescription</key>
 	<string>AgriMada utilise l'appareil photo pour photographier vos plants de riz et vous aider à décrire le problème.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>AgriMada ouvre votre galerie pour importer une photo de plant de riz déjà prise.</string>
 </dict>
 </plist>

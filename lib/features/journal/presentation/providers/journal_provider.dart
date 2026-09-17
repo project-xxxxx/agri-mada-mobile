@@ -2,6 +2,7 @@
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/local_db/models/parcelle_local.dart';
+import '../../domain/entities/detail_scan.dart';
 import '../../domain/entities/resultat_scan.dart';
 import '../../../scan/presentation/providers/session_scan_provider.dart'
     show sessionRepositoryProvider;
@@ -63,6 +64,19 @@ final resultatsParParcelleProvider =
     FutureProvider.family<List<ResultatScan>, int>((ref, parcelleId) async {
   return ref.read(sessionRepositoryProvider).resultats(parcelleLocalId: parcelleId);
 });
+
+/// Détail d'un scan passé ; null s'il a été supprimé entre-temps.
+final detailScanProvider = FutureProvider.autoDispose.family<DetailScan?, int>(
+  (ref, sessionId) => ref.read(sessionRepositoryProvider).detail(sessionId),
+);
+
+/// Après une suppression ou un rattachement : toutes les listes de scans se relisent.
+void rafraichirScans(WidgetRef ref, {int? sessionId}) {
+  ref.invalidate(resultatsHistoryProvider);
+  ref.invalidate(resultatsParParcelleProvider);
+  ref.invalidate(journalAgricoleProvider);
+  if (sessionId != null) ref.invalidate(detailScanProvider(sessionId));
+}
 
 /// Notifier pour les actions de création / mise à jour des parcelles
 class ParcelleNotifier extends StateNotifier<AsyncValue<void>> {

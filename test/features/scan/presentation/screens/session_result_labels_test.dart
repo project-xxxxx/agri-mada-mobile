@@ -80,7 +80,7 @@ void main() {
     caseSensitive: false,
   );
 
-  Future<void> pumpResultat(WidgetTester tester, String label, Locale locale) async {
+  Future<void> pumpFusion(WidgetTester tester, FusedDiagnosis fusion, Locale locale) async {
     final etat = ScanSessionState(
       etape: EtapeScan.resultat,
       organe: Organe.feuille,
@@ -91,14 +91,10 @@ void main() {
           organe: Organe.feuille,
           chemin: 'photo.jpg',
           qualite: _qualite,
-          scores: [ScoredLabel(label, 0.9)],
+          scores: fusion.classement,
         ),
       ],
-      fusion: FusedDiagnosis(
-        classement: [ScoredLabel(label, 0.9)],
-        certitude: DiagnosisCertainty.possible,
-        nommable: true,
-      ),
+      fusion: fusion,
     );
 
     final router = GoRouter(
@@ -138,7 +134,78 @@ void main() {
     await tester.pumpAndSettle();
   }
 
+  Future<void> pumpResultat(WidgetTester tester, String label, Locale locale) => pumpFusion(
+        tester,
+        FusedDiagnosis(
+          classement: [ScoredLabel(label, 0.9)],
+          certitude: DiagnosisCertainty.possible,
+          nommable: true,
+        ),
+        locale,
+      );
+
   for (final code in ['fr', 'mg']) {
+    group('rien de nommé ($code) : le message dit pourquoi (ADR-015)', () {
+      final locale = Locale(code);
+      final loc = lookupAppLocalizations(locale);
+      const incertain = <ScoredLabel>[ScoredLabel('helminthosporiose', 0.4), ScoredLabel('blb', 0.35)];
+
+      testWidgets('photo acceptée mais modèle hésitant : pas « peut-être pas du riz »', (tester) async {
+        await pumpFusion(
+          tester,
+          const FusedDiagnosis(
+            classement: incertain,
+            certitude: DiagnosisCertainty.incertain,
+            nommable: false,
+            analyseParModele: true,
+            photoAcceptee: true,
+          ),
+          locale,
+        );
+
+        expect(find.text(loc.scanSessionHesitationTitle), findsOneWidget);
+        expect(find.text(loc.scanSessionHesitationBody), findsOneWidget);
+        expect(find.text(loc.scanUncertainTitle), findsNothing);
+        expect(find.text(loc.scanSessionNotRecognizedBody), findsNothing);
+        expect(find.text(DiseaseCatalog.displayName('helminthosporiose', loc)), findsNothing,
+            reason: 'un résultat incertain ne nomme aucune maladie');
+      });
+
+      testWidgets('photo rejetée (pas_riz, végétation) : « ne reconnaît pas cette photo »', (tester) async {
+        await pumpFusion(
+          tester,
+          const FusedDiagnosis(
+            classement: <ScoredLabel>[],
+            certitude: DiagnosisCertainty.incertain,
+            nommable: false,
+            analyseParModele: true,
+          ),
+          locale,
+        );
+
+        expect(find.text(loc.scanUncertainTitle), findsOneWidget);
+        expect(find.text(loc.scanSessionNotRecognizedBody), findsOneWidget);
+        expect(find.text(loc.scanSessionHesitationTitle), findsNothing);
+      });
+
+      testWidgets('organe sans modèle : partie non analysée', (tester) async {
+        await pumpFusion(
+          tester,
+          const FusedDiagnosis(
+            classement: <ScoredLabel>[],
+            certitude: DiagnosisCertainty.incertain,
+            nommable: false,
+          ),
+          locale,
+        );
+
+        expect(find.text(loc.scanSessionNoName), findsOneWidget);
+        expect(find.text(loc.scanSessionHesitationTitle), findsNothing);
+        expect(find.text(loc.scanUncertainTitle), findsNothing);
+      });
+    });
+
+
     for (final label in labels) {
       testWidgets('$label ($code) : nom traduit et gestes du catalogue', (tester) async {
         final locale = Locale(code);
