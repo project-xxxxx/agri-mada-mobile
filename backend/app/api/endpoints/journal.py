@@ -29,9 +29,9 @@ router = APIRouter(prefix="/journal", tags=["Journal Agricole"])
     "/",
     summary="Journal agricole",
     description=(
-        "Retourne un résumé de l'état de santé de toutes les parcelles "
-        "de l'agriculteur connecté. Indique si chaque parcelle est saine ou malade, "
-        "le nombre de diagnostics, et la dernière maladie détectée."
+        "Retourne l'état de santé de chaque parcelle de l'agriculteur connecté, "
+        "d'après son dernier scan : `sain`, `malade` (résultat probable seulement), "
+        "`a_confirmer` (piste du modèle, ADR-006) ou `aucun_diagnostic`."
     ),
 )
 def get_journal(
@@ -41,9 +41,9 @@ def get_journal(
     """
     Récupère le journal agricole complet :
     - Liste de toutes les parcelles
-    - Statut de santé de chaque parcelle (sain / malade / aucun_diagnostic)
-    - Dernière maladie détectée
-    - Nombre de diagnostics
+    - Statut de santé de chaque parcelle (sain / malade / a_confirmer / aucun_diagnostic)
+    - Dernier résultat et sa certitude
+    - Nombre de scans
     """
     journal = get_journal_agricole(db, current_user.id)
     return {
@@ -53,6 +53,7 @@ def get_journal(
         "total_parcelles": len(journal),
         "parcelles_saines": sum(1 for p in journal if p["statut"] == "sain"),
         "parcelles_malades": sum(1 for p in journal if p["statut"] == "malade"),
+        "parcelles_a_confirmer": sum(1 for p in journal if p["statut"] == "a_confirmer"),
         "parcelles": journal,
     }
 

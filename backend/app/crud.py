@@ -370,31 +370,60 @@ def bulk_upsert_diagnostics(
     return processed, created, skipped
 
 
+def statut_sante(etiquette: Optional[str], certitude: Optional[str]) -> str:
+    """
+    État d'une parcelle d'après son dernier résultat, même règle que l'app
+    (parcelle_local_repository.dart) : seul un résultat « probable » classe la
+    parcelle malade ; une piste du modèle reste à confirmer (ADR-006).
+    """
+    if etiquette and etiquette.strip().lower() in _HEALTHY_LABELS:
+        return "sain"
+    if etiquette and certitude == "probable":
+        return "malade"
+    return "a_confirmer"
+
+
 def get_journal_agricole(db: Session, user_id: int) -> list:
     """
-    Construit le journal agricole : un résumé de l'état de santé de chaque parcelle.
-    Pour chaque parcelle, retourne :
-      - Infos de la parcelle
-      - Nombre total de diagnostics
-      - Dernière maladie détectée
-      - Statut global (sain / malade)
+    Construit le journal agricole : l'état de santé de chaque parcelle d'après
+    son dernier scan (sessions, ADR-007).
+
+    Une parcelle sans session peut encore avoir des diagnostics envoyés par une
+    ancienne version de l'app : ils servent alors de repli, avec la même règle.
+    Dès qu'une session existe, on ne les compte plus, car le téléphone les a
+    migrés en sessions et les enverrait deux fois.
     """
     parcelles = get_parcelles_by_user(db, user_id)
+    sessions_par_parcelle: dict = {}
+    for session in (
+        db.query(DiagnosticSession)
+        .filter(
+            DiagnosticSession.user_id == user_id,
+            DiagnosticSession.parcelle_id.isnot(None),
+        )
+        .order_by(DiagnosticSession.created_at.desc(), DiagnosticSession.id.desc())
+    ):
+        sessions_par_parcelle.setdefault(session.parcelle_id, []).append(session)
+
     journal = []
-
     for parcelle in parcelles:
-        diagnostics = get_diagnostics_by_parcelle(db, parcelle.id)
-        nb_diagnostics = len(diagnostics)
-
-        derniere_maladie = None
-        statut = "aucun_diagnostic"
-
-        if nb_diagnostics > 0:
-            # Le diagnostic le plus récent détermine l'état actuel
-            dernier = diagnostics[0]  # Déjà trié par date desc
-            derniere_maladie = dernier.maladie_detectee
-            statut = (
-                "sain" if derniere_maladie.lower() in _HEALTHY_LABELS else "malade"
+        sessions = sessions_par_parcelle.get(parcelle.id, [])
+        if sessions:
+            dernier = sessions[0]
+            nb_diagnostics = len(sessions)
+            etiquette, certitude, date_resultat = (
+                dernier.resultat_fiche_id,
+                dernier.certitude,
+                dernier.created_at,
+            )
+        else:
+            diagnostics = get_diagnostics_by_parcelle(db, parcelle.id)
+            nb_diagnostics = len(diagnostics)
+            dernier = diagnostics[0] if diagnostics else None
+            etiquette, certitude, date_resultat = (
+                (dernier.maladie_detectee, dernier.certitude, dernier.date_diagnostic)
+                if dernier
+                else (None, None, None)
             )
 
         journal.append(
@@ -406,8 +435,10 @@ def get_journal_agricole(db: Session, user_id: int) -> list:
                 "latitude": parcelle.latitude,
                 "longitude": parcelle.longitude,
                 "nb_diagnostics": nb_diagnostics,
-                "derniere_maladie": derniere_maladie,
-                "statut": statut,
+                "derniere_maladie": etiquette,
+                "derniere_certitude": certitude,
+                "dernier_resultat_le": date_resultat,
+                "statut": statut_sante(etiquette, certitude) if dernier else "aucun_diagnostic",
                 "created_at": parcelle.created_at,
             }
         )
