@@ -1,0 +1,39 @@
+{
+  "id": "brunissure_bacterienne_panicule",
+  "noms": {
+    "fr": "Brunissure bactérienne de la panicule",
+    "mg": null,
+    "sci": "Burkholderia glumae",
+    "autres_noms_mg": []
+  },
+  "organes": {
+    "panicule_grains": [
+      "brunissement bactérien de la panicule"
+    ]
+  },
+  "confusions": [],
+  "conditions": {
+    "ecosystemes": [],
+    "altitude_m": [],
+    "facteurs": []
+  },
+  "prevention": [
+    "semences saines",
+    "résidus de récolte retirés ou enfouis",
+    "outils nettoyés entre parcelles",
+    "avis d'un technicien avant tout traitement"
+  ],
+  "lutte_chimique": {
+    "statut": "a_completer_liste_DPV",
+    "produits": []
+  },
+  "sources": [],
+  "taxonomy_ids": [
+    "brunissure_bacterienne_panicule"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}

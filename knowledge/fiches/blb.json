@@ -1,0 +1,57 @@
+{
+  "id": "blb",
+  "noms": {
+    "fr": "Flétrissement bactérien (BLB)",
+    "mg": "Malazo ravina vokatry ny bakteria",
+    "sci": "Xanthomonas oryzae pv. oryzae",
+    "autres_noms_mg": []
+  },
+  "organes": {
+    "feuille": [
+      "flétrissement à partir du bord de la feuille",
+      "stries jaune-grisâtre à blanchâtre le long des nervures"
+    ]
+  },
+  "confusions": [
+    {
+      "fiche": "bls",
+      "question": {
+        "fr": "Le flétrissement part-il du bord de la feuille (BLB) ou suit-il des stries fines entre les nervures sans flétrir toute la feuille (BLS) ?",
+        "mg": null
+      }
+    }
+  ],
+  "conditions": {
+    "ecosystemes": [],
+    "altitude_m": [],
+    "facteurs": [
+      "excès d'azote",
+      "blessures des feuilles (vent, outils)"
+    ]
+  },
+  "prevention": [
+    "éviter l'excès d'azote",
+    "semences saines",
+    "résidus de récolte retirés ou enfouis",
+    "outils nettoyés entre parcelles",
+    "avis d'un technicien avant tout traitement"
+  ],
+  "lutte_chimique": {
+    "statut": "a_completer_liste_DPV",
+    "produits": []
+  },
+  "sources": [
+    {
+      "titre": "Les maladies bactériennes du riz (fiche FR et MG), CRR FOFIFA Antsirabe, 2020",
+      "url": "https://www.fofifa.mg/wp-content/uploads/2020/09/FicheBLBBLS-VF-Final.pdf"
+    }
+  ],
+  "taxonomy_ids": [
+    "blb"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}

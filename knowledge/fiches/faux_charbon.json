@@ -1,0 +1,48 @@
+{
+  "id": "faux_charbon",
+  "noms": {
+    "fr": "Faux charbon",
+    "mg": null,
+    "sci": "Ustilaginoidea virens",
+    "autres_noms_mg": []
+  },
+  "organes": {
+    "panicule_grains": [
+      "boules vert-olive à la place des grains"
+    ]
+  },
+  "confusions": [],
+  "conditions": {
+    "ecosystemes": [],
+    "altitude_m": [],
+    "facteurs": []
+  },
+  "prevention": [
+    "semences saines",
+    "résidus de récolte retirés ou enfouis",
+    "outils nettoyés entre parcelles",
+    "avis d'un technicien avant tout traitement"
+  ],
+  "lutte_chimique": {
+    "statut": "a_completer_liste_DPV",
+    "produits": []
+  },
+  "sources": [
+    {
+      "titre": "Importance des maladies de riz et proposition de lutte (Halitiana Rafalimanana, contexte malgache)",
+      "fichier": "knowledge/sources/cours/Maladies de riz.pdf"
+    },
+    {
+      "titre": "Reconnaissance et gestion intégrée des principales maladies du riz (cours L2, école professionnelle supérieure agricole)",
+      "fichier": "knowledge/sources/cours/Pathologie riz.pdf"
+    }
+  ],
+  "taxonomy_ids": [
+    "faux_charbon"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}

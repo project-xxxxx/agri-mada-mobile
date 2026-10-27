@@ -1,44 +1,113 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:agri_mada/l10n/app_localizations.dart';
+
 import '../../../../app/router.dart';
 import '../../../../app/theme/app_colors.dart';
 import '../../../../app/theme/app_spacing.dart';
 import '../../../../app/theme/app_typography.dart';
-import '../../../../core/constants/test_keys.dart';
+import '../../../../core/providers/connectivity_provider.dart';
+import '../../../../core/providers/locale_provider.dart';
+import '../../../../core/providers/tflite_provider.dart';
+import '../../../../core/sync/presentation/sync_status_indicator.dart';
+import '../../../../core/widgets/app_sidebar.dart';
+import '../../../auth/presentation/providers/session_provider.dart';
+import '../../../journal/presentation/providers/journal_provider.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen>
+    with SingleTickerProviderStateMixin {
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: const Duration(milliseconds: 1000),
+    );
+    _controller.forward();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  Widget _buildAnimatedItem(Widget child, int index) {
+    final animation =
+        Tween<Offset>(begin: const Offset(0, 30), end: Offset.zero).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Interval(
+          (index * 0.1).clamp(0.0, 1.0),
+          (index * 0.1 + 0.6).clamp(0.0, 1.0),
+          curve: Curves.easeOutCubic,
+        ),
+      ),
+    );
+    final fadeAnimation = Tween<double>(begin: 0.0, end: 1.0).animate(
+      CurvedAnimation(
+        parent: _controller,
+        curve: Interval(
+          (index * 0.1).clamp(0.0, 1.0),
+          (index * 0.1 + 0.6).clamp(0.0, 1.0),
+          curve: Curves.easeOut,
+        ),
+      ),
+    );
+
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) => Transform.translate(
+        offset: animation.value,
+        child: Opacity(opacity: fadeAnimation.value, child: child),
+      ),
+      child: child,
+    );
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+
     return Scaffold(
-      key: const Key(TestKeys.homeScreen),
       backgroundColor: AppColors.scaffoldBackground,
-      body: const SafeArea(
+      body: SafeArea(
         child: CustomScrollView(
           slivers: [
             SliverToBoxAdapter(
               child: Padding(
-                padding: EdgeInsets.symmetric(
+                padding: const EdgeInsets.symmetric(
                   horizontal: AppSpacing.screenHorizontal,
                   vertical: AppSpacing.md,
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _HomeHeader(),
-                    SizedBox(height: AppSpacing.md),
-                    _SearchBar(),
-                    SizedBox(height: AppSpacing.lg),
-                    _SummaryCard(),
-                    SizedBox(height: AppSpacing.lg),
-                    Text(
-                      'Nos Services',
-                      style: AppTypography.headlineMedium,
-                    ),
-                    SizedBox(height: AppSpacing.md),
-                    _ServicesGrid(),
-                    SizedBox(height: 100),
+                    _buildAnimatedItem(const _HomeHeader(), 0),
+                    const SizedBox(height: AppSpacing.lg),
+                    _buildAnimatedItem(const _SummaryCard(), 1),
+                    const SizedBox(height: AppSpacing.md),
+                    _buildAnimatedItem(const _ConseillerCard(), 2),
+                    const SizedBox(height: AppSpacing.lg),
+                    _buildAnimatedItem(
+                        Text(
+                          loc.homeServicesTitle,
+                          style: AppTypography.headlineMedium,
+                        ),
+                        3),
+                    const SizedBox(height: AppSpacing.md),
+                    _buildAnimatedItem(const _ServicesGrid(), 4),
+                    const SizedBox(height: 100),
                   ],
                 ),
               ),
@@ -46,133 +115,204 @@ class HomeScreen extends StatelessWidget {
           ],
         ),
       ),
-      floatingActionButton:
-          _ScanFab(onTap: () => context.go(AppRoutes.scanning)),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-      bottomNavigationBar: const _HomeBottomNav(),
     );
   }
 }
 
-class _HomeHeader extends StatelessWidget {
+class _HomeHeader extends ConsumerWidget {
   const _HomeHeader();
 
   @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        // Menu hamburger
-        Semantics(
-          button: true,
-          label: 'Ouvrir le menu',
-          child: GestureDetector(
-            onTap: () {},
-            child: Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: AppColors.cardBackground,
-                borderRadius: BorderRadius.circular(AppSpacing.sm),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.black.withAlpha(15),
-                    blurRadius: 8,
-                    offset: const Offset(0, 2),
-                  ),
-                ],
+  Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context);
+
+    final menuButton = Semantics(
+      button: true,
+      label: loc.homeMenuSemantics,
+      child: GestureDetector(
+        onTap: () => openAppMenu(context),
+        child: Container(
+          width: 48,
+          height: 48,
+          decoration: BoxDecoration(
+            color: AppColors.cardBackground,
+            borderRadius: BorderRadius.circular(AppSpacing.sm),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withAlpha(15),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
-              child: const Icon(Icons.menu,
-                  color: AppColors.textPrimary, size: 20),
-            ),
+            ],
           ),
+          child: const Icon(Icons.menu, color: AppColors.textPrimary, size: 22),
         ),
-        const SizedBox(width: AppSpacing.sm),
-        Column(
+      ),
+    );
+
+    final greeting = Consumer(
+      builder: (context, ref, _) {
+        final sessionAsync = ref.watch(sessionProvider);
+        final prenom =
+            sessionAsync.valueOrNull?['prenom'] ?? loc.homeFarmerDefault;
+        return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Bonjour, Soa!',
+              loc.homeHelloUser(prenom),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: AppTypography.headlineMedium.copyWith(
                 fontWeight: FontWeight.w600,
               ),
             ),
             Text(
-              'Prêt pour une analyse ?',
+              loc.homeReadyForAnalysis,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
               style: AppTypography.bodySmall.copyWith(
                 color: AppColors.primary,
-                fontSize: 12,
               ),
             ),
           ],
-        ),
-        const Spacer(),
-        // Mode hors ligne
-        Row(
-          key: const Key(TestKeys.homeOfflineBadge),
+        );
+      },
+    );
+
+    const actions = _HomeHeaderActions();
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        final isCompact = constraints.maxWidth < 390;
+
+        if (isCompact) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  menuButton,
+                  const SizedBox(width: AppSpacing.sm),
+                  Expanded(child: greeting),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              const Align(
+                alignment: Alignment.centerRight,
+                child: actions,
+              ),
+            ],
+          );
+        }
+
+        return Row(
           children: [
-            const Icon(Icons.wifi_off, color: AppColors.primary, size: 18),
-            const SizedBox(width: 4),
-            Text(
-              'Mode hors ligne',
-              style: AppTypography.caption.copyWith(
-                color: AppColors.primary,
+            menuButton,
+            const SizedBox(width: AppSpacing.sm),
+            Expanded(child: greeting),
+            const SizedBox(width: AppSpacing.sm),
+            const Flexible(
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: actions,
               ),
             ),
           ],
-        ),
-      ],
+        );
+      },
     );
   }
 }
 
-class _SearchBar extends StatelessWidget {
-  const _SearchBar();
+class _HomeHeaderActions extends ConsumerWidget {
+  const _HomeHeaderActions();
 
   @override
-  Widget build(BuildContext context) {
-    return Row(
+  Widget build(BuildContext context, WidgetRef ref) {
+    final loc = AppLocalizations.of(context);
+    final locale = ref.watch(localeProvider);
+    // null tant que l'état du réseau est inconnu : pas de badge plutôt qu'un faux.
+    final isOnline = ref.watch(isOnlineProvider).valueOrNull;
+
+    return Wrap(
+      spacing: AppSpacing.xs,
+      runSpacing: AppSpacing.xs,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      alignment: WrapAlignment.end,
       children: [
-        Expanded(
-          child: Container(
-            height: 49,
-            decoration: BoxDecoration(
-              color: AppColors.cardBackground,
-              borderRadius: BorderRadius.circular(AppSpacing.sm),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withAlpha(15),
-                  blurRadius: 8,
-                  offset: const Offset(0, 2),
+        const SyncStatusIndicator(),
+        if (isOnline == false)
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(Icons.wifi_off, color: AppColors.textSecondary, size: 18),
+              const SizedBox(width: 4),
+              Text(
+                loc.homeOfflineMode,
+                style: AppTypography.caption.copyWith(
+                  color: AppColors.textSecondary,
                 ),
-              ],
-            ),
-            child: Row(
-              children: [
-                const SizedBox(width: AppSpacing.md),
-                const Icon(Icons.search,
-                    color: AppColors.textSecondary, size: 18),
-                const SizedBox(width: AppSpacing.sm),
-                Text(
-                  'recherche...',
-                  style: AppTypography.bodyMedium.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
+              ),
+            ],
+          ),
+        PopupMenuButton<String>(
+          initialValue: locale.languageCode,
+          onSelected: (value) {
+            ref.read(localeProvider.notifier).setLocale(Locale(value));
+          },
+          itemBuilder: (_) => const [
+            PopupMenuItem(value: 'fr', child: Text('FR')),
+            PopupMenuItem(value: 'mg', child: Text('MG')),
+          ],
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 48, minHeight: 48),
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppSpacing.sm,
+                  vertical: AppSpacing.xs,
                 ),
-              ],
+                decoration: BoxDecoration(
+                  border: Border.all(color: AppColors.primary),
+                  borderRadius: BorderRadius.circular(AppSpacing.xs),
+                ),
+                child: Text(
+                  locale.languageCode.toUpperCase(),
+                  style: AppTypography.caption.copyWith(color: AppColors.primary),
+                ),
+              ),
             ),
           ),
         ),
-        const SizedBox(width: AppSpacing.sm),
-        // Bouton filtre
-        Container(
-          width: 49,
-          height: 49,
-          decoration: BoxDecoration(
-            color: AppColors.primary,
-            borderRadius: BorderRadius.circular(AppSpacing.sm),
+        Semantics(
+          button: true,
+          label: loc.homeHelpSemantics,
+          child: GestureDetector(
+            behavior: HitTestBehavior.opaque,
+            onTap: () => context.push('${AppRoutes.onboarding}?mode=help'),
+            child: SizedBox(
+              width: 48,
+              height: 48,
+              child: Center(
+                child: Container(
+                  width: 36,
+                  height: 36,
+                  decoration: BoxDecoration(
+                    color: AppColors.primaryLight,
+                    borderRadius: BorderRadius.circular(AppSpacing.xs),
+                  ),
+                  alignment: Alignment.center,
+                  child: Text(
+                    '?',
+                    style: AppTypography.bodyMedium.copyWith(
+                      color: AppColors.primary,
+                      fontWeight: FontWeight.w700,
+                    ),
+                  ),
+                ),
+              ),
+            ),
           ),
-          child:
-              const Icon(Icons.tune, color: AppColors.textOnPrimary, size: 22),
         ),
       ],
     );
@@ -184,6 +324,7 @@ class _SummaryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     return Container(
       height: 171,
       decoration: BoxDecoration(
@@ -206,35 +347,60 @@ class _SummaryCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    "Résumé de votre exploitation",
-                    style: AppTypography.headlineMedium.copyWith(fontSize: 16),
+                    loc.homeSummaryTitle,
+                    style: AppTypography.bodyMedium.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
                     maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   const Spacer(),
-                  Row(
-                    children: [
-                      Container(
-                        width: 8,
-                        height: 8,
-                        decoration: const BoxDecoration(
-                          color: AppColors.primary,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: AppSpacing.xs),
-                      Text(
-                        'Système prêt',
-                        style: AppTypography.bodySmall.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                    ],
+                  // Reflète l'état réel du modèle embarqué (tâche P1.10).
+                  Consumer(
+                    builder: (context, ref, _) {
+                      final isAiReady = ref.watch(isTFLiteReadyProvider);
+                      final color =
+                          isAiReady ? AppColors.primary : AppColors.warning;
+                      return Row(
+                        children: [
+                          Container(
+                            width: 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: color,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                          const SizedBox(width: AppSpacing.xs),
+                          Expanded(
+                            child: Text(
+                              isAiReady
+                                  ? loc.homeSystemReady
+                                  : loc.homeSystemAiUnavailable,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: AppTypography.bodySmall.copyWith(
+                                color: color,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ],
+                      );
+                    },
                   ),
                   const SizedBox(height: AppSpacing.xs),
-                  const Text(
-                    'Dernier diagnostic : il ya 2 jours',
-                    style: AppTypography.bodySmall,
+                  Consumer(
+                    builder: (context, ref, _) {
+                      final journalAsync = ref.watch(journalAgricoleProvider);
+                      final nb = journalAsync.valueOrNull?.length ?? 0;
+                      return Text(
+                        loc.homeRegisteredPlots(nb),
+                        style: AppTypography.bodySmall,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      );
+                    },
                   ),
                 ],
               ),
@@ -245,21 +411,55 @@ class _SummaryCard extends StatelessWidget {
               topRight: Radius.circular(AppSpacing.cardRadius),
               bottomRight: Radius.circular(AppSpacing.cardRadius),
             ),
-            child: Image.asset(
-              'assets/images/rice_summary.png',
+            child: Container(
               width: 128,
-              height: 140,
-              fit: BoxFit.cover,
-              errorBuilder: (_, __, ___) => Container(
-                width: 128,
-                height: 140,
-                color: AppColors.primaryLight,
-                child:
-                    const Icon(Icons.grass, color: AppColors.primary, size: 48),
-              ),
+              height: double.infinity,
+              color: AppColors.primaryLight,
+              child: const Icon(Icons.grass, color: AppColors.primary, size: 48),
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Accès au conseiller (ADR-012) : pleine largeur, pour ne pas déséquilibrer la grille.
+class _ConseillerCard extends StatelessWidget {
+  const _ConseillerCard();
+
+  @override
+  Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
+    return Material(
+      color: AppColors.primaryLight,
+      borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+        onTap: () => context.go(AppRoutes.conseiller),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.cardPadding),
+          child: Row(
+            children: [
+              const Icon(Icons.forum_outlined, color: AppColors.primary, size: 36),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      loc.agentHomeCardTitle,
+                      style: AppTypography.bodyMedium.copyWith(fontWeight: FontWeight.w600),
+                    ),
+                    const SizedBox(height: AppSpacing.xs),
+                    Text(loc.agentHomeCardDescription, style: AppTypography.caption),
+                  ],
+                ),
+              ),
+              const Icon(Icons.chevron_right, color: AppColors.primary),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -270,6 +470,7 @@ class _ServicesGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final loc = AppLocalizations.of(context);
     return GridView.count(
       crossAxisCount: 2,
       shrinkWrap: true,
@@ -278,34 +479,30 @@ class _ServicesGrid extends StatelessWidget {
       mainAxisSpacing: AppSpacing.md,
       childAspectRatio:
           AppSpacing.serviceCardWidth / AppSpacing.serviceCardHeight,
-      children: const [
+      children: [
         _ServiceCard(
-          title: 'Mes parcelles',
-          description:
-              'Suivez vos rizières, surfaces cultivées et l\'état sanitaire de chaque parcelle',
-          iconPath: 'assets/images/service_parcelles.png',
-          iconFallback: Icons.map_outlined,
+          title: loc.homeServicePlotsTitle,
+          description: loc.homeServicePlotsDescription,
+          icon: Icons.map_outlined,
+          onTap: () => context.go(AppRoutes.myParcelles),
         ),
         _ServiceCard(
-          title: 'État des cultures',
-          description:
-              'Consultez l\'état global de vos cultures et les niveaux de risque actuels',
-          iconPath: 'assets/images/service_cultures.png',
-          iconFallback: Icons.bar_chart_outlined,
+          title: loc.homeServiceCropsTitle,
+          description: loc.homeServiceCropsDescription,
+          icon: Icons.bar_chart_outlined,
+          onTap: () => context.go(AppRoutes.journal),
         ),
         _ServiceCard(
-          title: 'Solutions agricoles',
-          description:
-              'Découvrez les traitements biologiques et solutions locales recommandées',
-          iconPath: 'assets/images/service_solutions.png',
-          iconFallback: Icons.science_outlined,
+          title: loc.homeServiceSolutionsTitle,
+          description: loc.homeServiceSolutionsDescription,
+          icon: Icons.science_outlined,
+          onTap: () => context.go(AppRoutes.guides),
         ),
         _ServiceCard(
-          title: 'Prévenir les maladies',
-          description:
-              'Apprenez les bonnes pratiques pour protéger vos rizières et éviter les pertes',
-          iconPath: 'assets/images/service_prevention.png',
-          iconFallback: Icons.health_and_safety_outlined,
+          title: loc.homeServicePreventionTitle,
+          description: loc.homeServicePreventionDescription,
+          icon: Icons.health_and_safety_outlined,
+          onTap: () => context.go(AppRoutes.prevention),
         ),
       ],
     );
@@ -316,168 +513,53 @@ class _ServiceCard extends StatelessWidget {
   const _ServiceCard({
     required this.title,
     required this.description,
-    required this.iconPath,
-    required this.iconFallback,
+    required this.icon,
+    this.onTap,
   });
 
   final String title;
   final String description;
-  final String iconPath;
-  final IconData iconFallback;
+  final IconData icon;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        color: AppColors.cardBackground,
-        borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withAlpha(15),
-            blurRadius: 10,
-            offset: const Offset(0, 4),
-          ),
-        ],
-      ),
-      padding: const EdgeInsets.all(AppSpacing.cardPadding),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Image.asset(
-            iconPath,
-            width: 64,
-            height: 50,
-            fit: BoxFit.contain,
-            errorBuilder: (_, __, ___) => Icon(
-              iconFallback,
-              color: AppColors.primary,
-              size: 40,
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppColors.cardBackground,
+          borderRadius: BorderRadius.circular(AppSpacing.cardRadius),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withAlpha(15),
+              blurRadius: 10,
+              offset: const Offset(0, 4),
             ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-          Text(
-            title,
-            style: AppTypography.bodyMedium.copyWith(
-              fontWeight: FontWeight.w600,
-            ),
-            maxLines: 2,
-          ),
-          const SizedBox(height: AppSpacing.xs),
-          Expanded(
-            child: Text(
-              description,
-              style: AppTypography.bodySmall.copyWith(fontSize: 11),
-              maxLines: 4,
+          ],
+        ),
+        padding: const EdgeInsets.all(AppSpacing.cardPadding),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Icon(icon, color: AppColors.primary, size: 40),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              title,
+              style: AppTypography.bodyMedium.copyWith(
+                fontWeight: FontWeight.w600,
+              ),
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _ScanFab extends StatelessWidget {
-  const _ScanFab({required this.onTap});
-
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Semantics(
-      button: true,
-      label: 'Scanner une plante',
-      child: GestureDetector(
-        onTap: onTap,
-        child: Container(
-          key: const Key(TestKeys.homeScanFab),
-          width: 90,
-          height: 90,
-          decoration: BoxDecoration(
-            color: AppColors.primary,
-            shape: BoxShape.circle,
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.primary.withAlpha(100),
-                blurRadius: 16,
-                offset: const Offset(0, 6),
+            const SizedBox(height: AppSpacing.xs),
+            Expanded(
+              child: Text(
+                description,
+                style: AppTypography.caption,
+                maxLines: 4,
+                overflow: TextOverflow.ellipsis,
               ),
-            ],
-          ),
-          child: const Icon(
-            Icons.camera_alt_outlined,
-            color: AppColors.textOnPrimary,
-            size: 36,
-          ),
-        ),
-      ),
-    );
-  }
-}
-
-class _HomeBottomNav extends StatelessWidget {
-  const _HomeBottomNav();
-
-  @override
-  Widget build(BuildContext context) {
-    return BottomAppBar(
-      height: 79,
-      color: AppColors.navBar,
-      shape: const CircularNotchedRectangle(),
-      notchMargin: 8,
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _NavItem(
-            icon: Icons.home_outlined,
-            label: 'Accueil',
-            isSelected: true,
-            onTap: () {},
-          ),
-          const SizedBox(width: 60),
-          _NavItem(
-            icon: Icons.book_outlined,
-            label: 'Journal',
-            isSelected: false,
-            onTap: () => context.go(AppRoutes.journal),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-class _NavItem extends StatelessWidget {
-  const _NavItem({
-    required this.icon,
-    required this.label,
-    required this.isSelected,
-    required this.onTap,
-  });
-
-  final IconData icon;
-  final String label;
-  final bool isSelected;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = isSelected ? AppColors.primary : AppColors.textSecondary;
-    return Semantics(
-      button: true,
-      label: label,
-      child: GestureDetector(
-        key: label == 'Journal' ? const Key(TestKeys.homeJournalNav) : null,
-        onTap: onTap,
-        behavior: HitTestBehavior.opaque,
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(icon, color: color, size: 22),
-            const SizedBox(height: 2),
-            Text(
-              label,
-              style: AppTypography.caption.copyWith(color: color),
             ),
           ],
         ),

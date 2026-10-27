@@ -1,0 +1,129 @@
+{
+  "date": "2026-09-17",
+  "framework": "tensorflow 2.21.0",
+  "etage": "B (organe feuille, multi-étiquette)",
+  "sorties": [
+    "blb",
+    "bls",
+    "carence_azote",
+    "carence_phosphore",
+    "carence_potassium",
+    "cercosporiose",
+    "degats_hispa",
+    "echaudure",
+    "helminthosporiose",
+    "mildiou",
+    "pyriculariose_feuille"
+  ],
+  "saine": "aucune sortie au-dessus de son seuil",
+  "macro_f1": 0.824837449673275,
+  "par_classe": [
+    {
+      "classe": "blb",
+      "support": 289,
+      "seuil": 0.41999999999999993,
+      "precision": 0.8726591760299626,
+      "rappel": 0.8062283737024222,
+      "f1": 0.8381294964028777
+    },
+    {
+      "classe": "bls",
+      "support": 57,
+      "seuil": 0.42999999999999994,
+      "precision": 0.9629629629629629,
+      "rappel": 0.9122807017543859,
+      "f1": 0.9369369369369369
+    },
+    {
+      "classe": "carence_azote",
+      "support": 87,
+      "seuil": 0.32999999999999996,
+      "precision": 0.9885057471264368,
+      "rappel": 0.9885057471264368,
+      "f1": 0.9885057471264368
+    },
+    {
+      "classe": "carence_phosphore",
+      "support": 66,
+      "seuil": 0.37999999999999995,
+      "precision": 0.9841269841269841,
+      "rappel": 0.9393939393939394,
+      "f1": 0.9612403100775193
+    },
+    {
+      "classe": "carence_potassium",
+      "support": 76,
+      "seuil": 0.20999999999999996,
+      "precision": 0.9452054794520548,
+      "rappel": 0.9078947368421053,
+      "f1": 0.9261744966442953
+    },
+    {
+      "classe": "cercosporiose",
+      "support": 23,
+      "seuil": 0.4599999999999999,
+      "precision": 0.5769230769230769,
+      "rappel": 0.6521739130434783,
+      "f1": 0.6122448979591837
+    },
+    {
+      "classe": "degats_hispa",
+      "support": 297,
+      "seuil": 0.19999999999999996,
+      "precision": 0.7781155015197568,
+      "rappel": 0.8619528619528619,
+      "f1": 0.8178913738019169
+    },
+    {
+      "classe": "echaudure",
+      "support": 76,
+      "seuil": 0.37999999999999995,
+      "precision": 0.6666666666666666,
+      "rappel": 0.6578947368421053,
+      "f1": 0.6622516556291391
+    },
+    {
+      "classe": "helminthosporiose",
+      "support": 517,
+      "seuil": 0.22999999999999998,
+      "precision": 0.7790476190476191,
+      "rappel": 0.7911025145067698,
+      "f1": 0.7850287907869482
+    },
+    {
+      "classe": "mildiou",
+      "support": 97,
+      "seuil": 0.61,
+      "precision": 0.8089887640449438,
+      "rappel": 0.7422680412371134,
+      "f1": 0.7741935483870968
+    },
+    {
+      "classe": "pyriculariose_feuille",
+      "support": 648,
+      "seuil": 0.18,
+      "precision": 0.749271137026239,
+      "rappel": 0.7932098765432098,
+      "f1": 0.7706146926536731
+    }
+  ],
+  "decision_unique": {
+    "exactitude": 0.7816052359627971,
+    "saines_reconnues_saines": 0.7373134328358208,
+    "malades_prises_pour_saines": 0.1070309001343484
+  },
+  "hors_sujet_sans_porte": {
+    "n_photos": 50,
+    "au_moins_une_maladie_sans_porte": 26
+  },
+  "epochs_effectues": 40,
+  "regularisation": {
+    "label_smoothing": 0.05,
+    "mixup_alpha": 0.2,
+    "seed": 123
+  },
+  "calibration": {
+    "temperature": 0.6718592964824122
+  },
+  "limite": "données d'entraînement à une seule étiquette par photo : la détection de problèmes simultanés n'est pas mesurée"
+}

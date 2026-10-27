@@ -1,0 +1,48 @@
+{
+  "id": "degats_hispa",
+  "noms": {
+    "fr": "Dégâts d'hispa (« pou du riz »)",
+    "mg": "Haom-bary",
+    "sci": "Hispa gestroi, Trichispa sericea",
+    "autres_noms_mg": []
+  },
+  "organes": {
+    "feuille": [
+      "stries blanches parallèles aux nervures, grattage de la surface de la feuille"
+    ]
+  },
+  "confusions": [],
+  "conditions": {
+    "ecosystemes": [],
+    "altitude_m": [],
+    "facteurs": []
+  },
+  "prevention": [
+    "surveiller aussi la panachure jaune (RYMV), transmise par ce ravageur",
+    "surveillance régulière de la parcelle",
+    "élimination des adventices hôtes",
+    "avis d'un technicien avant tout traitement"
+  ],
+  "lutte_chimique": {
+    "statut": "a_completer_liste_DPV",
+    "produits": []
+  },
+  "sources": [
+    {
+      "titre": "Ireo bibikely fahavalon'ny vary an-drano sy an-tanety aty Alaotra, 2017",
+      "url": "https://www.fofifa.mg/wp-content/uploads/2020/07/KISARY-BIBIKELY.pdf"
+    },
+    {
+      "titre": "Ireo aretim-bary mirongatra noho ny fiovaovan'ny toetr'andro, AF RICE Alaotra, 2017",
+      "url": "https://www.fofifa.mg/wp-content/uploads/2020/07/IREO-ARETIM-2.pdf"
+    }
+  ],
+  "taxonomy_ids": [
+    "degats_hispa"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}

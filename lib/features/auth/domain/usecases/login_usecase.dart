@@ -10,14 +10,14 @@ class LoginUseCase {
   final AuthRepository _repository;
 
   Future<Either<Failure, AuthEntity>> call({
-    required String email,
+    required String tel,
     required String password,
   }) {
-    if (email.isEmpty || password.isEmpty) {
+    if (tel.isEmpty || password.isEmpty) {
       return Future.value(
-        const Left(ValidationFailure('Email et mot de passe requis')),
+        const Left(ValidationFailure('Numero et mot de passe requis')),
       );
     }
-    return _repository.login(email: email, password: password);
+    return _repository.login(tel: tel, password: password);
   }
 }

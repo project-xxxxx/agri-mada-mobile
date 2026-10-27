@@ -1,0 +1,58 @@
+{
+  "id": "rymv",
+  "noms": {
+    "fr": "Panachure jaune du riz (RYMV)",
+    "mg": "Mavoratsy",
+    "sci": "Rice yellow mottle virus, souche S4mg",
+    "autres_noms_mg": [
+      "Mativondrana",
+      "Fondrabe"
+    ]
+  },
+  "organes": {
+    "plante_entiere": [
+      "foyers de plants jaune-orangé, nains et peu tallés, répartis en taches dans la parcelle"
+    ]
+  },
+  "confusions": [],
+  "conditions": {
+    "ecosystemes": [],
+    "altitude_m": [],
+    "facteurs": [
+      "répartition côtière rapportée",
+      "transmis par l'hispa et d'autres insectes vecteurs"
+    ]
+  },
+  "prevention": [
+    "brûler les plants atteints (recommandation FOFIFA)",
+    "lutter contre les insectes vecteurs (hispa)",
+    "aucune lutte curative connue",
+    "avis d'un technicien avant tout traitement"
+  ],
+  "lutte_chimique": {
+    "statut": "sans_objet",
+    "note": "maladie virale : aucune lutte curative connue (FOFIFA), seule la prévention (variétés, vecteurs, arrachage) s'applique"
+  },
+  "sources": [
+    {
+      "titre": "Ireo aretim-bary mirongatra noho ny fiovaovan'ny toetr'andro, AF RICE Alaotra, 2017",
+      "url": "https://www.fofifa.mg/wp-content/uploads/2020/07/IREO-ARETIM-2.pdf"
+    },
+    {
+      "titre": "Comparing patterns and scales of plant virus phylogeography - RYMV in Madagascar",
+      "url": "https://pmc.ncbi.nlm.nih.gov/articles/PMC6671560/"
+    },
+    {
+      "titre": "Importance des maladies de riz et proposition de lutte (Halitiana Rafalimanana, contexte malgache)",
+      "fichier": "knowledge/sources/cours/Maladies de riz.pdf"
+    }
+  ],
+  "taxonomy_ids": [
+    "rymv"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}

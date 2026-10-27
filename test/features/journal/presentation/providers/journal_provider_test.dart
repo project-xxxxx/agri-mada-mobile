@@ -1,141 +1,88 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:fpdart/fpdart.dart';
 import 'package:mocktail/mocktail.dart';
 
-import 'package:agri_mada/core/errors/failure.dart';
-import 'package:agri_mada/features/journal/domain/entities/journal_entry_entity.dart';
-import 'package:agri_mada/features/journal/domain/usecases/get_journal_entries_usecase.dart';
-import 'package:agri_mada/features/journal/domain/usecases/save_journal_entry_usecase.dart';
+import 'package:agri_mada/core/local_db/models/parcelle_local.dart';
+import 'package:agri_mada/features/journal/data/repositories/parcelle_local_repository.dart';
 import 'package:agri_mada/features/journal/presentation/providers/journal_provider.dart';
-import 'package:agri_mada/features/scan/domain/entities/scan_result_entity.dart';
+import 'package:agri_mada/features/journal/domain/entities/journal_entry.dart';
 
-class MockGetJournalEntriesUseCase extends Mock
-    implements GetJournalEntriesUseCase {}
-
-class MockSaveJournalEntryUseCase extends Mock
-    implements SaveJournalEntryUseCase {}
-
-class FakeJournalEntryEntity extends Fake implements JournalEntryEntity {}
+class MockParcelleLocalRepository extends Mock
+    implements ParcelleLocalRepository {}
 
 void main() {
   late ProviderContainer container;
-  late MockGetJournalEntriesUseCase mockGetUseCase;
-  late MockSaveJournalEntryUseCase mockSaveUseCase;
-
-  final tEntry = JournalEntryEntity(
-    id: 'journal-1',
-    imagePath: 'mock://img.jpg',
-    diseaseName: 'Riz Pyriculariose',
-    scientificName: 'Magnaporthe oryzae',
-    confidence: 0.82,
-    severity: ScanSeverity.high,
-    recommendations: ['Action'],
-    createdAt: DateTime(2026, 1, 1),
-  );
-
-  final tScanResult = ScanResultEntity(
-    id: 'journal-1',
-    imagePath: 'mock://img.jpg',
-    diseaseName: 'Riz Pyriculariose',
-    scientificName: 'Magnaporthe oryzae',
-    confidence: 0.82,
-    severity: ScanSeverity.high,
-    recommendations: ['Action'],
-    tip: 'Surveiller la parcelle',
-    analyzedAt: DateTime(2026, 1, 1),
-  );
-
-  setUpAll(() {
-    registerFallbackValue(FakeJournalEntryEntity());
-  });
+  late MockParcelleLocalRepository mockRepository;
 
   setUp(() {
-    mockGetUseCase = MockGetJournalEntriesUseCase();
-    mockSaveUseCase = MockSaveJournalEntryUseCase();
-
+    mockRepository = MockParcelleLocalRepository();
     container = ProviderContainer(
       overrides: [
-        getJournalEntriesUseCaseProvider.overrideWith(
-          (ref) async => mockGetUseCase,
-        ),
-        saveJournalEntryUseCaseProvider.overrideWith(
-          (ref) async => mockSaveUseCase,
-        ),
+        parcelleRepositoryProvider.overrideWithValue(mockRepository),
       ],
     );
   });
 
-  tearDown(() => container.dispose());
+  tearDown(() {
+    container.dispose();
+  });
 
-  group('JournalNotifier', () {
-    test('l etat initial est JournalState.initial', () {
-      expect(
-        container.read(journalNotifierProvider),
-        const JournalState.initial(),
+  group('journalAgricoleProvider', () {
+    test('chargement initial -> loading()', () {
+      when(() => mockRepository.getJournalAgricole()).thenAnswer(
+        (_) async {
+          await Future<void>.delayed(const Duration(milliseconds: 10));
+          return <JournalEntry>[];
+        },
       );
+
+      final value = container.read(journalAgricoleProvider);
+
+      expect(value, const AsyncLoading<List<JournalEntry>>());
     });
 
-    test('passe par loading puis loaded quand loadEntries reussit', () async {
-      // Arrange
-      when(() => mockGetUseCase.call())
-          .thenAnswer((_) async => Right([tEntry]));
+    test('liste vide -> empty', () async {
+      when(() => mockRepository.getJournalAgricole()).thenAnswer(
+        (_) async => <JournalEntry>[],
+      );
 
-      final states = <JournalState>[];
-      container.listen(journalNotifierProvider, (_, next) => states.add(next));
+      final result = await container.read(journalAgricoleProvider.future);
 
-      // Act
-      await container.read(journalNotifierProvider.notifier).loadEntries();
-
-      // Assert
-      expect(states[0], const JournalState.loading());
-      expect(states[1], JournalState.loaded([tEntry]));
-      verify(() => mockGetUseCase.call()).called(1);
+      expect(result, isEmpty);
     });
 
-    test('saveScanResult recharge la liste apres sauvegarde reussie', () async {
-      // Arrange
-      when(() => mockSaveUseCase.call(entry: any(named: 'entry')))
-          .thenAnswer((_) async => const Right(unit));
-      when(() => mockGetUseCase.call())
-          .thenAnswer((_) async => Right([tEntry]));
+    test('liste non vide -> loaded(parcelles)', () async {
+      final parcelle = ParcelleLocal()
+        ..id = 1
+        ..nomParcelle = 'Riziere Centre'
+        ..createdAt = DateTime(2026, 1, 1);
 
-      // Act
-      final result =
-          await container.read(journalNotifierProvider.notifier).saveScanResult(
-                tScanResult,
-              );
-
-      // Assert
-      expect(result, const Right(unit));
-      expect(
-        container.read(journalNotifierProvider),
-        JournalState.loaded([tEntry]),
+      when(() => mockRepository.getJournalAgricole()).thenAnswer(
+        (_) async => <JournalEntry>[
+          JournalEntry(
+            parcelle: parcelle,
+            nbDiagnostics: 1,
+            derniereMaladie: 'Brown spot',
+            statut: 'malade',
+          ),
+        ],
       );
-      verify(() => mockSaveUseCase.call(entry: any(named: 'entry'))).called(1);
-      verify(() => mockGetUseCase.call()).called(1);
+
+      final result = await container.read(journalAgricoleProvider.future);
+
+      expect(result, hasLength(1));
+      expect(result.first.parcelle.nomParcelle, 'Riziere Centre');
     });
 
-    test('saveScanResult retourne une erreur quand la sauvegarde echoue',
-        () async {
-      // Arrange
-      when(() => mockSaveUseCase.call(entry: any(named: 'entry')))
-          .thenAnswer((_) async => const Left(CacheFailure('Sauvegarde KO')));
-
-      // Act
-      final result =
-          await container.read(journalNotifierProvider.notifier).saveScanResult(
-                tScanResult,
-              );
-
-      // Assert
-      expect(result.isLeft(), isTrue);
-      expect(
-        container.read(journalNotifierProvider),
-        const JournalState.error('Sauvegarde KO'),
+    test('erreur Isar -> error(message)', () async {
+      when(() => mockRepository.getJournalAgricole()).thenThrow(
+        Exception('Isar indisponible'),
       );
-      verify(() => mockSaveUseCase.call(entry: any(named: 'entry'))).called(1);
-      verifyNever(() => mockGetUseCase.call());
+
+      await expectLater(
+        container.read(journalAgricoleProvider.future),
+        throwsA(isA<Exception>()),
+      );
     });
   });
 }

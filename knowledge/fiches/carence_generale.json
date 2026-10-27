@@ -1,0 +1,37 @@
+{
+  "id": "carence_generale",
+  "noms": {
+    "fr": "Vert pâle uniforme (carence probable)",
+    "mg": null,
+    "sci": null,
+    "autres_noms_mg": []
+  },
+  "organes": {
+    "plante_entiere": [
+      "vert pâle uniforme sur toute la parcelle"
+    ]
+  },
+  "confusions": [],
+  "conditions": {
+    "ecosystemes": [],
+    "altitude_m": [],
+    "facteurs": []
+  },
+  "prevention": [
+    "analyse de sol avant d'ajuster la fertilisation",
+    "avis d'un technicien avant tout traitement"
+  ],
+  "lutte_chimique": {
+    "statut": "sans_objet",
+    "note": "carence nutritionnelle probable, pas une maladie : correction par la fertilisation"
+  },
+  "sources": [],
+  "taxonomy_ids": [
+    "carence_generale"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}

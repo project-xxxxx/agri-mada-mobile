@@ -1,0 +1,52 @@
+{
+  "id": "bls",
+  "noms": {
+    "fr": "Strie bactérienne (BLS)",
+    "mg": "Tsipika amin'ny ravina afitsoky ny bakteria",
+    "sci": "Xanthomonas oryzae pv. oryzicola",
+    "autres_noms_mg": []
+  },
+  "organes": {
+    "feuille": [
+      "fines stries translucides entre les nervures, jaunissant avec le temps"
+    ]
+  },
+  "confusions": [
+    {
+      "fiche": "blb",
+      "question": {
+        "fr": "Les stries restent-elles fines et entre les nervures, sans flétrissement complet de la feuille ?",
+        "mg": null
+      }
+    }
+  ],
+  "conditions": {
+    "ecosystemes": [],
+    "altitude_m": [],
+    "facteurs": []
+  },
+  "prevention": [
+    "semences saines",
+    "résidus de récolte retirés ou enfouis",
+    "outils nettoyés entre parcelles",
+    "avis d'un technicien avant tout traitement"
+  ],
+  "lutte_chimique": {
+    "statut": "a_completer_liste_DPV",
+    "produits": []
+  },
+  "sources": [
+    {
+      "titre": "Les maladies bactériennes du riz (fiche FR et MG), CRR FOFIFA Antsirabe, 2020",
+      "url": "https://www.fofifa.mg/wp-content/uploads/2020/09/FicheBLBBLS-VF-Final.pdf"
+    }
+  ],
+  "taxonomy_ids": [
+    "bls"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}

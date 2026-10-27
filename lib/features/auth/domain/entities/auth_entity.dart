@@ -3,13 +3,20 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 part 'auth_entity.freezed.dart';
 
 @freezed
-class AuthEntity with _$AuthEntity {
-  const factory AuthEntity({
+class AuthToken with _$AuthToken {
+  const factory AuthToken({
+    required String accessToken,
+    required String tokenType,
+  }) = _AuthToken;
+}
+
+@freezed
+class UserProfile with _$UserProfile {
+  const factory UserProfile({
     required String userId,
     required String email,
-    required String accessToken,
-    required String refreshToken,
-    String? displayName,
-    String? avatarUrl,
-  }) = _AuthEntity;
+    required String phoneNumber,
+  }) = _UserProfile;
 }
+
+typedef AuthEntity = UserProfile;

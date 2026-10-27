@@ -1,0 +1,75 @@
+# Correspondance entre les étiquettes brutes des jeux publics et la taxonomie v1
+# (tâche P3.2). Source des chemins bruts : ml/data/raw/inventory.csv, généré par
+# ml/scripts/inventory_raw.py. Source des ids de taxonomie : ml/taxonomy_v1.yaml.
+#
+# Valeurs spéciales :
+#   exclu:tungro       classe absente de Madagascar (voir `exclusions` de la taxonomie)
+#   sans_etiquette     images de test sans classe fournie par l'hébergeur
+#
+# ml/scripts/apply_label_map.py vérifie que chaque ligne de inventory.csv trouve
+# une correspondance ici et échoue sinon (aucune classe brute oubliée en silence).
+#
+# riceseg_5932 est hors périmètre : ce sont des masques de segmentation, pas des
+# étiquettes de classification (voir ml/DATASETS.md).
+
+datasets:
+  dhan_shomadhan:
+    "Field Background/Browon Spot": helminthosporiose
+    "Field Background/Leaf Scaled": echaudure
+    "Field Background/Rice Blast": pyriculariose_feuille
+    "Field Background/Rice Turgro": exclu:tungro
+    "Field Background/Sheath Blight": rhizoctone
+    "White Background/Brown Spot": helminthosporiose
+    "White Background/Leaf Scaled": echaudure
+    "White Background/Rice Blast": pyriculariose_feuille
+    "White Background/Rice Tungro": exclu:tungro
+    "White Background/Shath Blight": rhizoctone
+
+  hf_rice_disease:
+    "Rice___Brown_Spot": helminthosporiose
+    "Rice___Healthy": feuille_saine
+    "Rice___Leaf_Blast": pyriculariose_feuille
+    "Rice___Neck_Blast": pyriculariose_cou
+
+  mendeley_hx6f852hw4:
+    "Original Images/Bacterial Leaf Blight": blb
+    "Original Images/Brown Spot": helminthosporiose
+    "Original Images/Healthy Rice Leaf": feuille_saine
+    "Original Images/Leaf Blast": pyriculariose_feuille
+    "Original Images/Leaf scald": echaudure
+    "Original Images/Narrow Brown Leaf Spot": cercosporiose
+    "Original Images/Rice Hispa": degats_hispa
+    "Original Images/Sheath Blight": rhizoctone
+
+  nutrient_deficiency_rice:
+    "rice_plant_lacks_nutrients/Nitrogen(N)": carence_azote
+    "rice_plant_lacks_nutrients/Phosphorus(P)": carence_phosphore
+    "rice_plant_lacks_nutrients/Potassium(K)": carence_potassium
+
+  paddy_doctor:
+    "test_images": sans_etiquette
+    "train_images/bacterial_leaf_blight": blb
+    "train_images/bacterial_leaf_streak": bls
+    "train_images/bacterial_panicle_blight": brunissure_bacterienne_panicule
+    "train_images/blast": pyriculariose_feuille
+    "train_images/brown_spot": helminthosporiose
+    "train_images/dead_heart": coeur_mort_foreurs
+    "train_images/downy_mildew": mildiou
+    "train_images/hispa": degats_hispa
+    "train_images/normal": feuille_saine
+    "train_images/tungro": exclu:tungro
+
+  riceleafbd:
+    "Original Images/Bacterial Leaf Blight": blb
+    "Original Images/Brown Spot": helminthosporiose
+    "Original Images/Healthy Leaf": feuille_saine
+    "Original Images/Tungro Virus": exclu:tungro
+
+  sethy_5932:
+    "Rice Leaf Disease Images/Bacterialblight": blb
+    "Rice Leaf Disease Images/Blast": pyriculariose_feuille
+    "Rice Leaf Disease Images/Brownspot": helminthosporiose
+    "Rice Leaf Disease Images/Tungro": exclu:tungro
+
+hors_perimetre:
+  riceseg_5932: masques de segmentation (P3.2 porte sur les étiquettes de classification)

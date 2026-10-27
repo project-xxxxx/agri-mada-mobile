@@ -1,0 +1,68 @@
+{
+  "id": "toxicite_ferreuse",
+  "noms": {
+    "fr": "Toxicité ferreuse",
+    "mg": null,
+    "sci": null,
+    "autres_noms_mg": []
+  },
+  "organes": {
+    "feuille": [
+      "pigmentation orange rouille qui commence à la pointe des feuilles puis gagne tout le feuillage"
+    ],
+    "racines": [
+      "racines brun-rouge à orangé, gainées de dépôts de fer, peu de radicelles, souvent noircies"
+    ]
+  },
+  "confusions": [
+    {
+      "fiche": "carence_azote",
+      "question": {
+        "fr": "Le jaunissement est-il uniforme et pâle sur les vieilles feuilles (carence), ou orange rouille en partant de la pointe (toxicité ferreuse) ?",
+        "mg": null
+      }
+    }
+  ],
+  "conditions": {
+    "ecosystemes": [
+      "bas_fond",
+      "irrigue"
+    ],
+    "altitude_m": [],
+    "facteurs": [
+      "bas-fonds et parties mal drainées des périmètres irrigués"
+    ]
+  },
+  "prevention": [
+    "amélioration du drainage",
+    "éviter les bas-fonds mal drainés pour les variétés sensibles",
+    "avis d'un technicien avant tout traitement"
+  ],
+  "lutte_chimique": {
+    "statut": "a_completer_liste_DPV",
+    "produits": []
+  },
+  "sources": [
+    {
+      "titre": "La toxicité ferreuse dans les sols de rizières (IRD)",
+      "url": "https://horizon.documentation.ird.fr/exl-doc/pleins_textes/pleins_textes_5/b_fdi_23-25/30046.pdf"
+    },
+    {
+      "titre": "Effet de la toxicité ferreuse sur le rendement et les composantes du rendement du riz",
+      "url": "https://agritrop.cirad.fr/558461/"
+    },
+    {
+      "titre": "Reconnaissance et gestion intégrée des principales maladies du riz (cours L2, école professionnelle supérieure agricole)",
+      "fichier": "knowledge/sources/cours/Pathologie riz.pdf"
+    }
+  ],
+  "taxonomy_ids": [
+    "toxicite_fer_feuille",
+    "racines_ferreuses"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}

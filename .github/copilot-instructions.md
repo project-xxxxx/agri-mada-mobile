@@ -297,11 +297,23 @@ AppLogger.error('Failed to fetch', error: e, stackTrace: st);
 ### Règles non négociables
 
 - Tout fichier `.dart` dans `lib/` a son `_test.dart` correspondant
+- Toute modification de comportement, correction de bug ou nouvelle feature doit inclure au moins un test adapté dans le même lot de travail
+- Aucun travail n'est considéré terminé tant que les tests ciblés du périmètre modifié n'ont pas été exécutés et passés, ou qu'une impossibilité n'a pas été explicitement justifiée
 - Tests de widget **colocalisés** avec le widget dans `lib/`
 - Tests domain/data en miroir dans `test/`
 - Couverture minimum **80%** sur `domain/` et `presentation/providers/`
 - `test.skip` interdit sans `// TODO(author): raison — YYYY-MM-DD`
 - Nommer les tests comme des phrases lisibles en français
+
+### Ordre de travail obligatoire
+
+1. Identifier le test le plus proche du comportement à modifier
+2. Créer ou adapter ce test avant de considérer l'implémentation comme terminée
+3. Implémenter le changement minimal nécessaire
+4. Exécuter d'abord la validation la plus ciblée possible sur le périmètre modifié
+5. N'élargir à `dart analyze`, `flutter test --coverage` ou au run manuel qu'après succès de la validation ciblée
+
+Si aucun test automatisé n'est raisonnablement possible, il faut documenter pourquoi et exécuter au minimum une validation exécutable alternative adaptée au périmètre touché.
 
 ### Pattern obligatoire — AAA
 
@@ -616,10 +628,13 @@ Semantics(
 
 ## ✅ Checklist avant chaque PR
 
+- [ ] Chaque modification ou feature ajoutée a son test adapté dans le même lot
+- [ ] Les tests ciblés du périmètre modifié ont été exécutés avant toute validation globale
 - [ ] `dart analyze` — zéro erreur, zéro warning
 - [ ] `dart format . --set-exit-if-changed` — code formaté
 - [ ] `flutter test --coverage` — tous les tests verts
 - [ ] Couverture ≥ 80% sur `domain/` et `presentation/providers/`
+- [ ] Toute impossibilité d'exécuter un test ou une couverture est explicitement justifiée
 - [ ] Zéro `!` non commenté, zéro `dynamic`, zéro `print()`
 - [ ] Zéro magic number — tokens `AppSpacing` et `AppColors` partout
 - [ ] Chaque composant Figma : tous les états implémentés **et** testés

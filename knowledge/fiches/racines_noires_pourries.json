@@ -1,0 +1,42 @@
+{
+  "id": "racines_noires_pourries",
+  "noms": {
+    "fr": "Racines noires ou pourries (sol asphyxié)",
+    "mg": null,
+    "sci": null,
+    "autres_noms_mg": []
+  },
+  "organes": {
+    "racines": [
+      "racines noires et malodorantes dans un sol asphyxié"
+    ]
+  },
+  "confusions": [],
+  "conditions": {
+    "ecosystemes": [
+      "bas_fond",
+      "irrigue"
+    ],
+    "altitude_m": [],
+    "facteurs": [
+      "sol mal drainé, asphyxie racinaire"
+    ]
+  },
+  "prevention": [
+    "amélioration du drainage",
+    "avis d'un technicien avant tout traitement"
+  ],
+  "lutte_chimique": {
+    "statut": "a_completer_liste_DPV",
+    "produits": []
+  },
+  "sources": [],
+  "taxonomy_ids": [
+    "racines_noires_pourries"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}

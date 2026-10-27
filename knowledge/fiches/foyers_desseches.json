@@ -1,0 +1,37 @@
+{
+  "id": "foyers_desseches",
+  "noms": {
+    "fr": "Foyers de plants desséchés",
+    "mg": null,
+    "sci": null,
+    "autres_noms_mg": []
+  },
+  "organes": {
+    "plante_entiere": [
+      "taches de plants desséchés dans la parcelle — oriente vers une photo du collet ou de la tige (voana, foreurs ou rats)"
+    ]
+  },
+  "confusions": [],
+  "conditions": {
+    "ecosystemes": [],
+    "altitude_m": [],
+    "facteurs": []
+  },
+  "prevention": [
+    "photographier le collet et la tige pour préciser la cause",
+    "avis d'un technicien avant tout traitement"
+  ],
+  "lutte_chimique": {
+    "statut": "a_completer_liste_DPV",
+    "produits": []
+  },
+  "sources": [],
+  "taxonomy_ids": [
+    "foyers_desseches"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}

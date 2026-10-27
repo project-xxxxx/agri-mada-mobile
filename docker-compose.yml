@@ -1,0 +1,27 @@
+services:
+  # --- Serveur Backend (FastAPI) ---
+  backend:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: agrimada_backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/app
+    environment:
+      - ENVIRONMENT=development
+    restart: unless-stopped
+
+  # --- Environnement Flutter (Outils en ligne de commande) ---
+  # Ce conteneur permet d'exécuter `flutter pub get` ou `dart run build_runner build`
+  # sans avoir besoin d'installer le SDK Flutter sur Windows.
+  flutter:
+    image: ghcr.io/cirruslabs/flutter:stable
+    container_name: agrimada_flutter
+    working_dir: /workspace
+    volumes:
+      # On monte tout le projet Flutter dans le conteneur
+      - .:/workspace
+    # On maintient le conteneur en vie pour pouvoir y exécuter des commandes
+    command: tail -f /dev/null

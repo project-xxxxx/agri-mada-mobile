@@ -1,0 +1,56 @@
+{
+  "id": "carence_potassium",
+  "noms": {
+    "fr": "Carence en potassium",
+    "mg": null,
+    "sci": null,
+    "autres_noms_mg": []
+  },
+  "organes": {
+    "feuille": [
+      "chlorose sur les feuilles âgées et entre les nervures, suivie d'un brunissement",
+      "nécrose de la pointe et des bords de la feuille",
+      "recroquevillement des feuilles"
+    ]
+  },
+  "confusions": [
+    {
+      "fiche": "echaudure",
+      "question": {
+        "fr": "Le brunissement suit-il d'abord un jaunissement entre les nervures des vieilles feuilles (carence), ou apparaît-il directement en grandes taches sur des feuilles par ailleurs vertes ?",
+        "mg": null
+      }
+    }
+  ],
+  "conditions": {
+    "ecosystemes": [],
+    "altitude_m": [],
+    "facteurs": [
+      "sol pauvre en potassium",
+      "excès de fumure potassique pouvant par ailleurs accentuer une carence en magnésium (non suivie dans la taxonomie actuelle)"
+    ]
+  },
+  "prevention": [
+    "apport de potassium adapté à l'analyse du sol",
+    "éviter les excès, qui déplacent le déséquilibre vers d'autres éléments (magnésium notamment)"
+  ],
+  "lutte_chimique": {
+    "statut": "sans_objet",
+    "note": "carence nutritionnelle, pas une maladie : correction par la fertilisation, pas par un produit phytosanitaire"
+  },
+  "sources": [
+    {
+      "titre": "Manifestations de quelques carences courantes en éléments minéraux (suite)",
+      "id_reference": "cours_epsa_pathologie_riz",
+      "page": 49
+    }
+  ],
+  "taxonomy_ids": [
+    "carence_potassium"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}

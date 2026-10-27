@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'app_colors.dart';
 import 'app_spacing.dart';
 import 'app_typography.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 abstract final class AppTheme {
   static ThemeData get light => ThemeData(
@@ -13,7 +14,8 @@ abstract final class AppTheme {
           onPrimary: AppColors.textOnPrimary,
         ),
         scaffoldBackgroundColor: AppColors.background,
-        fontFamily: 'Poppins',
+        // Use Inter via Google Fonts as the app-wide font to match the brand splash
+        textTheme: GoogleFonts.interTextTheme(),
         appBarTheme: const AppBarTheme(
           backgroundColor: AppColors.background,
           elevation: 0,

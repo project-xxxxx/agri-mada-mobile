@@ -1,0 +1,44 @@
+{
+  "id": "cercosporiose",
+  "noms": {
+    "fr": "Cercosporiose",
+    "mg": "Cercosporiose",
+    "sci": "Cercospora janseana",
+    "autres_noms_mg": []
+  },
+  "organes": {
+    "feuille": [
+      "petites taches allongées brun-rougeâtre, bordées d'un halo jaune"
+    ]
+  },
+  "confusions": [],
+  "conditions": {
+    "ecosystemes": [],
+    "altitude_m": [],
+    "facteurs": []
+  },
+  "prevention": [
+    "semences saines",
+    "résidus de récolte retirés ou enfouis",
+    "outils nettoyés entre parcelles",
+    "avis d'un technicien avant tout traitement"
+  ],
+  "lutte_chimique": {
+    "statut": "a_completer_liste_DPV",
+    "produits": []
+  },
+  "sources": [
+    {
+      "titre": "Ireo aretim-bary mirongatra noho ny fiovaovan'ny toetr'andro, AF RICE Alaotra, 2017",
+      "url": "https://www.fofifa.mg/wp-content/uploads/2020/07/IREO-ARETIM-2.pdf"
+    }
+  ],
+  "taxonomy_ids": [
+    "cercosporiose"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}

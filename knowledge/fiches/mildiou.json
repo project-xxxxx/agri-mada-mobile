@@ -1,0 +1,39 @@
+{
+  "id": "mildiou",
+  "noms": {
+    "fr": "Mildiou (downy mildew)",
+    "mg": null,
+    "sci": "Sclerophthora macrospora",
+    "autres_noms_mg": []
+  },
+  "organes": {
+    "feuille": [
+      "stries vert pâle à jaunâtres le long des nervures, feuillage clairsemé"
+    ]
+  },
+  "confusions": [],
+  "conditions": {
+    "ecosystemes": [],
+    "altitude_m": [],
+    "facteurs": []
+  },
+  "prevention": [
+    "semences saines",
+    "résidus de récolte retirés ou enfouis",
+    "outils nettoyés entre parcelles",
+    "avis d'un technicien avant tout traitement"
+  ],
+  "lutte_chimique": {
+    "statut": "a_completer_liste_DPV",
+    "produits": []
+  },
+  "sources": [],
+  "taxonomy_ids": [
+    "mildiou"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}

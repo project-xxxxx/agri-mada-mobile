@@ -6,7 +6,7 @@ part of 'auth_provider.dart';
 // RiverpodGenerator
 // **************************************************************************
 
-String _$dioHash() => r'6e5c73702b05a123d9ffc6c7d7313870256c7d2f';
+String _$dioHash() => r'cf46cdb8b693a3420659a1f315926c06bd798289';
 
 /// See also [dio].
 @ProviderFor(dio)
@@ -19,8 +19,6 @@ final dioProvider = AutoDisposeProvider<Dio>.internal(
   allTransitiveDependencies: null,
 );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 typedef DioRef = AutoDisposeProviderRef<Dio>;
 String _$authRemoteDatasourceHash() =>
     r'e80921f39c874ab92eaaf9d0cd60ba9b05766e88';
@@ -38,10 +36,8 @@ final authRemoteDatasourceProvider =
   allTransitiveDependencies: null,
 );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 typedef AuthRemoteDatasourceRef = AutoDisposeProviderRef<AuthRemoteDatasource>;
-String _$authRepositoryHash() => r'3bfd6d0e666f4820a185495dfba5741c8879c987';
+String _$authRepositoryHash() => r'06428315d15e5470ec66ab507b918c6713d85afd';
 
 /// See also [authRepository].
 @ProviderFor(authRepository)
@@ -55,8 +51,6 @@ final authRepositoryProvider = AutoDisposeProvider<AuthRepositoryImpl>.internal(
   allTransitiveDependencies: null,
 );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 typedef AuthRepositoryRef = AutoDisposeProviderRef<AuthRepositoryImpl>;
 String _$loginUseCaseHash() => r'5a95b111ff086652f0c947b88bcfe26ea7ce95be';
 
@@ -71,10 +65,41 @@ final loginUseCaseProvider = AutoDisposeProvider<LoginUseCase>.internal(
   allTransitiveDependencies: null,
 );
 
-@Deprecated('Will be removed in 3.0. Use Ref instead')
-// ignore: unused_element
 typedef LoginUseCaseRef = AutoDisposeProviderRef<LoginUseCase>;
-String _$authNotifierHash() => r'abfc3b2504969428bf12e325c3d24beb893b8c2b';
+String _$registerUseCaseHash() => r'18669430c22e1c7844c19dd3dcbe2285a2250a73';
+
+/// See also [registerUseCase].
+@ProviderFor(registerUseCase)
+final registerUseCaseProvider = AutoDisposeProvider<RegisterUseCase>.internal(
+  registerUseCase,
+  name: r'registerUseCaseProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$registerUseCaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef RegisterUseCaseRef = AutoDisposeProviderRef<RegisterUseCase>;
+String _$forgotPasswordUseCaseHash() =>
+    r'fbdfcfd332abb715b8d3fc0b285a896d26dafb3c';
+
+/// See also [forgotPasswordUseCase].
+@ProviderFor(forgotPasswordUseCase)
+final forgotPasswordUseCaseProvider =
+    AutoDisposeProvider<ForgotPasswordUseCase>.internal(
+  forgotPasswordUseCase,
+  name: r'forgotPasswordUseCaseProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$forgotPasswordUseCaseHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef ForgotPasswordUseCaseRef
+    = AutoDisposeProviderRef<ForgotPasswordUseCase>;
+String _$authNotifierHash() => r'a8eee807e42fb5ede98149b8f42f02bf8fe9de1d';
 
 /// See also [AuthNotifier].
 @ProviderFor(AuthNotifier)
@@ -89,5 +114,38 @@ final authNotifierProvider =
 );
 
 typedef _$AuthNotifier = AutoDisposeNotifier<AuthState>;
+String _$registerNotifierHash() => r'91cac6d73e769e1ceb27dfa2b607b10c84016521';
+
+/// See also [RegisterNotifier].
+@ProviderFor(RegisterNotifier)
+final registerNotifierProvider =
+    AutoDisposeNotifierProvider<RegisterNotifier, RegisterState>.internal(
+  RegisterNotifier.new,
+  name: r'registerNotifierProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$registerNotifierHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$RegisterNotifier = AutoDisposeNotifier<RegisterState>;
+String _$forgotPasswordNotifierHash() =>
+    r'384c229d05bc952a848f82dc90a560a3f3a6f201';
+
+/// See also [ForgotPasswordNotifier].
+@ProviderFor(ForgotPasswordNotifier)
+final forgotPasswordNotifierProvider = AutoDisposeNotifierProvider<
+    ForgotPasswordNotifier, ForgotPasswordState>.internal(
+  ForgotPasswordNotifier.new,
+  name: r'forgotPasswordNotifierProvider',
+  debugGetCreateSourceHash: const bool.fromEnvironment('dart.vm.product')
+      ? null
+      : _$forgotPasswordNotifierHash,
+  dependencies: null,
+  allTransitiveDependencies: null,
+);
+
+typedef _$ForgotPasswordNotifier = AutoDisposeNotifier<ForgotPasswordState>;
 // ignore_for_file: type=lint
-// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member, deprecated_member_use_from_same_package
+// ignore_for_file: subtype_of_sealed_class, invalid_use_of_internal_member, invalid_use_of_visible_for_testing_member

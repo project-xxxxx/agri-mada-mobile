@@ -1,0 +1,52 @@
+{
+  "id": "sterilite_froid",
+  "noms": {
+    "fr": "Stérilité due au froid",
+    "mg": null,
+    "sci": null,
+    "autres_noms_mg": []
+  },
+  "organes": {
+    "panicule_grains": [
+      "grains vides sans marque visible sur la panicule ou les gaines",
+      "trouble non parasitaire"
+    ]
+  },
+  "confusions": [
+    {
+      "fiche": "bacteriose_gaine_altitude",
+      "question": {
+        "fr": "Y a-t-il des stries anguleuses sur les gaines (bactériose) ou aucune marque particulière hors la stérilité (froid) ?",
+        "mg": null
+      }
+    }
+  ],
+  "conditions": {
+    "ecosystemes": [],
+    "altitude_m": [
+      1600,
+      2200
+    ],
+    "facteurs": [
+      "Hautes Terres, froid à la floraison"
+    ]
+  },
+  "prevention": [
+    "choix d'une variété tolérante au froid pour l'altitude",
+    "ajuster la date de repiquage pour éviter la floraison en période froide",
+    "avis d'un technicien avant tout traitement"
+  ],
+  "lutte_chimique": {
+    "statut": "a_completer_liste_DPV",
+    "produits": []
+  },
+  "sources": [],
+  "taxonomy_ids": [
+    "sterilite_froid"
+  ],
+  "validation": {
+    "par": null,
+    "date": null,
+    "statut": "brouillon"
+  }
+}

@@ -1,0 +1,133 @@
+# Sources publiques récupérées par ml/scripts/fetch_public_data.py
+#
+# Licences : décision d'équipe du 2026-09-14, ce sont des projets publics. La
+# licence déclarée par l'hébergeur est relevée quand elle existe ; en CC BY,
+# citer la source (champ `attribution`) dans toute publication.
+#
+# Destination : ml/data/raw/<id>/ pour les jeux de données,
+# knowledge/sources/<id>/ pour les documents. Ces dossiers ne sont pas versionnés.
+
+datasets:
+  - id: sethy_5932
+    type: mendeley
+    mendeley_id: fwcj7stb8r
+    version: 2
+    licence: CC BY 4.0
+    attribution: "Sethy P.K., Barpanda N.K., Rath A.K., Behera S.K. (2020). Deep feature based rice leaf disease identification using support vector machine. Computers and Electronics in Agriculture 175, 105527."
+
+  - id: riceseg_5932
+    type: mendeley
+    mendeley_id: 92jc6w6mcy
+    version: 1
+    licence: CC BY 4.0
+    attribution: "RiceSeg-5932, Mendeley Data, doi:10.17632/92jc6w6mcy.1"
+
+  - id: mendeley_hx6f852hw4
+    type: mendeley
+    mendeley_id: hx6f852hw4
+    version: 2
+    # Images déjà augmentées exclues (règle 3 de ml/DATASETS.md).
+    exclude_folders: [Augmented]
+    licence: CC BY 4.0
+    attribution: "Rice Leaf Bacterial and Fungal Disease Dataset, Mendeley Data, doi:10.17632/hx6f852hw4.2"
+
+  - id: dhan_shomadhan
+    type: mendeley
+    mendeley_id: znsxdctwtt
+    version: 1
+    licence: CC BY 4.0
+    attribution: "Dhan-Shomadhan, Mendeley Data, doi:10.17632/znsxdctwtt.1"
+
+  - id: riceleafbd
+    type: mendeley
+    mendeley_id: kx9rx8p2mz
+    version: 1
+    licence: CC BY 4.0
+    attribution: "RiceLeafBD, Mendeley Data, doi:10.17632/kx9rx8p2mz.1"
+
+  - id: hf_rice_disease
+    type: huggingface
+    repo_id: Subh775/Rice-Disease-Classification-Dataset
+    files: [rename.zip, README.md]
+    licence: Apache-2.0
+
+  - id: paddy_doctor
+    type: kaggle
+    competition: paddy-disease-classification
+    licence: CC BY
+    note: "Sous-ensemble de 10 407 images étiquetées (10 classes) et 3 469 images de test sans étiquette. Récupéré à la main le 2026-09-15 : ml/data/raw/paddy_doctor/paddy-disease-classification.zip. Avec un jeton, accepter le règlement de la compétition sur kaggle.com avant le téléchargement."
+
+  - id: nutrient_deficiency_rice
+    type: kaggle
+    dataset: guy007/nutrientdeficiencysymptomsinrice
+    licence: non précisée par l'hébergeur
+    note: "Récupéré à la main le 2026-09-15 : ml/data/raw/nutrient_deficiency_rice/nutrientdeficiencysymptomsinrice.zip (fichier Kaggle archive.zip renommé)."
+
+  - id: ip102
+    type: manual
+    url: https://drive.google.com/drive/folders/1svFSy2Da3cVMvekBwe13mzyx38XZ9xWo
+    licence: libre pour usage académique
+    note: "Archive volumineuse (102 classes, dont 14 du riz). Reportée au module insecte."
+
+# Jeux écartés et raison, pour ne pas les rechercher à nouveau.
+excluded:
+  banglariceleaf: aucun lien de téléchargement public trouvé
+  rice_grain_disease: données non publiées, à demander aux auteurs
+  frontiers_33026: données non publiées
+  vbookshelf_120: jeu du modèle actuel, non représentatif (feuilles sur fond blanc)
+  riceyleafdisease_t46kkgh2yw: doublon de mendeley_hx6f852hw4 (même description)
+  rice_panicle_drone_ndb6t28xbk: détection de panicules par drone, sans maladies
+
+documents:
+  - id: fofifa
+    type: urls
+    licence: documents publics du site FOFIFA, citer la source
+    urls:
+      # Maladies et ravageurs
+      - https://www.fofifa.mg/wp-content/uploads/2020/09/FicheBLBBLS-VF-Final.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2020/09/PosterBLBBLS-VF-Final-.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2020/09/FicheBLBBLS-VM-Final-Enregistrement-automatique.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2020/09/PosterBLBBLS-VM-Final.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2020/07/IREO-ARETIM-2.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2020/07/KISARY-BIBIKELY.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2020/06/FICHE-METARHIZIUM_2010.pdf
+      # Pratiques culturales et calendriers
+      - https://www.fofifa.mg/wp-content/uploads/2026/02/Roll-up-Bonne-Pratique-Agricole-Riz-Irrigue-DRR_actualise.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2020/05/fomba-fambolena-vary-manitra.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2020/05/FT-Torolalana-vary-ankoraka-SO.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2020/07/PDF-Poster-calendrier-MIRR-sur-RBME-Riz-cycle-court-2mai-2019-Copie.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2020/07/PDF-Poster-calendrier-MIRR-sur-RMME-_Projet-AF-RICE-_02-mai-2019.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2020/07/Pdf-VERSION-MALAGASY-_-BROCH_MIRR_RBME_RMME_TANETY.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2020/07/FIFANDIMBIASAMBOLY-VARY-LEGIOMA.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2022/06/P-dipping-flyer-final.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2026/02/Manuel-P-dipping-2kg.pdf
+      # Variétés
+      - https://www.fofifa.mg/wp-content/uploads/2025/02/vary-mavitrika.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2024/06/Fiche-CNEV-Riz-MANGAFOTOTRA_26-Aout-2022.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2026/02/X265-MP3-PDF.pdf
+      - http://www.fofifa.mg/wp-content/uploads/2020/06/vary-manitra.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2020/05/FOFIFA-184-183-karazam-bary-faritra-avo.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2026/02/FICHE-DE-CARACTERISATION-X915-actualise.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2026/02/FOFIFA-200-Sambatra.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2026/02/FOFIFA-201-Soary.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2025/02/Vesainky.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2025/02/Aja-Mizesta.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2025/02/Soafintsanga.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2025/02/MAHAFATROSA.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2020/05/variétés-ME.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2021/01/PAGE-1-COUV-KARAZAMBARY-ANTANETY-VAOVAO-1.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2021/01/MAQUETTES-FICHES-RIZ-PLUVIAL-.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2020/05/catalogue-vari%C3%A9tal-RPA-2009.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2020/05/MAQUETTE-2-FICHES-INTERIEURES-riz.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2020/05/Variétés-de-riz-pour-la-région-Sud-Ouest-de-Madagascar.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2020/02/carte_varietale_riz-1.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2022/06/PASSEPORT-32.pdf
+      - https://www.fofifa.mg/wp-content/uploads/2022/06/PASSEPORT-85.pdf
+
+  - id: references_scientifiques
+    type: urls
+    licence: documents en libre accès, citer la source
+    urls:
+      - https://horizon.documentation.ird.fr/exl-doc/pleins_textes/pleins_textes_5/b_fdi_23-25/30046.pdf
+      - https://agritrop.cirad.fr/577265/1/Memoire_Rakotonindraina_Ecadrement_Penot_URSCA-Diagnostic_de_l_incidence-MEM_2007.pdf
+      - http://www.knowledgebank.irri.org/images/docs/diagnostic-of-common-diseases-of-rice.pdf
